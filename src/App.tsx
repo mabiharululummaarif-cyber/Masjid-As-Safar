@@ -10,8 +10,8 @@ import { ExportImportModal } from './components/ExportImportModal';
 import { ControlOverlay } from './components/ControlOverlay';
 import { Plus, Sliders, Layers, FileJson, Sun, Moon, Sunset, RotateCcw } from 'lucide-react';
 
-const STORAGE_HOTSPOTS_KEY = 'masjid_as_safar_hotspots_v2';
-const STORAGE_CONFIG_KEY = 'masjid_as_safar_config_v2';
+const STORAGE_HOTSPOTS_KEY = 'masjid_as_safar_hotspots_v4';
+const STORAGE_CONFIG_KEY = 'masjid_as_safar_config_v4';
 
 export default function App() {
   // Load initial data from localStorage if available
@@ -140,6 +140,15 @@ export default function App() {
     setFocusPosition(isInterior ? [0, 2.4, 0.5] : [0, 2.0, 0]);
   };
 
+  const handleToggleQibla = () => {
+    setConfig(prev => ({ ...prev, showQibla: !prev.showQibla }));
+  };
+
+  const handleOrientQibla = () => {
+    setSelectedHotspot(null);
+    setFocusPosition([0, isInterior ? 1.8 : 2.5, 9.5]);
+  };
+
   const handleResetDefaults = () => {
     setHotspots(INITIAL_HOTSPOTS);
     setConfig(DEFAULT_CONFIG);
@@ -249,6 +258,8 @@ export default function App() {
             onOpenExportImport={() => setIsExportImportOpen(true)}
             onCycleTimeOfDay={handleCycleTimeOfDay}
             onResetView={handleResetView}
+            onToggleQibla={handleToggleQibla}
+            onOrientQibla={handleOrientQibla}
             totalHotspots={hotspots.length}
           />
         </div>

@@ -183,10 +183,10 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
               </label>
             </div>
 
-            {/* Qibla Toggle */}
+            {/* Qibla & Compass Toggle */}
             <div className="flex items-center justify-between pt-2 border-t border-[#E8DCC0]/10">
               <span className="text-[#E8DCC0] flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 text-[#C9A227]" /> Penunjuk Arah Kiblat:
+                <Compass className="w-3.5 h-3.5 text-[#C9A227]" /> Kompas & Arah Kiblat (Luar & Dalam):
               </span>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
