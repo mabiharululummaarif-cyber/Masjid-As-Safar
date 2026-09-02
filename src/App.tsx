@@ -13,12 +13,12 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_CONFIG_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return { ...parsed, showQibla: false };
+        return { ...parsed, showQibla: false, autoRotate: false, fanSpeed: 0 };
       }
     } catch (e) {
       console.warn('Failed to load saved config', e);
     }
-    return { ...DEFAULT_CONFIG, showQibla: false };
+    return { ...DEFAULT_CONFIG, showQibla: false, autoRotate: false, fanSpeed: 0 };
   });
 
   // UI States

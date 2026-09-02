@@ -54,11 +54,12 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
   const configRef = useRef(config);
   configRef.current = config;
 
-  // Camera spherical & first-person interior state
+  // Camera spherical & first-person interior state with Smooth Damping
   const isPortraitInit = (typeof window !== 'undefined' ? window.innerWidth / Math.max(window.innerHeight, 1) : 1) < 1.0;
   const initialRadius = isPortraitInit ? 46 : 30;
 
   const camState = useRef({
+    // Current smoothed values (used for 60/120fps fluid rendering)
     target: new THREE.Vector3(0, 2.5, 0),
     radius: initialRadius,
     theta: Math.PI / 3.8,
@@ -66,6 +67,17 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     fov: 45,
     interiorYaw: 0, // 0 = looking forward towards Mihrab (+Z)
     interiorPitch: 0.05, // 0 = eye level, + = look up at dome/ceiling, - = look down at floor
+
+    // Destination target values (damping target)
+    destTarget: new THREE.Vector3(0, 2.5, 0),
+    destRadius: initialRadius,
+    destTheta: Math.PI / 3.8,
+    destPhi: Math.PI / 2.8,
+    destFov: 45,
+    destInteriorYaw: 0,
+    destInteriorPitch: 0.05,
+
+    // Smooth transition animations between presets
     animating: false,
     animStart: 0,
     animDuration: 600,
@@ -102,11 +114,17 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 300);
     cameraRef.current = camera;
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+    // Renderer (High-Performance Hardware-Accelerated WebGL)
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance',
+      precision: 'highp',
+      stencil: false,
+    });
     rendererRef.current = renderer;
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -120,15 +138,16 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     const sun = new THREE.DirectionalLight(0xfffaee, 1.40);
     sun.position.set(22, 36, 20);
     sun.castShadow = true;
-    sun.shadow.mapSize.width = 2048;
-    sun.shadow.mapSize.height = 2048;
+    sun.shadow.mapSize.width = 1024;
+    sun.shadow.mapSize.height = 1024;
     sun.shadow.camera.near = 0.5;
     sun.shadow.camera.far = 100;
     sun.shadow.camera.left = -28;
     sun.shadow.camera.right = 28;
     sun.shadow.camera.top = 28;
     sun.shadow.camera.bottom = -28;
-    sun.shadow.bias = -0.0004;
+    sun.shadow.bias = -0.0003;
+    sun.shadow.normalBias = 0.02;
     scene.add(sun);
 
     const fill = new THREE.DirectionalLight(0xeef5f2, 0.65);
@@ -238,6 +257,9 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     scene.add(qiblaGroup);
     qiblaGroupRef.current = qiblaGroup;
 
+    // Pre-allocated Vector3 objects to prevent GC spikes during 60fps rendering
+    const tempLookTarget = new THREE.Vector3();
+
     // Camera update function with smooth interior look-around & exterior bounds
     const updateCameraPos = () => {
       if (!cameraRef.current) return;
@@ -248,31 +270,35 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         // Interior: Camera is located at eye-level inside the hall
         cam.position.copy(target);
 
-        // Smooth 360 First-Person / Panoramic look vector
-        const lookDirX = Math.sin(interiorYaw) * Math.cos(interiorPitch);
+        // Smooth 360 First-Person / Panoramic look vector (reusing pre-allocated vector)
+        const cosPitch = Math.cos(interiorPitch);
+        const lookDirX = Math.sin(interiorYaw) * cosPitch;
         const lookDirY = Math.sin(interiorPitch);
-        const lookDirZ = Math.cos(interiorYaw) * Math.cos(interiorPitch);
+        const lookDirZ = Math.cos(interiorYaw) * cosPitch;
 
-        cam.lookAt(
+        tempLookTarget.set(
           target.x + lookDirX * 10.0,
           target.y + lookDirY * 10.0,
           target.z + lookDirZ * 10.0
         );
+        cam.lookAt(tempLookTarget);
       } else {
         // Exterior: Camera orbits around entire building, radius kept >= 16.0m so it NEVER clips into the walls
         const safeRadius = THREE.MathUtils.clamp(radius, 16.0, 70.0);
-        cam.position.x = target.x + safeRadius * Math.sin(phi) * Math.sin(theta);
+        const sinPhi = Math.sin(phi);
+        cam.position.x = target.x + safeRadius * sinPhi * Math.sin(theta);
         cam.position.y = target.y + safeRadius * Math.cos(phi);
-        cam.position.z = target.z + safeRadius * Math.sin(phi) * Math.cos(theta);
+        cam.position.z = target.z + safeRadius * sinPhi * Math.cos(theta);
         cam.lookAt(target);
       }
     };
     updateCameraPos();
 
-    // Mouse / Touch Orbit Controls (No OrbitControls conflict, clamped interior controls)
+    // Mouse / Touch Orbit Controls with Smooth Damping (Ultra-fluid, zero lag/stutter)
     let dragging = false;
     let lastX = 0, lastY = 0;
     let downX = 0, downY = 0;
+    let lastHoverCheck = 0;
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
@@ -286,24 +312,34 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
     const onPointerMove = (e: PointerEvent) => {
       if (!dragging) {
-        // Hover raycast for cursor
-        const rect = renderer.domElement.getBoundingClientRect();
-        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const visibleMarkerMeshes = markersRef.current
-          .filter(m => m.mesh.visible)
-          .map(m => m.mesh);
-        const hits = raycaster.intersectObjects(visibleMarkerMeshes);
-        if (hits.length > 0) {
-          renderer.domElement.style.cursor = 'pointer';
-        } else if (isPlacingRef.current) {
-          renderer.domElement.style.cursor = 'crosshair';
-        } else {
-          renderer.domElement.style.cursor = 'grab';
+        // Throttled hover check for cursor pointer (max once every 60ms, non-blocking)
+        const now = performance.now();
+        if (now - lastHoverCheck > 60 && (markersRef.current.length > 0 || isPlacingRef.current)) {
+          lastHoverCheck = now;
+          const rect = renderer.domElement.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const visibleMarkerMeshes = markersRef.current
+              .filter(m => m.mesh.visible)
+              .map(m => m.mesh);
+
+            const hits = raycaster.intersectObjects(visibleMarkerMeshes);
+            if (hits.length > 0) {
+              renderer.domElement.style.cursor = 'pointer';
+            } else if (isPlacingRef.current) {
+              renderer.domElement.style.cursor = 'crosshair';
+            } else {
+              renderer.domElement.style.cursor = 'grab';
+            }
+          }
         }
         return;
       }
+
+      // Smooth camera drag delta calculation (Lightweight, 0 GC overhead)
       const dx = e.clientX - lastX;
       const dy = e.clientY - lastY;
       lastX = e.clientX;
@@ -315,9 +351,9 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         // Dragging right (dx > 0) turns camera left (yaw decreases)
         // Dragging up (dy < 0) tilts camera down to floor/carpet (pitch decreases)
         // Dragging down (dy > 0) tilts camera up to chandelier/dome (pitch increases)
-        camState.current.interiorYaw -= dx * 0.005;
-        camState.current.interiorPitch = THREE.MathUtils.clamp(
-          camState.current.interiorPitch + dy * 0.005,
+        camState.current.destInteriorYaw -= dx * 0.0042;
+        camState.current.destInteriorPitch = THREE.MathUtils.clamp(
+          camState.current.destInteriorPitch + dy * 0.0042,
           -1.35, // Looking down at carpet
           1.35   // Looking up at dome/ceiling
         );
@@ -325,10 +361,13 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         // Exterior Orbit:
         const minPhi = 0.12;
         const maxPhi = Math.PI / 2 - 0.01;
-        camState.current.theta -= dx * 0.005;
-        camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.005, minPhi, maxPhi);
+        camState.current.destTheta -= dx * 0.0042;
+        camState.current.destPhi = THREE.MathUtils.clamp(
+          camState.current.destPhi - dy * 0.0042,
+          minPhi,
+          maxPhi
+        );
       }
-      updateCameraPos();
     };
 
     const onPointerUp = (e: PointerEvent) => {
@@ -337,6 +376,8 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       if (moved > 6) return; // Ignore drag release
 
       const rect = renderer.domElement.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return;
+
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
@@ -370,28 +411,22 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (!cameraRef.current) return;
-      const cam = cameraRef.current;
 
       if (isInteriorRef.current) {
-        // Interior Zoom: Adjusts field of view (FOV) smoothly between 26 deg (close-up detail) and 72 deg (wide room)
-        camState.current.fov = THREE.MathUtils.clamp(
-          camState.current.fov + e.deltaY * 0.035,
-          26,
+        // Interior Zoom: Smooth field of view (FOV) between 24 deg (close-up) and 72 deg (wide room)
+        camState.current.destFov = THREE.MathUtils.clamp(
+          camState.current.destFov + e.deltaY * 0.025,
+          24,
           72
         );
-        cam.fov = camState.current.fov;
-        cam.updateProjectionMatrix();
       } else {
-        // Exterior Zoom: Adjusts orbit radius
-        cam.fov = 45;
-        cam.updateProjectionMatrix();
-        camState.current.radius = THREE.MathUtils.clamp(
-          camState.current.radius + e.deltaY * 0.02,
+        // Exterior Zoom: Smooth orbit radius
+        camState.current.destRadius = THREE.MathUtils.clamp(
+          camState.current.destRadius + e.deltaY * 0.016,
           16.0,
           70.0
         );
       }
-      updateCameraPos();
     };
 
     // Dedicated Mobile Touch Events (1-finger orbit, 2-finger pinch-to-zoom)
@@ -411,8 +446,8 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         touchStartDist = Math.hypot(dx, dy);
-        initialTouchRadius = camState.current.radius;
-        initialTouchFov = camState.current.fov;
+        initialTouchRadius = camState.current.destRadius;
+        initialTouchFov = camState.current.destFov;
       }
     };
 
@@ -424,33 +459,33 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         lastTouchY = e.touches[0].clientY;
 
         if (isInteriorRef.current) {
-          camState.current.interiorYaw -= dx * 0.006;
-          camState.current.interiorPitch = THREE.MathUtils.clamp(
-            camState.current.interiorPitch + dy * 0.006,
+          camState.current.destInteriorYaw -= dx * 0.0048;
+          camState.current.destInteriorPitch = THREE.MathUtils.clamp(
+            camState.current.destInteriorPitch + dy * 0.0048,
             -1.35,
             1.35
           );
         } else {
           const minPhi = 0.12;
           const maxPhi = Math.PI / 2 - 0.01;
-          camState.current.theta -= dx * 0.006;
-          camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.006, minPhi, maxPhi);
+          camState.current.destTheta -= dx * 0.0048;
+          camState.current.destPhi = THREE.MathUtils.clamp(
+            camState.current.destPhi - dy * 0.0048,
+            minPhi,
+            maxPhi
+          );
         }
-        updateCameraPos();
       } else if (e.touches.length === 2 && touchStartDist > 0) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const currentDist = Math.hypot(dx, dy);
         const scale = touchStartDist / Math.max(currentDist, 1);
 
-        if (isInteriorRef.current && cameraRef.current) {
-          camState.current.fov = THREE.MathUtils.clamp(initialTouchFov * scale, 26, 72);
-          cameraRef.current.fov = camState.current.fov;
-          cameraRef.current.updateProjectionMatrix();
+        if (isInteriorRef.current) {
+          camState.current.destFov = THREE.MathUtils.clamp(initialTouchFov * scale, 24, 72);
         } else {
-          camState.current.radius = THREE.MathUtils.clamp(initialTouchRadius * scale, 16.0, 70.0);
+          camState.current.destRadius = THREE.MathUtils.clamp(initialTouchRadius * scale, 16.0, 70.0);
         }
-        updateCameraPos();
       }
     };
 
@@ -479,62 +514,74 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     };
     window.addEventListener('resize', onResize);
 
-    // Animation Loop
+    // Animation Loop with Real-Time Smooth Inertial Interpolation (60/120fps Butter-Smooth)
     let animationFrameId: number;
     let clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.05);
       const elapsedTime = clock.getElapsedTime();
 
-      // Camera lerp animation
+      // Camera smooth damping and lerp animation
       if (camState.current.animating) {
         const now = performance.now();
         const progress = Math.min((now - camState.current.animStart) / camState.current.animDuration, 1);
-        const t = progress * progress * (3 - 2 * progress);
+        const t = progress * progress * (3 - 2 * progress); // Hermite cubic smooth easing
 
-        camState.current.target.lerpVectors(camState.current.fromTarget, camState.current.toTarget, t);
-        camState.current.radius = camState.current.fromRadius + (camState.current.toRadius - camState.current.fromRadius) * t;
-        camState.current.phi = camState.current.fromPhi + (camState.current.toPhi - camState.current.fromPhi) * t;
-        camState.current.theta = camState.current.fromTheta + (camState.current.toTheta - camState.current.fromTheta) * t;
-        camState.current.interiorPitch = camState.current.fromPitch + (camState.current.toPitch - camState.current.fromPitch) * t;
-        camState.current.interiorYaw = camState.current.fromYaw + (camState.current.toYaw - camState.current.fromYaw) * t;
-        camState.current.fov = camState.current.fromFov + (camState.current.toFov - camState.current.fromFov) * t;
+        const s = camState.current;
+        s.target.lerpVectors(s.fromTarget, s.toTarget, t);
+        s.radius = s.fromRadius + (s.toRadius - s.fromRadius) * t;
+        s.phi = s.fromPhi + (s.toPhi - s.fromPhi) * t;
+        s.theta = s.fromTheta + (s.toTheta - s.fromTheta) * t;
+        s.interiorPitch = s.fromPitch + (s.toPitch - s.fromPitch) * t;
+        s.interiorYaw = s.fromYaw + (s.toYaw - s.fromYaw) * t;
+        s.fov = s.fromFov + (s.toFov - s.fromFov) * t;
 
-        if (cameraRef.current) {
+        // Keep destinations in sync
+        s.destTarget.copy(s.target);
+        s.destRadius = s.radius;
+        s.destPhi = s.phi;
+        s.destTheta = s.theta;
+        s.destInteriorPitch = s.interiorPitch;
+        s.destInteriorYaw = s.interiorYaw;
+        s.destFov = s.fov;
+
+        if (progress >= 1) {
+          s.animating = false;
+        }
+      } else {
+        if (configRef.current.autoRotate && !dragging && !touchDragging) {
+          // Smooth architectural auto-orbit
+          if (isInteriorRef.current) {
+            camState.current.destInteriorYaw += 0.0025;
+          } else {
+            camState.current.destTheta += 0.003;
+          }
+        }
+
+        // Frame-rate independent exponential damping for ultra-responsive, fluid gliding
+        const damp = 1 - Math.exp(-22 * delta);
+        const s = camState.current;
+        s.target.lerp(s.destTarget, damp);
+        s.radius += (s.destRadius - s.radius) * damp;
+        s.theta += (s.destTheta - s.theta) * damp;
+        s.phi += (s.destPhi - s.phi) * damp;
+        s.interiorYaw += (s.destInteriorYaw - s.interiorYaw) * damp;
+        s.interiorPitch += (s.destInteriorPitch - s.interiorPitch) * damp;
+        s.fov += (s.destFov - s.fov) * damp;
+      }
+
+      if (cameraRef.current) {
+        if (Math.abs(cameraRef.current.fov - camState.current.fov) > 0.01) {
           cameraRef.current.fov = camState.current.fov;
           cameraRef.current.updateProjectionMatrix();
         }
-
-        updateCameraPos();
-
-        if (progress >= 1) {
-          camState.current.animating = false;
-        }
-      } else if (configRef.current.autoRotate && !dragging) {
-        // Smooth architectural auto-orbit
-        if (isInteriorRef.current) {
-          camState.current.interiorYaw += 0.0025;
-        } else {
-          camState.current.theta += 0.003;
-        }
-        updateCameraPos();
       }
 
-      // Fan blade rotation animation
-      const fanSpd = configRef.current.fanSpeed ?? 1;
-      if (fanSpd > 0 && fanBladesRef.current.length > 0) {
-        const spinDelta = fanSpd * 0.18;
-        fanBladesRef.current.forEach(f => {
-          f.rotation.z += spinDelta;
-        });
-      }
+      updateCameraPos();
 
-      // Animate sky compass floating effect
-      if (skyCompassRef.current) {
-        skyCompassRef.current.position.y = 10.2 + Math.sin(elapsedTime * 1.6) * 0.16;
-      }
-
+      // Static rendering without background moving animations for maximum 60/120fps smoothness
       renderer.render(scene, camera);
     };
     animate();
@@ -545,6 +592,9 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       dom.removeEventListener('wheel', onWheel);
+      dom.removeEventListener('touchstart', onTouchStart);
+      dom.removeEventListener('touchmove', onTouchMove);
+      dom.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('resize', onResize);
       renderer.dispose();
     };
@@ -699,14 +749,14 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       metalness: 0.1
     });
 
-    // Kaca Transparan Bersih
-    const matGlass = new THREE.MeshPhysicalMaterial({
+    // Kaca Transparan Bersih (High-performance clean glass, depthWrite: false for zero overdraw thrashing)
+    const matGlass = new THREE.MeshStandardMaterial({
       color: 0xE8F4F8,
       transparent: true,
-      opacity: 0.40,
-      roughness: 0.05,
-      transmission: 0.85,
-      ior: 1.5,
+      opacity: 0.35,
+      roughness: 0.08,
+      metalness: 0.1,
+      depthWrite: false,
     });
 
     // Lantai Keramik Interior Putih Polos
@@ -776,7 +826,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
     // 5. Contact Shadow Overlay (Memastikan bayangan jatuh tegas di atas alas tanah putih)
     const shadowPlaneGeo = new THREE.PlaneGeometry(160, 160);
-    const matShadow = new THREE.ShadowMaterial({ opacity: 0.22 });
+    const matShadow = new THREE.ShadowMaterial({ opacity: 0.22, depthWrite: false });
     const shadowPlane = new THREE.Mesh(shadowPlaneGeo, matShadow);
     shadowPlane.rotation.x = -Math.PI / 2;
     shadowPlane.position.y = -0.59;
@@ -813,14 +863,14 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       roughness: 0.8,
     });
 
-    const matPartitionGlass = new THREE.MeshPhysicalMaterial({
+    const matPartitionGlass = new THREE.MeshStandardMaterial({
       color: 0xb5e0f2,
       transparent: true,
-      opacity: 0.40,
+      opacity: 0.35,
       roughness: 0.08,
-      transmission: 0.80,
-      ior: 1.5,
+      metalness: 0.1,
       side: THREE.DoubleSide,
+      depthWrite: false,
     });
 
     // Helper to create a Glass Curtain Wall (Dinding Kaca Transparan dengan Kusen & Mullion Modern)
@@ -887,7 +937,6 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
           matGlass
         );
         glassPane.position.set(bayCenterX, glassY, 0);
-        glassPane.castShadow = true;
         wallGroup.add(glassPane);
 
         // Horizontal mid-transom rails
@@ -1004,7 +1053,6 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         matGlass
       );
       fixedGlassL.position.set(-totalPortalW / 2 + fixedPanelW / 2, doorH / 2, 0);
-      fixedGlassL.castShadow = true;
       subGroup.add(fixedGlassL);
 
       // Right Fixed Glass Panel
@@ -1013,7 +1061,6 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         matGlass
       );
       fixedGlassR.position.set(totalPortalW / 2 - fixedPanelW / 2, doorH / 2, 0);
-      fixedGlassR.castShadow = true;
       subGroup.add(fixedGlassR);
 
       // 3. JENDELA TRANSOM KACA TERBAGI 4 PANEL HORIZONTAL (Di atas pintu)
@@ -1045,7 +1092,6 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       // Glass Pane
       const leafGlassL = new THREE.Mesh(new THREE.BoxGeometry(leafW - 0.08, leafH - 0.08, 0.04), matGlass);
       leafGlassL.position.set(leafW / 2, leafH / 2, 0);
-      leafGlassL.castShadow = true;
       leafGroupL.add(leafGlassL);
 
       // White perimeter frame for Leaf Left
@@ -1109,7 +1155,6 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       // Glass Pane
       const leafGlassR = new THREE.Mesh(new THREE.BoxGeometry(leafW - 0.08, leafH - 0.08, 0.04), matGlass);
       leafGlassR.position.set(-leafW / 2, leafH / 2, 0);
-      leafGlassR.castShadow = true;
       leafGroupR.add(leafGlassR);
 
       // White perimeter frame for Leaf Right
@@ -1404,15 +1449,24 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     group.add(dome);
     roofMeshesRef.current.push(dome);
 
-    // Rusuk Kubah Tengah - Lis Hijau Muda
+    // Cincin Dasar Kubah Tengah - Lis Hijau Muda
+    const centralDomeBaseRing = new THREE.Mesh(
+      new THREE.TorusGeometry(centralDomeRadius + 0.02, 0.05, 10, 36),
+      matLightGreen
+    );
+    centralDomeBaseRing.rotation.x = Math.PI / 2;
+    centralDomeBaseRing.position.set(0, H + 0.45 + 0.6, 0);
+    group.add(centralDomeBaseRing);
+    roofMeshesRef.current.push(centralDomeBaseRing);
+
+    // Rusuk Kubah Tengah - Lis Hijau Muda Vertikal (Meridian Arches)
     for (let r = 0; r < 8; r++) {
       const ribAngle = (r / 8) * Math.PI;
       const rib = new THREE.Mesh(
-        new THREE.TorusGeometry(centralDomeRadius + 0.02, 0.04, 8, 32, Math.PI),
+        new THREE.TorusGeometry(centralDomeRadius + 0.02, 0.035, 8, 32, Math.PI),
         matLightGreen
       );
       rib.rotation.y = ribAngle;
-      rib.rotation.x = Math.PI / 2;
       rib.position.set(0, H + 0.45 + 0.6, 0);
       group.add(rib);
       roofMeshesRef.current.push(rib);
@@ -1466,15 +1520,24 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     group.add(frontDome);
     roofMeshesRef.current.push(frontDome);
 
-    // Front Dome Meridian Ribs - Lis Hijau Muda
+    // Cincin Dasar Kubah Depan - Lis Hijau Muda
+    const frontDomeBaseRing = new THREE.Mesh(
+      new THREE.TorusGeometry(frontDomeRadius + 0.02, 0.04, 10, 28),
+      matLightGreen
+    );
+    frontDomeBaseRing.rotation.x = Math.PI / 2;
+    frontDomeBaseRing.position.set(0, H + 0.45 + 0.55, frontDomeZ);
+    group.add(frontDomeBaseRing);
+    roofMeshesRef.current.push(frontDomeBaseRing);
+
+    // Front Dome Meridian Ribs - Lis Hijau Muda Vertikal
     for (let fr = 0; fr < 6; fr++) {
       const fAngle = (fr / 6) * Math.PI;
       const fRib = new THREE.Mesh(
-        new THREE.TorusGeometry(frontDomeRadius + 0.02, 0.035, 8, 24, Math.PI),
+        new THREE.TorusGeometry(frontDomeRadius + 0.02, 0.03, 8, 24, Math.PI),
         matLightGreen
       );
       fRib.rotation.y = fAngle;
-      fRib.rotation.x = Math.PI / 2;
       fRib.position.set(0, H + 0.45 + 0.55, frontDomeZ);
       group.add(fRib);
       roofMeshesRef.current.push(fRib);

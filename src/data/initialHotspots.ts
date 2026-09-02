@@ -15,7 +15,7 @@ export const DEFAULT_CONFIG: MosqueConfig = {
   showTabir: true,
   roofMode: 'solid',
   autoRotate: false,
-  fanSpeed: 1,
+  fanSpeed: 0,
   showHotspots: false,
   showDimensions: false,
 };
