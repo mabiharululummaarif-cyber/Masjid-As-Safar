@@ -54,7 +54,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
   const configRef = useRef(config);
   configRef.current = config;
 
-  // Camera spherical state
+  // Camera spherical & first-person interior state
   const isPortraitInit = (typeof window !== 'undefined' ? window.innerWidth / Math.max(window.innerHeight, 1) : 1) < 1.0;
   const initialRadius = isPortraitInit ? 46 : 30;
 
@@ -63,6 +63,9 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     radius: initialRadius,
     theta: Math.PI / 3.8,
     phi: Math.PI / 2.8,
+    fov: 45,
+    interiorYaw: 0, // 0 = looking forward towards Mihrab (+Z)
+    interiorPitch: 0.05, // 0 = eye level, + = look up at dome/ceiling, - = look down at floor
     animating: false,
     animStart: 0,
     animDuration: 600,
@@ -72,6 +75,14 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     toRadius: initialRadius,
     fromPhi: Math.PI / 2.8,
     toPhi: Math.PI / 2.8,
+    fromTheta: Math.PI / 3.8,
+    toTheta: Math.PI / 3.8,
+    fromYaw: 0,
+    toYaw: 0,
+    fromPitch: 0.05,
+    toPitch: 0.05,
+    fromFov: 45,
+    toFov: 45,
   });
 
   // Initialize Scene & Renderer
@@ -84,8 +95,8 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     // Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color(0xFFFFFF);
-    scene.fog = new THREE.Fog(0xFFFFFF, 55, 140);
+    scene.background = new THREE.Color(0xD8DEE4);
+    scene.fog = new THREE.Fog(0xD8DEE4, 55, 140);
 
     // Camera (near = 0.05 to prevent close polygon clipping)
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 300);
@@ -220,270 +231,41 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     };
 
     // =========================================================================
-    // COMPASS & QIBLA 3D NAVIGATION SYSTEM (Exterior & Interior)
+    // COMPASS & QIBLA 3D NAVIGATION SYSTEM
     // =========================================================================
     const qiblaGroup = new THREE.Group();
-
-    // 1. Materials for Compass
-    const matGoldCompass = new THREE.MeshStandardMaterial({
-      color: 0xC9A227,
-      metalness: 0.85,
-      roughness: 0.25,
-      emissive: 0x5a4610,
-      emissiveIntensity: 0.35,
-    });
-
-    const matCreamCardinal = new THREE.MeshStandardMaterial({
-      color: 0xE8DCC0,
-      metalness: 0.3,
-      roughness: 0.6,
-    });
-
-    const matDarkGreenCompass = new THREE.MeshStandardMaterial({
-      color: 0x163832,
-      metalness: 0.4,
-      roughness: 0.5,
-    });
-
-    // 2. Ground Compass Rose (Around Mosque Perimeter)
-    const groundCompassRadius = 16.5;
-
-    // Outer Ground Ring
-    const groundRing1 = new THREE.Mesh(
-      new THREE.TorusGeometry(groundCompassRadius, 0.09, 8, 64),
-      matGoldCompass
-    );
-    groundRing1.rotation.x = Math.PI / 2;
-    groundRing1.position.set(0, 0.08, 0);
-    qiblaGroup.add(groundRing1);
-
-    // Inner Concentric Ring
-    const groundRing2 = new THREE.Mesh(
-      new THREE.TorusGeometry(groundCompassRadius - 1.4, 0.05, 8, 64),
-      matCreamCardinal
-    );
-    groundRing2.rotation.x = Math.PI / 2;
-    groundRing2.position.set(0, 0.08, 0);
-    qiblaGroup.add(groundRing2);
-
-    // 12 Radial Dial Ticks on Ground
-    for (let d = 0; d < 12; d++) {
-      const angle = (d / 12) * Math.PI * 2;
-      const isMajor = d % 3 === 0;
-      const tickLen = isMajor ? 1.6 : 0.8;
-      const tick = new THREE.Mesh(
-        new THREE.BoxGeometry(isMajor ? 0.12 : 0.06, 0.04, tickLen),
-        isMajor ? matGoldCompass : matCreamCardinal
-      );
-      const tickDist = groundCompassRadius - tickLen / 2;
-      tick.position.set(Math.sin(angle) * tickDist, 0.09, Math.cos(angle) * tickDist);
-      tick.rotation.y = -angle;
-      qiblaGroup.add(tick);
-    }
-
-    // 3. Cardinal Direction Markers on Ground (Utara, Selatan, Timur, Barat)
-    // UTARA (U / North) -> -X axis
-    const arrowNorth = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.4, 4), matCreamCardinal);
-    arrowNorth.rotation.z = Math.PI / 2;
-    arrowNorth.position.set(-groundCompassRadius, 0.12, 0);
-    qiblaGroup.add(arrowNorth);
-    const badgeNorth = createCompassBadge('🧭 U · UTARA', false, 'NORTH (0° / 360°)');
-    badgeNorth.position.set(-groundCompassRadius - 2.0, 1.8, 0);
-    badgeNorth.scale.set(4.0, 1.0, 1);
-    qiblaGroup.add(badgeNorth);
-
-    // SELATAN (S / South) -> +X axis
-    const arrowSouth = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.4, 4), matCreamCardinal);
-    arrowSouth.rotation.z = -Math.PI / 2;
-    arrowSouth.position.set(groundCompassRadius, 0.12, 0);
-    qiblaGroup.add(arrowSouth);
-    const badgeSouth = createCompassBadge('🧭 S · SELATAN', false, 'SOUTH (180°)');
-    badgeSouth.position.set(groundCompassRadius + 2.0, 1.8, 0);
-    badgeSouth.scale.set(4.0, 1.0, 1);
-    qiblaGroup.add(badgeSouth);
-
-    // TIMUR (T / East) -> -Z axis
-    const arrowEast = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.4, 4), matCreamCardinal);
-    arrowEast.rotation.x = -Math.PI / 2;
-    arrowEast.position.set(0, 0.12, -groundCompassRadius);
-    qiblaGroup.add(arrowEast);
-    const badgeEast = createCompassBadge('🧭 T · TIMUR', false, 'EAST (90°)');
-    badgeEast.position.set(0, 1.8, -groundCompassRadius - 2.0);
-    badgeEast.scale.set(4.0, 1.0, 1);
-    qiblaGroup.add(badgeEast);
-
-    // BARAT (B / West) -> +Z axis
-    const arrowWest = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.4, 4), matCreamCardinal);
-    arrowWest.rotation.x = Math.PI / 2;
-    arrowWest.position.set(0, 0.12, groundCompassRadius);
-    qiblaGroup.add(arrowWest);
-    const badgeWest = createCompassBadge('🧭 B · BARAT', false, 'WEST (270°)');
-    badgeWest.position.set(0, 1.8, groundCompassRadius + 2.0);
-    badgeWest.scale.set(4.0, 1.0, 1);
-    qiblaGroup.add(badgeWest);
-
-    // =========================================================================
-    // 4. PROMINENT GOLDEN QIBLA ARROWS & BEACONS (KIBLAT 295° / ARAH KIBLAT)
-    // =========================================================================
-    // A. Ground & Interior Golden Qibla Runner
-    const qiblaArrow = new THREE.ArrowHelper(
-      new THREE.Vector3(0, 0, 1),
-      new THREE.Vector3(0, 0.06, -6.0),
-      14.0,
-      0xC9A227,
-      2.2,
-      1.1
-    );
-    qiblaGroup.add(qiblaArrow);
-
-    // Glowing golden ground chevrons along Kiblat axis
-    for (let c = -4; c <= 8; c += 3) {
-      const chevron = new THREE.Mesh(
-        new THREE.RingGeometry(0.8, 1.1, 3, 1, Math.PI * 0.25, Math.PI * 0.5),
-        matGoldCompass
-      );
-      chevron.rotation.x = -Math.PI / 2;
-      chevron.rotation.z = -Math.PI / 4;
-      chevron.position.set(0, 0.07, c);
-      qiblaGroup.add(chevron);
-    }
-
-    // B. Interior Floating Qibla Badge (Near Mimbar & Saf)
-    const qiblaLabelInterior = createCompassBadge('🕋 ARAH KIBLAT', true, 'Arah Sholat Menghadap Kiblat');
-    qiblaLabelInterior.position.set(0, 1.5, 3.0);
-    qiblaLabelInterior.scale.set(3.8, 0.95, 1);
-    qiblaGroup.add(qiblaLabelInterior);
-
-    // C. Elevated Exterior Floating Qibla Beacon (Visible from high orbit and outside)
-    const qiblaLabelExterior = createCompassBadge('🕋 ARAH KIBLAT (QIBLA)', true, '295° BARAT LAUT · KA\'BAH');
-    qiblaLabelExterior.position.set(0, 9.4, 13.0);
-    qiblaLabelExterior.scale.set(4.8, 1.2, 1);
-    qiblaGroup.add(qiblaLabelExterior);
-
-    // Glowing Vertical Beacon Cylinder linking ground to exterior badge
-    const beaconBeam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.04, 0.08, 9.2, 12),
-      new THREE.MeshStandardMaterial({
-        color: 0xffea78,
-        emissive: 0xc9a227,
-        emissiveIntensity: 0.9,
-        transparent: true,
-        opacity: 0.65,
-      })
-    );
-    beaconBeam.position.set(0, 4.7, 13.0);
-    qiblaGroup.add(beaconBeam);
-
-    // =========================================================================
-    // 5. FLOATING 3D SKY COMPASS (Tactical Map / Game HUD Floating Halo)
-    // =========================================================================
-    const skyCompassGroup = new THREE.Group();
-    const skyCompassY = 10.2;
-    const skyCompassR = 7.5;
-
-    // Sky Floating Rings
-    const skyRingOuter = new THREE.Mesh(
-      new THREE.TorusGeometry(skyCompassR, 0.06, 8, 48),
-      matGoldCompass
-    );
-    skyRingOuter.rotation.x = Math.PI / 2;
-    skyCompassGroup.add(skyRingOuter);
-
-    const skyRingInner = new THREE.Mesh(
-      new THREE.TorusGeometry(skyCompassR - 1.0, 0.035, 8, 48),
-      matDarkGreenCompass
-    );
-    skyRingInner.rotation.x = Math.PI / 2;
-    skyCompassGroup.add(skyRingInner);
-
-    // 4 Directional Cardinal Spoke Arms
-    const spokeGeo = new THREE.CylinderGeometry(0.025, 0.025, skyCompassR * 2, 8);
-    const spokeNS = new THREE.Mesh(spokeGeo, matCreamCardinal);
-    spokeNS.rotation.z = Math.PI / 2;
-    skyCompassGroup.add(spokeNS);
-
-    const spokeEW = new THREE.Mesh(spokeGeo, matCreamCardinal);
-    spokeEW.rotation.x = Math.PI / 2;
-    skyCompassGroup.add(spokeEW);
-
-    // Prominent Golden Qibla Arrow Pointer on Sky Compass (Pointing along +Z)
-    const skyQiblaArrow = new THREE.Mesh(
-      new THREE.ConeGeometry(0.45, 1.8, 6),
-      new THREE.MeshStandardMaterial({
-        color: 0xffea78,
-        emissive: 0xc9a227,
-        emissiveIntensity: 0.85,
-        metalness: 0.8,
-        roughness: 0.2,
-      })
-    );
-    skyQiblaArrow.rotation.x = Math.PI / 2;
-    skyQiblaArrow.position.set(0, 0, skyCompassR + 0.9);
-    skyCompassGroup.add(skyQiblaArrow);
-
-    // Sky Cardinal Pointer Cones (Utara, Selatan, Timur)
-    const skyNorthArrow = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.0, 4), matCreamCardinal);
-    skyNorthArrow.rotation.z = Math.PI / 2;
-    skyNorthArrow.position.set(-skyCompassR - 0.5, 0, 0);
-    skyCompassGroup.add(skyNorthArrow);
-
-    const skySouthArrow = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.0, 4), matCreamCardinal);
-    skySouthArrow.rotation.z = -Math.PI / 2;
-    skySouthArrow.position.set(skyCompassR + 0.5, 0, 0);
-    skyCompassGroup.add(skySouthArrow);
-
-    const skyEastArrow = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.0, 4), matCreamCardinal);
-    skyEastArrow.rotation.x = -Math.PI / 2;
-    skyEastArrow.position.set(0, 0, -skyCompassR - 0.5);
-    skyCompassGroup.add(skyEastArrow);
-
-    skyCompassGroup.position.set(0, skyCompassY, 0);
-    qiblaGroup.add(skyCompassGroup);
-    skyCompassRef.current = skyCompassGroup;
-
-    // Set initial visibility based on config.showQibla (ALWAYS VISIBLE in both Exterior and Interior!)
-    qiblaGroup.visible = config.showQibla;
+    qiblaGroup.visible = false;
     scene.add(qiblaGroup);
     qiblaGroupRef.current = qiblaGroup;
 
-    // Camera update function with STRICT INTERIOR WALL/ROOF CLAMPING
+    // Camera update function with smooth interior look-around & exterior bounds
     const updateCameraPos = () => {
       if (!cameraRef.current) return;
       const cam = cameraRef.current;
-      const { target, radius, theta, phi } = camState.current;
-      const cfg = configRef.current;
-      const W = cfg.width;
-      const D = cfg.depth;
-      const H = cfg.height;
+      const { target, radius, theta, phi, interiorYaw, interiorPitch } = camState.current;
 
       if (isInteriorRef.current) {
-        // 1. Clamp target to inner room bounds
-        const maxTX = Math.max(W / 2 - 3.2, 1.0);
-        const maxTZ = Math.max(D / 2 - 3.8, 1.0);
-        target.x = THREE.MathUtils.clamp(target.x, -maxTX, maxTX);
-        target.y = THREE.MathUtils.clamp(target.y, 1.2, 3.2);
-        target.z = THREE.MathUtils.clamp(target.z, -maxTZ, maxTZ);
+        // Interior: Camera is located at eye-level inside the hall
+        cam.position.copy(target);
 
-        // 2. Compute candidate position in spherical coordinates
-        const posX = target.x + radius * Math.sin(phi) * Math.sin(theta);
-        const posY = target.y + radius * Math.cos(phi);
-        const posZ = target.z + radius * Math.sin(phi) * Math.cos(theta);
+        // Smooth 360 First-Person / Panoramic look vector
+        const lookDirX = Math.sin(interiorYaw) * Math.cos(interiorPitch);
+        const lookDirY = Math.sin(interiorPitch);
+        const lookDirZ = Math.cos(interiorYaw) * Math.cos(interiorPitch);
 
-        // 3. Strict bounding box clamping with safety margins (Camera NEVER penetrates walls or roof!)
-        const marginX = 0.65;
-        const marginZ = 0.65;
-        const marginFloor = 0.60;
-        const marginCeiling = 0.70;
-
-        cam.position.x = THREE.MathUtils.clamp(posX, -W / 2 + marginX, W / 2 - marginX);
-        cam.position.y = THREE.MathUtils.clamp(posY, marginFloor, H - marginCeiling);
-        cam.position.z = THREE.MathUtils.clamp(posZ, -D / 2 + marginZ, D / 2 - marginZ);
+        cam.lookAt(
+          target.x + lookDirX * 10.0,
+          target.y + lookDirY * 10.0,
+          target.z + lookDirZ * 10.0
+        );
       } else {
-        cam.position.x = target.x + radius * Math.sin(phi) * Math.sin(theta);
-        cam.position.y = target.y + radius * Math.cos(phi);
-        cam.position.z = target.z + radius * Math.sin(phi) * Math.cos(theta);
+        // Exterior: Camera orbits around entire building, radius kept >= 16.0m so it NEVER clips into the walls
+        const safeRadius = THREE.MathUtils.clamp(radius, 16.0, 70.0);
+        cam.position.x = target.x + safeRadius * Math.sin(phi) * Math.sin(theta);
+        cam.position.y = target.y + safeRadius * Math.cos(phi);
+        cam.position.z = target.z + safeRadius * Math.sin(phi) * Math.cos(theta);
+        cam.lookAt(target);
       }
-      cam.lookAt(target);
     };
     updateCameraPos();
 
@@ -527,11 +309,25 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       lastX = e.clientX;
       lastY = e.clientY;
 
-      const minPhi = isInteriorRef.current ? 0.35 : 0.12;
-      const maxPhi = isInteriorRef.current ? Math.PI / 2 - 0.08 : Math.PI / 2 - 0.01;
-
-      camState.current.theta -= dx * 0.005;
-      camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.005, minPhi, maxPhi);
+      if (isInteriorRef.current) {
+        // Interior 360 Look:
+        // Dragging left (dx < 0) turns camera right (yaw increases)
+        // Dragging right (dx > 0) turns camera left (yaw decreases)
+        // Dragging up (dy < 0) tilts camera down to floor/carpet (pitch decreases)
+        // Dragging down (dy > 0) tilts camera up to chandelier/dome (pitch increases)
+        camState.current.interiorYaw -= dx * 0.005;
+        camState.current.interiorPitch = THREE.MathUtils.clamp(
+          camState.current.interiorPitch + dy * 0.005,
+          -1.35, // Looking down at carpet
+          1.35   // Looking up at dome/ceiling
+        );
+      } else {
+        // Exterior Orbit:
+        const minPhi = 0.12;
+        const maxPhi = Math.PI / 2 - 0.01;
+        camState.current.theta -= dx * 0.005;
+        camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.005, minPhi, maxPhi);
+      }
       updateCameraPos();
     };
 
@@ -573,21 +369,35 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const cfg = configRef.current;
-      const maxInteriorRadius = Math.min(cfg.width, cfg.depth) * 0.44;
-      const minR = isInteriorRef.current ? 1.5 : 12;
-      const maxR = isInteriorRef.current ? Math.max(maxInteriorRadius, 6.0) : 65;
-      camState.current.radius = THREE.MathUtils.clamp(
-        camState.current.radius + e.deltaY * 0.015,
-        minR,
-        maxR
-      );
+      if (!cameraRef.current) return;
+      const cam = cameraRef.current;
+
+      if (isInteriorRef.current) {
+        // Interior Zoom: Adjusts field of view (FOV) smoothly between 26 deg (close-up detail) and 72 deg (wide room)
+        camState.current.fov = THREE.MathUtils.clamp(
+          camState.current.fov + e.deltaY * 0.035,
+          26,
+          72
+        );
+        cam.fov = camState.current.fov;
+        cam.updateProjectionMatrix();
+      } else {
+        // Exterior Zoom: Adjusts orbit radius
+        cam.fov = 45;
+        cam.updateProjectionMatrix();
+        camState.current.radius = THREE.MathUtils.clamp(
+          camState.current.radius + e.deltaY * 0.02,
+          16.0,
+          70.0
+        );
+      }
       updateCameraPos();
     };
 
     // Dedicated Mobile Touch Events (1-finger orbit, 2-finger pinch-to-zoom)
     let touchStartDist = 0;
     let initialTouchRadius = 0;
+    let initialTouchFov = 45;
     let touchDragging = false;
     let lastTouchX = 0, lastTouchY = 0;
 
@@ -602,6 +412,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         touchStartDist = Math.hypot(dx, dy);
         initialTouchRadius = camState.current.radius;
+        initialTouchFov = camState.current.fov;
       }
     };
 
@@ -612,20 +423,33 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         lastTouchX = e.touches[0].clientX;
         lastTouchY = e.touches[0].clientY;
 
-        const minPhi = isInteriorRef.current ? 0.35 : 0.12;
-        const maxPhi = isInteriorRef.current ? Math.PI / 2 - 0.08 : Math.PI / 2 - 0.01;
-
-        camState.current.theta -= dx * 0.006;
-        camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.006, minPhi, maxPhi);
+        if (isInteriorRef.current) {
+          camState.current.interiorYaw -= dx * 0.006;
+          camState.current.interiorPitch = THREE.MathUtils.clamp(
+            camState.current.interiorPitch + dy * 0.006,
+            -1.35,
+            1.35
+          );
+        } else {
+          const minPhi = 0.12;
+          const maxPhi = Math.PI / 2 - 0.01;
+          camState.current.theta -= dx * 0.006;
+          camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.006, minPhi, maxPhi);
+        }
         updateCameraPos();
       } else if (e.touches.length === 2 && touchStartDist > 0) {
         const dx = e.touches[0].clientX - e.touches[1].clientX;
         const dy = e.touches[0].clientY - e.touches[1].clientY;
         const currentDist = Math.hypot(dx, dy);
         const scale = touchStartDist / Math.max(currentDist, 1);
-        const minR = isInteriorRef.current ? 1.5 : 12;
-        const maxR = isInteriorRef.current ? 8.0 : 65;
-        camState.current.radius = THREE.MathUtils.clamp(initialTouchRadius * scale, minR, maxR);
+
+        if (isInteriorRef.current && cameraRef.current) {
+          camState.current.fov = THREE.MathUtils.clamp(initialTouchFov * scale, 26, 72);
+          cameraRef.current.fov = camState.current.fov;
+          cameraRef.current.updateProjectionMatrix();
+        } else {
+          camState.current.radius = THREE.MathUtils.clamp(initialTouchRadius * scale, 16.0, 70.0);
+        }
         updateCameraPos();
       }
     };
@@ -672,6 +496,16 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         camState.current.target.lerpVectors(camState.current.fromTarget, camState.current.toTarget, t);
         camState.current.radius = camState.current.fromRadius + (camState.current.toRadius - camState.current.fromRadius) * t;
         camState.current.phi = camState.current.fromPhi + (camState.current.toPhi - camState.current.fromPhi) * t;
+        camState.current.theta = camState.current.fromTheta + (camState.current.toTheta - camState.current.fromTheta) * t;
+        camState.current.interiorPitch = camState.current.fromPitch + (camState.current.toPitch - camState.current.fromPitch) * t;
+        camState.current.interiorYaw = camState.current.fromYaw + (camState.current.toYaw - camState.current.fromYaw) * t;
+        camState.current.fov = camState.current.fromFov + (camState.current.toFov - camState.current.fromFov) * t;
+
+        if (cameraRef.current) {
+          cameraRef.current.fov = camState.current.fov;
+          cameraRef.current.updateProjectionMatrix();
+        }
+
         updateCameraPos();
 
         if (progress >= 1) {
@@ -679,7 +513,11 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         }
       } else if (configRef.current.autoRotate && !dragging) {
         // Smooth architectural auto-orbit
-        camState.current.theta += 0.003;
+        if (isInteriorRef.current) {
+          camState.current.interiorYaw += 0.0025;
+        } else {
+          camState.current.theta += 0.003;
+        }
         updateCameraPos();
       }
 
@@ -749,10 +587,10 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         l.distance = 22;
       });
     } else {
-      // Day (Clean, high-contrast studio white background)
-      scene.background = new THREE.Color(0xFFFFFF);
+      // Day (Comfortable soft studio light grey background)
+      scene.background = new THREE.Color(0xD8DEE4);
       if (scene.fog) {
-        scene.fog.color = new THREE.Color(0xFFFFFF);
+        scene.fog.color = new THREE.Color(0xD8DEE4);
       }
       sun.color.setHex(0xfffaee);
       sun.intensity = 1.40;
@@ -873,7 +711,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
     // Lantai Keramik Interior Putih Polos
     const matFloor = new THREE.MeshStandardMaterial({
-      color: 0xFAFAFC,
+      color: 0xFFFFFF,
       roughness: 0.35,
       metalness: 0.05,
     });
@@ -886,28 +724,62 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     group.add(floor);
     floorMeshRef.current = floor;
 
-    // Floor Surrounding Terrace / Courtyard (Eksterior Putih Bersih dengan Lis Tepi Hijau Tua)
-    const terraceGeo = new THREE.PlaneGeometry(W + 6, D + 6);
-    const matTerrace = new THREE.MeshStandardMaterial({ color: 0xF4F6F8, roughness: 0.6 });
-    const terrace = new THREE.Mesh(terraceGeo, matTerrace);
-    terrace.rotation.x = -Math.PI / 2;
-    terrace.position.y = -0.02;
-    terrace.receiveShadow = true;
-    group.add(terrace);
+    // =========================================================================
+    // ALAS TANAH & PODIUM DASAR BANGUNAN (Solid Pure White Ground & Foundation)
+    // =========================================================================
+    // 1. Teras / Podium Trap 1 (Pelataran Keliling Masjid - Putih Padat)
+    const matPodiumWhite = new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.45,
+      metalness: 0.02,
+    });
 
-    // Terrace Green Border Perimeter
-    const terraceBorderGeo = new THREE.BoxGeometry(W + 6.3, 0.08, D + 6.3);
-    const matTerraceBorder = new THREE.MeshStandardMaterial({ color: 0x1B4332, roughness: 0.5 });
-    const terraceBorder = new THREE.Mesh(terraceBorderGeo, matTerraceBorder);
-    terraceBorder.position.set(0, -0.05, 0);
-    group.add(terraceBorder);
+    const podium1Geo = new THREE.BoxGeometry(W + 5.0, 0.20, D + 5.0);
+    const podium1 = new THREE.Mesh(podium1Geo, matPodiumWhite);
+    podium1.position.set(0, -0.10, 0);
+    podium1.receiveShadow = true;
+    podium1.castShadow = true;
+    group.add(podium1);
 
-    // Subtle Ground Shadow Catcher on Pure White Studio Floor
-    const shadowPlaneGeo = new THREE.PlaneGeometry(120, 120);
-    const matShadow = new THREE.ShadowMaterial({ opacity: 0.18 });
+    // 2. Teras / Podium Trap 2 (Tangga Trap Bawah - Putih Padat)
+    const podium2Geo = new THREE.BoxGeometry(W + 7.0, 0.20, D + 7.0);
+    const podium2 = new THREE.Mesh(podium2Geo, matPodiumWhite);
+    podium2.position.set(0, -0.30, 0);
+    podium2.receiveShadow = true;
+    podium2.castShadow = true;
+    group.add(podium2);
+
+    // 3. Pelataran Plaza Luas / Courtyard (Plaza Pelataran Terang)
+    const matPlazaWhite = new THREE.MeshStandardMaterial({
+      color: 0xEEF2F5,
+      roughness: 0.55,
+      metalness: 0.02,
+    });
+    const plazaGeo = new THREE.BoxGeometry(W + 16.0, 0.20, D + 16.0);
+    const plaza = new THREE.Mesh(plazaGeo, matPlazaWhite);
+    plaza.position.set(0, -0.50, 0);
+    plaza.receiveShadow = true;
+    plaza.castShadow = true;
+    group.add(plaza);
+
+    // 4. Alas Tanah Luas (Expansive Soft Neutral Studio Ground Base)
+    const matGroundEarth = new THREE.MeshStandardMaterial({
+      color: 0xD8DEE4,
+      roughness: 0.75,
+      metalness: 0.0,
+    });
+    const groundBaseGeo = new THREE.BoxGeometry(160, 0.50, 160);
+    const groundBase = new THREE.Mesh(groundBaseGeo, matGroundEarth);
+    groundBase.position.set(0, -0.85, 0);
+    groundBase.receiveShadow = true;
+    group.add(groundBase);
+
+    // 5. Contact Shadow Overlay (Memastikan bayangan jatuh tegas di atas alas tanah putih)
+    const shadowPlaneGeo = new THREE.PlaneGeometry(160, 160);
+    const matShadow = new THREE.ShadowMaterial({ opacity: 0.22 });
     const shadowPlane = new THREE.Mesh(shadowPlaneGeo, matShadow);
     shadowPlane.rotation.x = -Math.PI / 2;
-    shadowPlane.position.y = -0.09;
+    shadowPlane.position.y = -0.59;
     shadowPlane.receiveShadow = true;
     group.add(shadowPlane);
 
@@ -2255,9 +2127,13 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
     // Animate camera target and radius inside room boundary
     const isPortrait = (typeof window !== 'undefined' ? window.innerWidth / Math.max(window.innerHeight, 1) : 1) < 1.0;
-    const newTarget = isInterior ? new THREE.Vector3(0, 1.8, 1.5) : new THREE.Vector3(0, 2.5, 0);
-    const newRadius = isInterior ? 5.8 : (isPortrait ? 46.0 : 30.0);
-    const newPhi = isInterior ? 1.15 : Math.PI / 2.8;
+    const newTarget = isInterior ? new THREE.Vector3(0, 1.6, 0.5) : new THREE.Vector3(0, 2.5, 0);
+    const newRadius = isInterior ? 2.8 : (isPortrait ? 46.0 : 30.0);
+    const newPhi = isInterior ? 0.05 : Math.PI / 2.8;
+    const newTheta = isInterior ? 0 : Math.PI / 3.8;
+    const newFov = isInterior ? 55 : 45;
+    const newYaw = 0;
+    const newPitch = 0.05;
 
     camState.current.fromTarget.copy(camState.current.target);
     camState.current.toTarget.copy(newTarget);
@@ -2265,6 +2141,14 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     camState.current.toRadius = newRadius;
     camState.current.fromPhi = camState.current.phi;
     camState.current.toPhi = newPhi;
+    camState.current.fromTheta = camState.current.theta;
+    camState.current.toTheta = newTheta;
+    camState.current.fromYaw = camState.current.interiorYaw;
+    camState.current.toYaw = newYaw;
+    camState.current.fromPitch = camState.current.interiorPitch;
+    camState.current.toPitch = newPitch;
+    camState.current.fromFov = camState.current.fov;
+    camState.current.toFov = newFov;
     camState.current.animStart = performance.now();
     camState.current.animDuration = 650;
     camState.current.animating = true;
@@ -2287,19 +2171,28 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
   useEffect(() => {
     if (!focusPosition) return;
     const cfg = configRef.current;
+    const isTop = focusPosition[1] > 20;
     const target = new THREE.Vector3(
-      isInterior ? THREE.MathUtils.clamp(focusPosition[0], -cfg.width / 2 + 2.0, cfg.width / 2 - 2.0) : focusPosition[0],
-      Math.max(focusPosition[1], 1.2),
-      isInterior ? THREE.MathUtils.clamp(focusPosition[2], -cfg.depth / 2 + 2.0, cfg.depth / 2 - 2.0) : focusPosition[2]
+      isInterior ? THREE.MathUtils.clamp(focusPosition[0], -cfg.width / 2 + 1.5, cfg.width / 2 - 1.5) : focusPosition[0],
+      isInterior ? Math.max(focusPosition[1], 1.5) : Math.max(focusPosition[1], 1.2),
+      isInterior ? THREE.MathUtils.clamp(focusPosition[2], -cfg.depth / 2 + 1.5, cfg.depth / 2 - 1.5) : focusPosition[2]
     );
     camState.current.fromTarget.copy(camState.current.target);
     camState.current.toTarget.copy(target);
     camState.current.fromRadius = camState.current.radius;
-    camState.current.toRadius = isInterior ? 4.5 : Math.min(camState.current.radius, 14);
+    camState.current.toRadius = isInterior ? 2.8 : (isTop ? 28 : Math.min(camState.current.radius, 32));
     camState.current.fromPhi = camState.current.phi;
-    camState.current.toPhi = isInterior ? 1.1 : 0.65;
+    camState.current.toPhi = isInterior ? 0.05 : (isTop ? 0.15 : 0.65);
+    camState.current.fromTheta = camState.current.theta;
+    camState.current.toTheta = isInterior ? 0 : camState.current.theta;
+    camState.current.fromYaw = camState.current.interiorYaw;
+    camState.current.toYaw = 0; // Face forward (+Z Mihrab)
+    camState.current.fromPitch = camState.current.interiorPitch;
+    camState.current.toPitch = 0.05;
+    camState.current.fromFov = camState.current.fov;
+    camState.current.toFov = isInterior ? 55 : 45;
     camState.current.animStart = performance.now();
-    camState.current.animDuration = 700;
+    camState.current.animDuration = 650;
     camState.current.animating = true;
   }, [focusPosition, isInterior]);
 

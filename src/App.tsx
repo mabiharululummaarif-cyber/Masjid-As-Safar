@@ -5,17 +5,20 @@ import { MosqueCanvas3D } from './components/MosqueCanvas3D';
 import { MosqueConfigModal } from './components/MosqueConfigModal';
 import { ControlOverlay } from './components/ControlOverlay';
 
-const STORAGE_CONFIG_KEY = 'masjid_as_safar_config_arch_v1';
+const STORAGE_CONFIG_KEY = 'masjid_as_safar_config_arch_v2';
 
 export default function App() {
   const [config, setConfig] = useState<MosqueConfig>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_CONFIG_KEY);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...parsed, showQibla: false };
+      }
     } catch (e) {
       console.warn('Failed to load saved config', e);
     }
-    return DEFAULT_CONFIG;
+    return { ...DEFAULT_CONFIG, showQibla: false };
   });
 
   // UI States
@@ -37,31 +40,30 @@ export default function App() {
     switch (preset) {
       case 'mihrab':
         setIsInterior(true);
-        setFocusPosition([0, 1.8, 9.2]);
+        setFocusPosition([0, 1.6, 6.5]);
         break;
       case 'backDoor':
         setIsInterior(true);
-        setFocusPosition([0, 1.8, -9.0]);
+        setFocusPosition([0, 1.6, -7.0]);
         break;
       case 'leftDoor':
         setIsInterior(true);
-        setFocusPosition([-6.0, 1.8, -3.2]);
+        setFocusPosition([-4.5, 1.6, -2.5]);
         break;
       case 'rightDoor':
         setIsInterior(true);
-        setFocusPosition([6.0, 1.8, -3.2]);
+        setFocusPosition([4.5, 1.6, -2.5]);
         break;
       case 'topView':
-        setIsInterior(false);
-        setFocusPosition([0, 26, 0.1]);
+        setFocusPosition([0, 28, 0.1]);
         break;
       case 'exterior':
         setIsInterior(false);
-        setFocusPosition([0, 2.0, 0]);
+        setFocusPosition([0, 2.5, 0]);
         break;
       case 'interior':
         setIsInterior(true);
-        setFocusPosition([0, 1.8, 1.5]);
+        setFocusPosition([0, 1.5, 0.5]);
         break;
     }
   };
@@ -95,7 +97,7 @@ export default function App() {
   };
 
   return (
-    <div className="w-screen h-screen bg-white font-sans relative overflow-hidden select-none">
+    <div className="w-screen h-screen bg-[#D8DEE4] font-sans relative overflow-hidden select-none">
       {/* 100% Fullscreen 3D Canvas of the Mosque Building */}
       <main className="w-full h-full relative overflow-hidden">
         <MosqueCanvas3D
