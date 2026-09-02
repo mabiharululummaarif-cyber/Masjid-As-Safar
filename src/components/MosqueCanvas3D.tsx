@@ -31,6 +31,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
   // Dynamic 3D groups and meshes
   const dynamicGroupRef = useRef<THREE.Group | null>(null);
   const roofMeshesRef = useRef<THREE.Mesh[]>([]);
+  const fanBladesRef = useRef<THREE.Group[]>([]);
   const markersRef = useRef<{ mesh: THREE.Mesh; halo: THREE.Mesh; hotspotId: string; pos: THREE.Vector3 }[]>([]);
   const qiblaGroupRef = useRef<THREE.Group | null>(null);
   const skyCompassRef = useRef<THREE.Group | null>(null);
@@ -54,20 +55,23 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
   configRef.current = config;
 
   // Camera spherical state
+  const isPortraitInit = (typeof window !== 'undefined' ? window.innerWidth / Math.max(window.innerHeight, 1) : 1) < 1.0;
+  const initialRadius = isPortraitInit ? 46 : 30;
+
   const camState = useRef({
-    target: new THREE.Vector3(0, 2, 0),
-    radius: 28,
-    theta: Math.PI / 4,
-    phi: Math.PI / 3.2,
+    target: new THREE.Vector3(0, 2.5, 0),
+    radius: initialRadius,
+    theta: Math.PI / 3.8,
+    phi: Math.PI / 2.8,
     animating: false,
     animStart: 0,
     animDuration: 600,
     fromTarget: new THREE.Vector3(),
     toTarget: new THREE.Vector3(),
-    fromRadius: 28,
-    toRadius: 28,
-    fromPhi: Math.PI / 3.2,
-    toPhi: Math.PI / 3.2,
+    fromRadius: initialRadius,
+    toRadius: initialRadius,
+    fromPhi: Math.PI / 2.8,
+    toPhi: Math.PI / 2.8,
   });
 
   // Initialize Scene & Renderer
@@ -80,8 +84,8 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     // Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color(0x163832);
-    scene.fog = new THREE.Fog(0x163832, 38, 90);
+    scene.background = new THREE.Color(0xFFFFFF);
+    scene.fog = new THREE.Fog(0xFFFFFF, 55, 140);
 
     // Camera (near = 0.05 to prevent close polygon clipping)
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.05, 300);
@@ -98,11 +102,11 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     container.innerHTML = '';
     container.appendChild(renderer.domElement);
 
-    // Enhanced High-Clarity Lighting (Daylight default: bright, clear, no dark spots)
-    const ambient = new THREE.AmbientLight(0xffffff, 0.90);
+    // Enhanced High-Clarity Lighting (Daylight default: bright, clear, high contrast)
+    const ambient = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambient);
 
-    const sun = new THREE.DirectionalLight(0xfff8ea, 1.45);
+    const sun = new THREE.DirectionalLight(0xfffaee, 1.40);
     sun.position.set(22, 36, 20);
     sun.castShadow = true;
     sun.shadow.mapSize.width = 2048;
@@ -116,11 +120,11 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     sun.shadow.bias = -0.0004;
     scene.add(sun);
 
-    const fill = new THREE.DirectionalLight(0xd5ede4, 0.70);
+    const fill = new THREE.DirectionalLight(0xeef5f2, 0.65);
     fill.position.set(-20, 18, -18);
     scene.add(fill);
 
-    const hemi = new THREE.HemisphereLight(0xfffaee, 0x163832, 0.55);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xe2e8f0, 0.60);
     scene.add(hemi);
 
     // 6 Indoor Chandeliers + Mihrab Spotlight for uniform bright interior
@@ -572,7 +576,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       const cfg = configRef.current;
       const maxInteriorRadius = Math.min(cfg.width, cfg.depth) * 0.44;
       const minR = isInteriorRef.current ? 1.5 : 12;
-      const maxR = isInteriorRef.current ? Math.max(maxInteriorRadius, 6.0) : 55;
+      const maxR = isInteriorRef.current ? Math.max(maxInteriorRadius, 6.0) : 65;
       camState.current.radius = THREE.MathUtils.clamp(
         camState.current.radius + e.deltaY * 0.015,
         minR,
@@ -581,11 +585,64 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       updateCameraPos();
     };
 
+    // Dedicated Mobile Touch Events (1-finger orbit, 2-finger pinch-to-zoom)
+    let touchStartDist = 0;
+    let initialTouchRadius = 0;
+    let touchDragging = false;
+    let lastTouchX = 0, lastTouchY = 0;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        touchDragging = true;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        touchDragging = false;
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        touchStartDist = Math.hypot(dx, dy);
+        initialTouchRadius = camState.current.radius;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1 && touchDragging) {
+        const dx = e.touches[0].clientX - lastTouchX;
+        const dy = e.touches[0].clientY - lastTouchY;
+        lastTouchX = e.touches[0].clientX;
+        lastTouchY = e.touches[0].clientY;
+
+        const minPhi = isInteriorRef.current ? 0.35 : 0.12;
+        const maxPhi = isInteriorRef.current ? Math.PI / 2 - 0.08 : Math.PI / 2 - 0.01;
+
+        camState.current.theta -= dx * 0.006;
+        camState.current.phi = THREE.MathUtils.clamp(camState.current.phi - dy * 0.006, minPhi, maxPhi);
+        updateCameraPos();
+      } else if (e.touches.length === 2 && touchStartDist > 0) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const currentDist = Math.hypot(dx, dy);
+        const scale = touchStartDist / Math.max(currentDist, 1);
+        const minR = isInteriorRef.current ? 1.5 : 12;
+        const maxR = isInteriorRef.current ? 8.0 : 65;
+        camState.current.radius = THREE.MathUtils.clamp(initialTouchRadius * scale, minR, maxR);
+        updateCameraPos();
+      }
+    };
+
+    const onTouchEnd = () => {
+      touchDragging = false;
+      touchStartDist = 0;
+    };
+
     const dom = renderer.domElement;
     dom.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
     dom.addEventListener('wheel', onWheel, { passive: false });
+    dom.addEventListener('touchstart', onTouchStart, { passive: true });
+    dom.addEventListener('touchmove', onTouchMove, { passive: false });
+    dom.addEventListener('touchend', onTouchEnd, { passive: true });
 
     // Handle Resize
     const onResize = () => {
@@ -620,24 +677,25 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         if (progress >= 1) {
           camState.current.animating = false;
         }
+      } else if (configRef.current.autoRotate && !dragging) {
+        // Smooth architectural auto-orbit
+        camState.current.theta += 0.003;
+        updateCameraPos();
+      }
+
+      // Fan blade rotation animation
+      const fanSpd = configRef.current.fanSpeed ?? 1;
+      if (fanSpd > 0 && fanBladesRef.current.length > 0) {
+        const spinDelta = fanSpd * 0.18;
+        fanBladesRef.current.forEach(f => {
+          f.rotation.z += spinDelta;
+        });
       }
 
       // Animate sky compass floating effect
       if (skyCompassRef.current) {
         skyCompassRef.current.position.y = 10.2 + Math.sin(elapsedTime * 1.6) * 0.16;
       }
-
-      // Animate hotspot markers (gentle hover float & rotating halo)
-      markersRef.current.forEach((item, index) => {
-        if (item.mesh.visible) {
-          item.mesh.position.y = item.pos.y + Math.sin(elapsedTime * 2.5 + index) * 0.04;
-          if (item.halo) {
-            item.halo.position.copy(item.mesh.position);
-            item.halo.rotation.z = elapsedTime * 1.5 + index;
-            item.halo.rotation.x = Math.PI / 2;
-          }
-        }
-      });
 
       renderer.render(scene, camera);
     };
@@ -691,17 +749,17 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         l.distance = 22;
       });
     } else {
-      // Day (Crisp, highly clear, beautiful daylight)
-      scene.background = new THREE.Color(0x163832);
+      // Day (Clean, high-contrast studio white background)
+      scene.background = new THREE.Color(0xFFFFFF);
       if (scene.fog) {
-        scene.fog.color = new THREE.Color(0x163832);
+        scene.fog.color = new THREE.Color(0xFFFFFF);
       }
-      sun.color.setHex(0xfff8ea);
-      sun.intensity = 1.45;
+      sun.color.setHex(0xfffaee);
+      sun.intensity = 1.40;
       ambient.color.setHex(0xffffff);
-      ambient.intensity = 0.90;
-      fill.intensity = 0.70;
-      if (hemi) hemi.intensity = 0.55;
+      ambient.intensity = 0.85;
+      fill.intensity = 0.65;
+      if (hemi) hemi.intensity = 0.60;
       indoorLights.forEach(l => {
         l.intensity = 1.25;
         l.distance = 22;
@@ -719,6 +777,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       group.remove(obj);
     }
     roofMeshesRef.current = [];
+    fanBladesRef.current = [];
     markersRef.current = [];
 
     const W = config.width;      // 16
@@ -745,46 +804,78 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       if (lights[6]) lights[6].position.set(0, 3.2, D / 2 - 1.0);
     }
 
-    // ---------- Materials ----------
-    const matSand = new THREE.MeshStandardMaterial({
-      color: 0xE8DCC0,
-      roughness: 0.85,
-      metalness: 0.05
+    // Determine roof opacity based on roofMode & isInterior
+    let roofOpacity = 1.0;
+    if (config.roofMode === 'hidden') {
+      roofOpacity = 0.0;
+    } else if (config.roofMode === 'transparent') {
+      roofOpacity = 0.22;
+    } else if (isInterior) {
+      roofOpacity = 0.06;
+    }
+
+    // ---------- Materials (Warna: Interior Putih Polos, Eksterior Hijau Tua, Hijau Muda & Putih) ----------
+    // Interior Putih Polos
+    const matInteriorWhite = new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.9,
+      metalness: 0.02
     });
 
-    const matRoof = new THREE.MeshStandardMaterial({
-      color: 0x2F6B4F,
-      roughness: 0.55,
+    // Alias for existing references
+    const matSand = matInteriorWhite;
+
+    // Eksterior Hijau Tua
+    const matDarkGreen = new THREE.MeshStandardMaterial({
+      color: 0x1B4332,
+      roughness: 0.5,
       metalness: 0.15,
       transparent: true,
-      opacity: isInterior ? 0.06 : 1.0,
+      opacity: roofOpacity,
       side: THREE.DoubleSide
     });
 
+    // Eksterior Hijau Muda
+    const matLightGreen = new THREE.MeshStandardMaterial({
+      color: 0x40916C,
+      roughness: 0.45,
+      metalness: 0.15,
+      transparent: true,
+      opacity: roofOpacity,
+      side: THREE.DoubleSide
+    });
+
+    const matRoof = matDarkGreen;
+
+    // Aksen Emas & Kuningan
     const matGold = new THREE.MeshStandardMaterial({
       color: 0xC9A227,
       metalness: 0.65,
       roughness: 0.35,
     });
 
+    // Kayu Jati Alami untuk Mimbar & Lemari
     const matDarkWood = new THREE.MeshStandardMaterial({
-      color: 0x3d2716,
-      roughness: 0.7,
+      color: 0x4A2E18,
+      roughness: 0.65,
       metalness: 0.1
     });
 
+    // Kaca Transparan Bersih
     const matGlass = new THREE.MeshPhysicalMaterial({
-      color: 0x9fd0e8,
+      color: 0xE8F4F8,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.40,
       roughness: 0.05,
-      transmission: 0.75,
+      transmission: 0.85,
       ior: 1.5,
     });
 
+    // Lantai Keramik Interior Putih Polos
     const matFloor = new THREE.MeshStandardMaterial({
-      color: 0xd8ceb3,
-      roughness: 0.82,
+      color: 0xFAFAFC,
+      roughness: 0.35,
+      metalness: 0.05,
     });
 
     // Floor Base (Spacious main hall)
@@ -795,20 +886,59 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     group.add(floor);
     floorMeshRef.current = floor;
 
-    // Floor Surrounding Terrace / Courtyard
-    const terraceGeo = new THREE.PlaneGeometry(W + 10, D + 10);
-    const matTerrace = new THREE.MeshStandardMaterial({ color: 0x1d443c, roughness: 0.95 });
+    // Floor Surrounding Terrace / Courtyard (Eksterior Putih Bersih dengan Lis Tepi Hijau Tua)
+    const terraceGeo = new THREE.PlaneGeometry(W + 6, D + 6);
+    const matTerrace = new THREE.MeshStandardMaterial({ color: 0xF4F6F8, roughness: 0.6 });
     const terrace = new THREE.Mesh(terraceGeo, matTerrace);
     terrace.rotation.x = -Math.PI / 2;
     terrace.position.y = -0.02;
     terrace.receiveShadow = true;
     group.add(terrace);
 
-    // Mosque Structural Frames & Materials
+    // Terrace Green Border Perimeter
+    const terraceBorderGeo = new THREE.BoxGeometry(W + 6.3, 0.08, D + 6.3);
+    const matTerraceBorder = new THREE.MeshStandardMaterial({ color: 0x1B4332, roughness: 0.5 });
+    const terraceBorder = new THREE.Mesh(terraceBorderGeo, matTerraceBorder);
+    terraceBorder.position.set(0, -0.05, 0);
+    group.add(terraceBorder);
+
+    // Subtle Ground Shadow Catcher on Pure White Studio Floor
+    const shadowPlaneGeo = new THREE.PlaneGeometry(120, 120);
+    const matShadow = new THREE.ShadowMaterial({ opacity: 0.18 });
+    const shadowPlane = new THREE.Mesh(shadowPlaneGeo, matShadow);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = -0.09;
+    shadowPlane.receiveShadow = true;
+    group.add(shadowPlane);
+
+    // Mosque Structural Frames & Materials (Kusen Putih & Aksen Hijau)
     const matDoorFrame = new THREE.MeshStandardMaterial({
-      color: 0x163832,
-      roughness: 0.45,
-      metalness: 0.45,
+      color: 0xFFFFFF,
+      roughness: 0.3,
+      metalness: 0.1,
+    });
+
+    const matWhiteFrame = new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.3,
+      metalness: 0.1,
+    });
+
+    const matStainless = new THREE.MeshStandardMaterial({
+      color: 0xDEE2E6,
+      metalness: 0.9,
+      roughness: 0.15,
+    });
+
+    const matWhiteCeramic = new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      roughness: 0.25,
+      metalness: 0.08,
+    });
+
+    const matCeramicGrout = new THREE.MeshStandardMaterial({
+      color: 0xE2E8F0,
+      roughness: 0.8,
     });
 
     const matPartitionGlass = new THREE.MeshPhysicalMaterial({
@@ -838,40 +968,40 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       const glassH = height - curbH - topBeamH;
       const bayW = length / bays;
 
-      // 1. Bottom Structural Base Curb (Dado / Plinth)
+      // 1. Bottom Structural Base Curb (Dado / Plinth - Eksterior Putih Bersih dengan Lis Hijau)
       const curb = new THREE.Mesh(
         new THREE.BoxGeometry(length, curbH, wallThickness),
-        matSand
+        matInteriorWhite
       );
       curb.position.set(0, curbH / 2, 0);
       curb.castShadow = true;
       curb.receiveShadow = true;
       wallGroup.add(curb);
 
-      // Bottom gold accent runner
-      const curbGold = new THREE.Mesh(
-        new THREE.BoxGeometry(length + 0.02, 0.05, wallThickness + 0.02),
-        matGold
+      // Bottom green accent runner (Hijau Tua)
+      const curbGreen = new THREE.Mesh(
+        new THREE.BoxGeometry(length + 0.02, 0.06, wallThickness + 0.02),
+        matDarkGreen
       );
-      curbGold.position.set(0, curbH + 0.025, 0);
-      wallGroup.add(curbGold);
+      curbGreen.position.set(0, curbH + 0.03, 0);
+      wallGroup.add(curbGreen);
 
-      // 2. Top Structural Transom Header Beam
+      // 2. Top Structural Transom Header Beam (Putih Bersih)
       const topBeam = new THREE.Mesh(
         new THREE.BoxGeometry(length, topBeamH, wallThickness),
-        matDoorFrame
+        matWhiteFrame
       );
       topBeam.position.set(0, height - topBeamH / 2, 0);
       topBeam.castShadow = true;
       wallGroup.add(topBeam);
 
-      // Top gold fascia trim
-      const topGold = new THREE.Mesh(
-        new THREE.BoxGeometry(length + 0.02, 0.05, wallThickness + 0.02),
-        matGold
+      // Top green fascia trim (Hijau Muda)
+      const topGreen = new THREE.Mesh(
+        new THREE.BoxGeometry(length + 0.02, 0.06, wallThickness + 0.02),
+        matLightGreen
       );
-      topGold.position.set(0, height - topBeamH - 0.025, 0);
-      wallGroup.add(topGold);
+      topGreen.position.set(0, height - topBeamH - 0.03, 0);
+      wallGroup.add(topGreen);
 
       // 3. Glass Panes & Mullion Grid for each Bay
       const glassY = curbH + glassH / 2;
@@ -924,247 +1054,309 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
         wallGroup.add(pinstripe);
       }
 
-      wallGroup.position.set(x, 0, z);
+      wallGroup.position.set(x, y, z);
       wallGroup.rotation.y = ry;
       group.add(wallGroup);
       return wallGroup;
     };
 
-    // Mosque Walls & 3 Sliding Glass Doors (Pintu Kaca Tarik-Dorong)
-    const doorH = 3.4;
-
-    // Helper to create a Sliding Glass Door (Pintu Kaca Geser / Tarik-Dorong 2 Panel)
-    const createSlidingDoor = (
+    // =========================================================================
+    // PINTU KACA MODEL AYUN / ENGSEL (DOUBLE SWING HINGED GLASS DOOR)
+    // =========================================================================
+    // Setiap pintu:
+    // - 2 daun kaca ayun dengan engsel di pinggir
+    // - Gagang tarik (pull handle) stainless vertikal di tengah tiap daun
+    // - Di kiri-kanan pintu ada panel kaca tetap (fixed) dari lantai s/d bawah transom
+    // - Di atas pintu ada jendela transom kaca terbagi 4 panel horizontal
+    // - Frame keseluruhan berwarna PUTIH
+    const createSwingDoor = (
       x: number,
       z: number,
-      width: number,
-      orientation: 'x' | 'z',
-      isGrandEntrance = false
+      totalPortalW: number,
+      orientation: 'x' | 'z'
     ) => {
-      const doorGroup = new THREE.Group();
-      const halfW = width / 2;
-      const leafW = halfW + 0.08; // Slight overlap in center for realistic sliding door
-      const leafH = doorH - 0.08;
-      const leafThickness = 0.06;
-      const trackOffset = 0.035; // Offset between inner and outer sliding tracks
+      const doorPortalGroup = new THREE.Group();
+      const doorH = 2.45; // Height of swing doors & fixed side panels
+      const transomH = 0.85; // Height of 4-panel horizontal transom
+      const frameT = 0.16; // Thickness of white frame
 
-      if (orientation === 'z') {
-        // Door lies along Z-axis (Right wall X = +W/2 or Left wall X = -W/2)
-        // Panel 1 (Outer track)
-        const panel1Group = new THREE.Group();
-        const glass1 = new THREE.Mesh(new THREE.BoxGeometry(leafThickness, leafH, leafW), matGlass);
-        glass1.castShadow = true;
-        panel1Group.add(glass1);
+      // Dimensions breakdown:
+      // Center opening for 2 swing doors = 1.80m (0.90m per leaf)
+      const centerDoorOpeningW = 1.80;
+      const leafW = 0.88;
+      const leafH = doorH - 0.06;
+      const fixedPanelW = (totalPortalW - centerDoorOpeningW) / 2; // Fixed glass on left & right
 
-        const topFrame1 = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, 0.06, leafW), matDoorFrame);
-        topFrame1.position.set(0, leafH / 2 - 0.03, 0);
-        panel1Group.add(topFrame1);
-        const botFrame1 = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, 0.08, leafW), matDoorFrame);
-        botFrame1.position.set(0, -leafH / 2 + 0.04, 0);
-        panel1Group.add(botFrame1);
-        const sideFrame1A = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, leafH, 0.06), matDoorFrame);
-        sideFrame1A.position.set(0, 0, leafW / 2 - 0.03);
-        panel1Group.add(sideFrame1A);
-        const sideFrame1B = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, leafH, 0.06), matDoorFrame);
-        sideFrame1B.position.set(0, 0, -leafW / 2 + 0.03);
-        panel1Group.add(sideFrame1B);
+      const subGroup = new THREE.Group();
 
-        // Vertical sliding handle (Gold bar handle)
-        const handle1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.95, 12), matGold);
-        handle1.position.set(trackOffset > 0 ? 0.06 : -0.06, 0, leafW / 2 - 0.12);
-        panel1Group.add(handle1);
+      // 1. Outer White Perimeter Jamb & Base/Top Beams
+      // Base threshold
+      const baseCurb = new THREE.Mesh(new THREE.BoxGeometry(totalPortalW, 0.08, frameT), matWhiteFrame);
+      baseCurb.position.set(0, 0.04, 0);
+      subGroup.add(baseCurb);
 
-        panel1Group.position.set(trackOffset, doorH / 2, -halfW / 2);
-        doorGroup.add(panel1Group);
+      // Transom Mid-Beam (Horizontal beam dividing doors from transom)
+      const transomBeam = new THREE.Mesh(new THREE.BoxGeometry(totalPortalW, 0.10, frameT + 0.02), matWhiteFrame);
+      transomBeam.position.set(0, doorH + 0.05, 0);
+      transomBeam.castShadow = true;
+      subGroup.add(transomBeam);
 
-        // Panel 2 (Inner track)
-        const panel2Group = new THREE.Group();
-        const glass2 = new THREE.Mesh(new THREE.BoxGeometry(leafThickness, leafH, leafW), matGlass);
-        glass2.castShadow = true;
-        panel2Group.add(glass2);
+      // Top Portal Header Beam
+      const topPortalBeam = new THREE.Mesh(new THREE.BoxGeometry(totalPortalW, 0.12, frameT + 0.02), matWhiteFrame);
+      topPortalBeam.position.set(0, doorH + transomH + 0.06, 0);
+      topPortalBeam.castShadow = true;
+      subGroup.add(topPortalBeam);
 
-        const topFrame2 = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, 0.06, leafW), matDoorFrame);
-        topFrame2.position.set(0, leafH / 2 - 0.03, 0);
-        panel2Group.add(topFrame2);
-        const botFrame2 = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, 0.08, leafW), matDoorFrame);
-        botFrame2.position.set(0, -leafH / 2 + 0.04, 0);
-        panel2Group.add(botFrame2);
-        const sideFrame2A = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, leafH, 0.06), matDoorFrame);
-        sideFrame2A.position.set(0, 0, leafW / 2 - 0.03);
-        panel2Group.add(sideFrame2A);
-        const sideFrame2B = new THREE.Mesh(new THREE.BoxGeometry(leafThickness + 0.02, leafH, 0.06), matDoorFrame);
-        sideFrame2B.position.set(0, 0, -leafW / 2 + 0.03);
-        panel2Group.add(sideFrame2B);
+      // Left & Right Outer Vertical Jambs
+      const jambL = new THREE.Mesh(new THREE.BoxGeometry(0.12, doorH + transomH + 0.12, frameT), matWhiteFrame);
+      jambL.position.set(-totalPortalW / 2 + 0.06, (doorH + transomH + 0.12) / 2, 0);
+      subGroup.add(jambL);
 
-        const handle2 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.95, 12), matGold);
-        handle2.position.set(trackOffset > 0 ? -0.06 : 0.06, 0, -leafW / 2 + 0.12);
-        panel2Group.add(handle2);
+      const jambR = new THREE.Mesh(new THREE.BoxGeometry(0.12, doorH + transomH + 0.12, frameT), matWhiteFrame);
+      jambR.position.set(totalPortalW / 2 - 0.06, (doorH + transomH + 0.12) / 2, 0);
+      subGroup.add(jambR);
 
-        panel2Group.position.set(-trackOffset, doorH / 2, halfW / 2);
-        doorGroup.add(panel2Group);
+      // Inner Vertical Mullions separating Fixed Side Panels from Swing Door Opening
+      const mullionL = new THREE.Mesh(new THREE.BoxGeometry(0.08, doorH, frameT), matWhiteFrame);
+      mullionL.position.set(-centerDoorOpeningW / 2, doorH / 2, 0);
+      subGroup.add(mullionL);
 
-        // Top Sliding Rail / Header Casing
-        const topRail = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.14, width + 0.16), matGold);
-        topRail.position.set(0, doorH + 0.07, 0);
-        doorGroup.add(topRail);
+      const mullionR = new THREE.Mesh(new THREE.BoxGeometry(0.08, doorH, frameT), matWhiteFrame);
+      mullionR.position.set(centerDoorOpeningW / 2, doorH / 2, 0);
+      subGroup.add(mullionR);
 
-        // Floor threshold runner
-        const floorGuide = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.03, width + 0.12), matGold);
-        floorGuide.position.set(0, 0.015, 0);
-        doorGroup.add(floorGuide);
+      // 2. FIXED GLASS SIDE PANELS (Kiri & Kanan Pintu dari lantai s/d bawah transom)
+      // Left Fixed Glass Panel
+      const fixedGlassL = new THREE.Mesh(
+        new THREE.BoxGeometry(fixedPanelW - 0.10, doorH - 0.12, 0.04),
+        matGlass
+      );
+      fixedGlassL.position.set(-totalPortalW / 2 + fixedPanelW / 2, doorH / 2, 0);
+      fixedGlassL.castShadow = true;
+      subGroup.add(fixedGlassL);
 
-        // Wall segment above the door (Glass transom / curtain header)
-        const wallH = H - doorH - 0.14;
-        const wallAbove = new THREE.Mesh(new THREE.BoxGeometry(0.08, wallH - 0.1, width - 0.1), matGlass);
-        wallAbove.position.set(0, doorH + 0.14 + wallH / 2, 0);
-        doorGroup.add(wallAbove);
+      // Right Fixed Glass Panel
+      const fixedGlassR = new THREE.Mesh(
+        new THREE.BoxGeometry(fixedPanelW - 0.10, doorH - 0.12, 0.04),
+        matGlass
+      );
+      fixedGlassR.position.set(totalPortalW / 2 - fixedPanelW / 2, doorH / 2, 0);
+      fixedGlassR.castShadow = true;
+      subGroup.add(fixedGlassR);
 
-        const wallAboveFrame = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.10, width), matDoorFrame);
-        wallAboveFrame.position.set(0, H - 0.05, 0);
-        doorGroup.add(wallAboveFrame);
-      } else {
-        // Door lies along X-axis (Front wall Z = +D/2)
-        // Panel 1 (Outer track)
-        const panel1Group = new THREE.Group();
-        const glass1 = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafH, leafThickness), matGlass);
-        glass1.castShadow = true;
-        panel1Group.add(glass1);
+      // 3. JENDELA TRANSOM KACA TERBAGI 4 PANEL HORIZONTAL (Di atas pintu)
+      const transomGlassY = doorH + 0.10 + (transomH - 0.10) / 2;
+      const transomBayW = totalPortalW / 4;
+      for (let tp = 0; tp < 4; tp++) {
+        const transCenterX = -totalPortalW / 2 + (tp + 0.5) * transomBayW;
+        const transGlass = new THREE.Mesh(
+          new THREE.BoxGeometry(transomBayW - 0.06, transomH - 0.12, 0.035),
+          matGlass
+        );
+        transGlass.position.set(transCenterX, transomGlassY, 0);
+        subGroup.add(transGlass);
 
-        const topFrame1 = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.06, leafThickness + 0.02), matDoorFrame);
-        topFrame1.position.set(0, leafH / 2 - 0.03, 0);
-        panel1Group.add(topFrame1);
-        const botFrame1 = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.08, leafThickness + 0.02), matDoorFrame);
-        botFrame1.position.set(0, -leafH / 2 + 0.04, 0);
-        panel1Group.add(botFrame1);
-        const sideFrame1A = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, leafThickness + 0.02), matDoorFrame);
-        sideFrame1A.position.set(leafW / 2 - 0.03, 0, 0);
-        panel1Group.add(sideFrame1A);
-        const sideFrame1B = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, leafThickness + 0.02), matDoorFrame);
-        sideFrame1B.position.set(-leafW / 2 + 0.03, 0, 0);
-        panel1Group.add(sideFrame1B);
-
-        const handle1 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.95, 12), matGold);
-        handle1.position.set(leafW / 2 - 0.12, 0, 0.06);
-        panel1Group.add(handle1);
-
-        panel1Group.position.set(-halfW / 2, doorH / 2, trackOffset);
-        doorGroup.add(panel1Group);
-
-        // Panel 2 (Inner track)
-        const panel2Group = new THREE.Group();
-        const glass2 = new THREE.Mesh(new THREE.BoxGeometry(leafW, leafH, leafThickness), matGlass);
-        glass2.castShadow = true;
-        panel2Group.add(glass2);
-
-        const topFrame2 = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.06, leafThickness + 0.02), matDoorFrame);
-        topFrame2.position.set(0, leafH / 2 - 0.03, 0);
-        panel2Group.add(topFrame2);
-        const botFrame2 = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.08, leafThickness + 0.02), matDoorFrame);
-        botFrame2.position.set(0, -leafH / 2 + 0.04, 0);
-        panel2Group.add(botFrame2);
-        const sideFrame2A = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, leafThickness + 0.02), matDoorFrame);
-        sideFrame2A.position.set(leafW / 2 - 0.03, 0, 0);
-        panel2Group.add(sideFrame2A);
-        const sideFrame2B = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, leafThickness + 0.02), matDoorFrame);
-        sideFrame2B.position.set(-leafW / 2 + 0.03, 0, 0);
-        panel2Group.add(sideFrame2B);
-
-        const handle2 = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.95, 12), matGold);
-        handle2.position.set(-leafW / 2 + 0.12, 0, -0.06);
-        panel2Group.add(handle2);
-
-        panel2Group.position.set(halfW / 2, doorH / 2, -trackOffset);
-        doorGroup.add(panel2Group);
-
-        // Top Sliding Rail / Header Casing
-        const topRail = new THREE.Mesh(new THREE.BoxGeometry(width + 0.20, 0.16, 0.26), matGold);
-        topRail.position.set(0, doorH + 0.08, 0);
-        doorGroup.add(topRail);
-
-        // Floor threshold runner
-        const floorGuide = new THREE.Mesh(new THREE.BoxGeometry(width + 0.16, 0.03, 0.22), matGold);
-        floorGuide.position.set(0, 0.015, 0);
-        doorGroup.add(floorGuide);
-
-        // Grand Entrance Portal Architrave Frame
-        if (isGrandEntrance) {
-          const portalPillarL = new THREE.Mesh(new THREE.BoxGeometry(0.24, H, 0.32), matGold);
-          portalPillarL.position.set(-halfW - 0.12, H / 2, 0);
-          portalPillarL.castShadow = true;
-          doorGroup.add(portalPillarL);
-
-          const portalPillarR = new THREE.Mesh(new THREE.BoxGeometry(0.24, H, 0.32), matGold);
-          portalPillarR.position.set(halfW + 0.12, H / 2, 0);
-          portalPillarR.castShadow = true;
-          doorGroup.add(portalPillarR);
-
-          const portalArchitrave = new THREE.Mesh(new THREE.BoxGeometry(width + 0.6, 0.45, 0.36), matGold);
-          portalArchitrave.position.set(0, H - 0.225, 0);
-          portalArchitrave.castShadow = true;
-          doorGroup.add(portalArchitrave);
-
-          // Front Entrance Portico Canopy (Kanopi Teras Depan)
-          const canopyRoof = new THREE.Mesh(
-            new THREE.BoxGeometry(width + 1.2, 0.18, 1.8),
-            new THREE.MeshStandardMaterial({ color: 0x163832, roughness: 0.5, metalness: 0.3 })
+        // Vertical transom divider mullion
+        if (tp < 3) {
+          const transDiv = new THREE.Mesh(
+            new THREE.BoxGeometry(0.06, transomH - 0.04, frameT),
+            matWhiteFrame
           );
-          canopyRoof.position.set(0, doorH + 0.4, 0.9);
-          canopyRoof.castShadow = true;
-          doorGroup.add(canopyRoof);
-
-          // Canopy Gold Edge
-          const canopyGold = new THREE.Mesh(new THREE.BoxGeometry(width + 1.26, 0.08, 1.86), matGold);
-          canopyGold.position.set(0, doorH + 0.49, 0.9);
-          doorGroup.add(canopyGold);
-
-          // 2 Front Entrance Portico Columns
-          const colL = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, doorH + 0.35, 16), matGold);
-          colL.position.set(-halfW - 0.4, (doorH + 0.35) / 2, 1.65);
-          colL.castShadow = true;
-          doorGroup.add(colL);
-
-          const colR = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, doorH + 0.35, 16), matGold);
-          colR.position.set(halfW + 0.4, (doorH + 0.35) / 2, 1.65);
-          colR.castShadow = true;
-          doorGroup.add(colR);
+          transDiv.position.set(-totalPortalW / 2 + (tp + 1) * transomBayW, transomGlassY, 0);
+          subGroup.add(transDiv);
         }
-
-        // Wall segment above the door (Curtain glass & transom)
-        const wallH = H - doorH - 0.16;
-        const wallAbove = new THREE.Mesh(new THREE.BoxGeometry(width, wallH - 0.12, 0.08), matGlass);
-        wallAbove.position.set(0, doorH + 0.16 + wallH / 2, 0);
-        doorGroup.add(wallAbove);
       }
 
-      doorGroup.position.set(x, 0, z);
-      group.add(doorGroup);
-      return doorGroup;
+      // 4. DUA DAUN PINTU KACA AYUN / ENGSEL (DOUBLE SWING LEAVES)
+      // A. Daun Pintu Kiri (Hinged on Left edge)
+      const leafGroupL = new THREE.Group();
+      // Glass Pane
+      const leafGlassL = new THREE.Mesh(new THREE.BoxGeometry(leafW - 0.08, leafH - 0.08, 0.04), matGlass);
+      leafGlassL.position.set(leafW / 2, leafH / 2, 0);
+      leafGlassL.castShadow = true;
+      leafGroupL.add(leafGlassL);
+
+      // White perimeter frame for Leaf Left
+      const leafTopL = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.06, 0.06), matWhiteFrame);
+      leafTopL.position.set(leafW / 2, leafH - 0.03, 0);
+      leafGroupL.add(leafTopL);
+      const leafBotL = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.10, 0.06), matWhiteFrame);
+      leafBotL.position.set(leafW / 2, 0.05, 0);
+      leafGroupL.add(leafBotL);
+      const leafStileL1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, 0.06), matWhiteFrame);
+      leafStileL1.position.set(0.03, leafH / 2, 0);
+      leafGroupL.add(leafStileL1);
+      const leafStileL2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, 0.06), matWhiteFrame);
+      leafStileL2.position.set(leafW - 0.03, leafH / 2, 0);
+      leafGroupL.add(leafStileL2);
+
+      // 3 Stainless Steel Hinges on Left Edge
+      for (let hg = 0; hg < 3; hg++) {
+        const hingeY = 0.35 + hg * 0.82;
+        const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.10, 10), matStainless);
+        hinge.position.set(0.01, hingeY, 0);
+        leafGroupL.add(hinge);
+      }
+
+      // Vertical Stainless Pull Handle (Gagang Tarik Model Stainless Vertikal)
+      const handleL = new THREE.Group();
+      const hBarL = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.05, 12), matStainless);
+      hBarL.position.set(0, 0, 0.06);
+      handleL.add(hBarL);
+      // Top & Bottom Standoffs
+      const standOffT_L = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffT_L.rotation.x = Math.PI / 2;
+      standOffT_L.position.set(0, 0.42, 0.03);
+      handleL.add(standOffT_L);
+      const standOffB_L = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffB_L.rotation.x = Math.PI / 2;
+      standOffB_L.position.set(0, -0.42, 0.03);
+      handleL.add(standOffB_L);
+      // Double sided (inner handle)
+      const hBarL_In = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.05, 12), matStainless);
+      hBarL_In.position.set(0, 0, -0.06);
+      handleL.add(hBarL_In);
+      const standOffT_L_In = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffT_L_In.rotation.x = Math.PI / 2;
+      standOffT_L_In.position.set(0, 0.42, -0.03);
+      handleL.add(standOffT_L_In);
+      const standOffB_L_In = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffB_L_In.rotation.x = Math.PI / 2;
+      standOffB_L_In.position.set(0, -0.42, -0.03);
+      handleL.add(standOffB_L_In);
+
+      handleL.position.set(leafW - 0.12, 1.15, 0);
+      leafGroupL.add(handleL);
+
+      // Position Left Leaf at hinge pivot
+      leafGroupL.position.set(-centerDoorOpeningW / 2 + 0.01, 0.04, 0);
+      subGroup.add(leafGroupL);
+
+      // B. Daun Pintu Kanan (Hinged on Right edge)
+      const leafGroupR = new THREE.Group();
+      // Glass Pane
+      const leafGlassR = new THREE.Mesh(new THREE.BoxGeometry(leafW - 0.08, leafH - 0.08, 0.04), matGlass);
+      leafGlassR.position.set(-leafW / 2, leafH / 2, 0);
+      leafGlassR.castShadow = true;
+      leafGroupR.add(leafGlassR);
+
+      // White perimeter frame for Leaf Right
+      const leafTopR = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.06, 0.06), matWhiteFrame);
+      leafTopR.position.set(-leafW / 2, leafH - 0.03, 0);
+      leafGroupR.add(leafTopR);
+      const leafBotR = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.10, 0.06), matWhiteFrame);
+      leafBotR.position.set(-leafW / 2, 0.05, 0);
+      leafGroupR.add(leafBotR);
+      const leafStileR1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, 0.06), matWhiteFrame);
+      leafStileR1.position.set(-0.03, leafH / 2, 0);
+      leafGroupR.add(leafStileR1);
+      const leafStileR2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, leafH, 0.06), matWhiteFrame);
+      leafStileR2.position.set(-leafW + 0.03, leafH / 2, 0);
+      leafGroupR.add(leafStileR2);
+
+      // 3 Stainless Steel Hinges on Right Edge
+      for (let hg = 0; hg < 3; hg++) {
+        const hingeY = 0.35 + hg * 0.82;
+        const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.10, 10), matStainless);
+        hinge.position.set(-0.01, hingeY, 0);
+        leafGroupR.add(hinge);
+      }
+
+      // Vertical Stainless Pull Handle
+      const handleR = new THREE.Group();
+      const hBarR = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.05, 12), matStainless);
+      hBarR.position.set(0, 0, 0.06);
+      handleR.add(hBarR);
+      const standOffT_R = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffT_R.rotation.x = Math.PI / 2;
+      standOffT_R.position.set(0, 0.42, 0.03);
+      handleR.add(standOffT_R);
+      const standOffB_R = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffB_R.rotation.x = Math.PI / 2;
+      standOffB_R.position.set(0, -0.42, 0.03);
+      handleR.add(standOffB_R);
+      // Double sided (inner handle)
+      const hBarR_In = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 1.05, 12), matStainless);
+      hBarR_In.position.set(0, 0, -0.06);
+      handleR.add(hBarR_In);
+      const standOffT_R_In = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffT_R_In.rotation.x = Math.PI / 2;
+      standOffT_R_In.position.set(0, 0.42, -0.03);
+      handleR.add(standOffT_R_In);
+      const standOffB_R_In = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.06, 8), matStainless);
+      standOffB_R_In.rotation.x = Math.PI / 2;
+      standOffB_R_In.position.set(0, -0.42, -0.03);
+      handleR.add(standOffB_R_In);
+
+      handleR.position.set(-leafW + 0.12, 1.15, 0);
+      leafGroupR.add(handleR);
+
+      // Position Right Leaf at hinge pivot
+      leafGroupR.position.set(centerDoorOpeningW / 2 - 0.01, 0.04, 0);
+      subGroup.add(leafGroupR);
+
+      // 5. Wall segment above the transom (Curtain glass header up to roof H)
+      const upperWallH = H - (doorH + transomH + 0.12);
+      if (upperWallH > 0.1) {
+        const upperGlass = new THREE.Mesh(
+          new THREE.BoxGeometry(totalPortalW - 0.16, upperWallH - 0.08, 0.04),
+          matGlass
+        );
+        upperGlass.position.set(0, doorH + transomH + 0.12 + upperWallH / 2, 0);
+        subGroup.add(upperGlass);
+
+        const upperBeam = new THREE.Mesh(new THREE.BoxGeometry(totalPortalW, 0.12, frameT), matWhiteFrame);
+        upperBeam.position.set(0, H - 0.06, 0);
+        subGroup.add(upperBeam);
+      }
+
+      if (orientation === 'z') {
+        subGroup.rotation.y = Math.PI / 2;
+      }
+
+      doorPortalGroup.add(subGroup);
+      doorPortalGroup.position.set(x, 0, z);
+      group.add(doorPortalGroup);
+      return doorPortalGroup;
     };
 
-    // 1. Back Wall (-Z) - Full Panoramic Glass Curtain Wall
-    createCurtainWall(W, H, 0, 0, -D / 2, 0, Math.round(W / 2.0));
+    // =========================================================================
+    // POSISI 3 PINTU KACA AYUN SESUAI ARSITEKTUR FINAL:
+    // 1. Pintu samping KIRI — di dinding kiri (X = -W/2), area belakang-tengah (Z = -3.5)
+    // 2. Pintu samping KANAN — di dinding kanan (X = +W/2), area belakang-tengah (Z = -3.5)
+    // 3. Pintu BELAKANG TENGAH — di tengah dinding belakang (Z = -D/2, X = 0)
+    // DINDING DEPAN (+Z) TIDAK ADA PINTU!
+    // =========================================================================
+    const doorPortalW = 3.6;
+    const doorSideZ = -3.5; // Area belakang-tengah
 
-    // 2. Right Wall (+X) - Glass Curtain Walls with Center Sliding Glass Door
-    const segLen = (D - doorGap) / 2;
-    createCurtainWall(segLen, H, W / 2, 0, (doorGap / 2 + segLen / 2), Math.PI / 2, Math.round(segLen / 2.0));
-    createCurtainWall(segLen, H, W / 2, 0, -(doorGap / 2 + segLen / 2), Math.PI / 2, Math.round(segLen / 2.0));
-    createSlidingDoor(W / 2, 0, doorGap, 'z');
+    // 1. Back Wall (-Z) with Center Swing Glass Door
+    const backWallSegW = (W - doorPortalW) / 2;
+    createCurtainWall(backWallSegW, H, -W / 2 + backWallSegW / 2, 0, -D / 2, 0, Math.max(1, Math.round(backWallSegW / 2.0)));
+    createCurtainWall(backWallSegW, H, W / 2 - backWallSegW / 2, 0, -D / 2, 0, Math.max(1, Math.round(backWallSegW / 2.0)));
+    createSwingDoor(0, -D / 2, doorPortalW, 'x');
 
-    // 3. Left Wall (-X) - Glass Curtain Walls with Center Sliding Glass Door (Symmetrical)
-    createCurtainWall(segLen, H, -W / 2, 0, (doorGap / 2 + segLen / 2), Math.PI / 2, Math.round(segLen / 2.0));
-    createCurtainWall(segLen, H, -W / 2, 0, -(doorGap / 2 + segLen / 2), Math.PI / 2, Math.round(segLen / 2.0));
-    createSlidingDoor(-W / 2, 0, doorGap, 'z');
+    // 2. Left Wall (-X) with Swing Glass Door at Z = -3.5
+    // Front segment: from Z = +D/2 to (doorSideZ + doorPortalW/2)
+    const leftFrontSegLen = D / 2 - (doorSideZ + doorPortalW / 2);
+    const leftFrontSegCenterZ = (D / 2 + (doorSideZ + doorPortalW / 2)) / 2;
+    createCurtainWall(leftFrontSegLen, H, -W / 2, 0, leftFrontSegCenterZ, Math.PI / 2, Math.max(1, Math.round(leftFrontSegLen / 2.0)));
 
-    // 4. Front Wall (+Z, Mihrab/Entrance side) with Grand Center Front Entrance Door
-    const grandDoorW = 3.8;
-    createSlidingDoor(0, D / 2, grandDoorW, 'x', true);
+    // Back segment: from (doorSideZ - doorPortalW/2) to -D/2
+    const leftBackSegLen = (doorSideZ - doorPortalW / 2) - (-D / 2);
+    const leftBackSegCenterZ = ((doorSideZ - doorPortalW / 2) + (-D / 2)) / 2;
+    createCurtainWall(leftBackSegLen, H, -W / 2, 0, leftBackSegCenterZ, Math.PI / 2, Math.max(1, Math.round(leftBackSegLen / 2.0)));
 
-    // Front Wall Left & Right Glass Curtain Wall Segments
-    const frontSegW = (W - grandDoorW) / 2;
-    const frontSegCenterL = -W / 2 + frontSegW / 2;
-    const frontSegCenterR = W / 2 - frontSegW / 2;
-    createCurtainWall(frontSegW, H, frontSegCenterL, 0, D / 2, 0, Math.max(1, Math.round(frontSegW / 2.0)));
-    createCurtainWall(frontSegW, H, frontSegCenterR, 0, D / 2, 0, Math.max(1, Math.round(frontSegW / 2.0)));
+    // Left Door
+    createSwingDoor(-W / 2, doorSideZ, doorPortalW, 'z');
+
+    // 3. Right Wall (+X) with Swing Glass Door at Z = -3.5 (Symmetrical)
+    createCurtainWall(leftFrontSegLen, H, W / 2, 0, leftFrontSegCenterZ, Math.PI / 2, Math.max(1, Math.round(leftFrontSegLen / 2.0)));
+    createCurtainWall(leftBackSegLen, H, W / 2, 0, leftBackSegCenterZ, Math.PI / 2, Math.max(1, Math.round(leftBackSegLen / 2.0)));
+    createSwingDoor(W / 2, doorSideZ, doorPortalW, 'z');
+
+    // 4. Front Wall (+Z, Mihrab/Front side) - Full Glass Curtain Wall (NO DOOR!)
+    createCurtainWall(W, H, 0, 0, D / 2, 0, Math.round(W / 2.0));
 
     // ==========================================
     // 5. DUA RUANGAN TAMBAHAN SIMETRIS DI DEPAN
@@ -1198,7 +1390,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       backWin.position.set(isRightSide ? -0.6 : 0.6, 1.8, innerWallZ);
       rGroup.add(backWin);
 
-      // Inner side partition facing central entrance foyer
+      // Inner side partition facing center
       const innerSideX = isRightSide ? -roomW / 2 : roomW / 2;
       const sidePartition = new THREE.Mesh(
         new THREE.BoxGeometry(0.10, roomH, roomD),
@@ -1227,10 +1419,10 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       roomDoorHandle.position.set(innerSideX + (isRightSide ? 0.06 : -0.06), 1.1, doorZ + 0.32);
       rGroup.add(roomDoorHandle);
 
-      // Room Ceiling / Roof Cap
+      // Room Ceiling / Roof Cap (Putih Polos)
       const roomCeiling = new THREE.Mesh(
         new THREE.BoxGeometry(roomW, 0.12, roomD),
-        new THREE.MeshStandardMaterial({ color: 0x163832, roughness: 0.6 })
+        matInteriorWhite
       );
       roomCeiling.position.set(0, roomH + 0.06, 0);
       rGroup.add(roomCeiling);
@@ -1242,7 +1434,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
       // Interior Furniture for the room
       if (isRightSide) {
-        // Ruang Imam & Sound System: Sound Central Audio Rack + Desk
+        // Ruang Imam & Sound System: Central Audio Rack + Desk
         const soundRack = new THREE.Mesh(
           new THREE.BoxGeometry(0.7, 1.3, 0.6),
           new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.7, roughness: 0.3 })
@@ -1295,45 +1487,57 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     createFrontRoom(roomLeftX, false);
 
     // ==========================================
-    // 6. ROOF STRUCTURE & DUAL DOMES (Grand Dome + Front Mihrab Dome)
+    // 6. ROOF STRUCTURE & DUAL DOMES
+    // "Di dalam putih polos, di luar hijau tua, hijau muda dan putih"
     // ==========================================
-    const roofBase = new THREE.Mesh(new THREE.BoxGeometry(W + 0.8, 0.45, D + 0.8), matRoof);
+    // Dak Atap Utama - Hijau Tua
+    const roofBase = new THREE.Mesh(new THREE.BoxGeometry(W + 0.8, 0.45, D + 0.8), matDarkGreen);
     roofBase.position.set(0, H + 0.225, 0);
     roofBase.castShadow = true;
     group.add(roofBase);
     roofMeshesRef.current.push(roofBase);
 
-    // Roof perimeter gold cornice
-    const roofCornice = new THREE.Mesh(new THREE.BoxGeometry(W + 0.95, 0.12, D + 0.95), matGold);
+    // Lis Profil Atap Keliling - Hijau Muda
+    const roofCornice = new THREE.Mesh(new THREE.BoxGeometry(W + 0.95, 0.12, D + 0.95), matLightGreen);
     roofCornice.position.set(0, H + 0.45 + 0.06, 0);
     group.add(roofCornice);
     roofMeshesRef.current.push(roofCornice);
 
     // A. GRAND CENTRAL DOME (Kubah Utama Tengah)
     const centralDomeRadius = 3.6;
+    // Drum Kubah Tengah - Putih Bersih dengan Cincin Lis Hijau Muda
     const centralDrum = new THREE.Mesh(
       new THREE.CylinderGeometry(centralDomeRadius + 0.2, centralDomeRadius + 0.3, 0.6, 32),
-      matGold
+      matInteriorWhite
     );
     centralDrum.position.set(0, H + 0.45 + 0.3, 0);
     group.add(centralDrum);
     roofMeshesRef.current.push(centralDrum);
 
+    const centralDrumRing = new THREE.Mesh(
+      new THREE.CylinderGeometry(centralDomeRadius + 0.32, centralDomeRadius + 0.32, 0.08, 32),
+      matLightGreen
+    );
+    centralDrumRing.position.set(0, H + 0.45 + 0.1, 0);
+    group.add(centralDrumRing);
+    roofMeshesRef.current.push(centralDrumRing);
+
+    // Kubah Utama Tengah - Hijau Tua
     const dome = new THREE.Mesh(
       new THREE.SphereGeometry(centralDomeRadius, 36, 24, 0, Math.PI * 2, 0, Math.PI / 2),
-      matRoof
+      matDarkGreen
     );
     dome.position.set(0, H + 0.45 + 0.6, 0);
     dome.castShadow = true;
     group.add(dome);
     roofMeshesRef.current.push(dome);
 
-    // Central Dome Gold Ribs
+    // Rusuk Kubah Tengah - Lis Hijau Muda
     for (let r = 0; r < 8; r++) {
       const ribAngle = (r / 8) * Math.PI;
       const rib = new THREE.Mesh(
         new THREE.TorusGeometry(centralDomeRadius + 0.02, 0.04, 8, 32, Math.PI),
-        matGold
+        matLightGreen
       );
       rib.rotation.y = ribAngle;
       rib.rotation.x = Math.PI / 2;
@@ -1363,31 +1567,39 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     const frontDomeZ = D / 2 - 3.2;
     const frontDomeRadius = 2.4;
 
-    // Front Dome Base Drum with Gold Arched Clerestory Motifs
+    // Front Dome Base Drum - Putih Bersih dengan Cincin Lis Hijau Muda
     const frontDomeDrum = new THREE.Mesh(
       new THREE.CylinderGeometry(frontDomeRadius + 0.2, frontDomeRadius + 0.3, 0.55, 24),
-      matGold
+      matInteriorWhite
     );
     frontDomeDrum.position.set(0, H + 0.45 + 0.275, frontDomeZ);
     group.add(frontDomeDrum);
     roofMeshesRef.current.push(frontDomeDrum);
 
-    // Front Dome Hemisphere
+    const frontDrumRing = new THREE.Mesh(
+      new THREE.CylinderGeometry(frontDomeRadius + 0.32, frontDomeRadius + 0.32, 0.08, 24),
+      matLightGreen
+    );
+    frontDrumRing.position.set(0, H + 0.45 + 0.08, frontDomeZ);
+    group.add(frontDrumRing);
+    roofMeshesRef.current.push(frontDrumRing);
+
+    // Front Dome Hemisphere - Hijau Tua
     const frontDome = new THREE.Mesh(
       new THREE.SphereGeometry(frontDomeRadius, 32, 20, 0, Math.PI * 2, 0, Math.PI / 2),
-      matRoof
+      matDarkGreen
     );
     frontDome.position.set(0, H + 0.45 + 0.55, frontDomeZ);
     frontDome.castShadow = true;
     group.add(frontDome);
     roofMeshesRef.current.push(frontDome);
 
-    // Front Dome Gold Meridian Ribs
+    // Front Dome Meridian Ribs - Lis Hijau Muda
     for (let fr = 0; fr < 6; fr++) {
       const fAngle = (fr / 6) * Math.PI;
       const fRib = new THREE.Mesh(
         new THREE.TorusGeometry(frontDomeRadius + 0.02, 0.035, 8, 24, Math.PI),
-        matGold
+        matLightGreen
       );
       fRib.rotation.y = fAngle;
       fRib.rotation.x = Math.PI / 2;
@@ -1414,33 +1626,105 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     roofMeshesRef.current.push(fCrescent);
 
     // ==========================================
-    // 7. MIMBAR, MIHRAB & JAM RUNNING TEXT
+    // 7. MIMBAR, STEPPED WALL NICHE & DIGITAL JAM
     // ==========================================
-    // Digital Jam Sholat Running Text Board (mounted on the header of the main front portal)
+    // Digital Jam Sholat Running Text Board
     const jamBoard = new THREE.Mesh(
-      new THREE.BoxGeometry(3.0, 0.65, 0.16),
+      new THREE.BoxGeometry(3.2, 0.65, 0.16),
       new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3, metalness: 0.6 })
     );
-    jamBoard.position.set(0, doorH + 0.8, D / 2 - 0.12);
+    jamBoard.position.set(0, 4.8, D / 2 - 0.22);
     group.add(jamBoard);
 
-    // Mimbar Steps & Khutbah Podium (Depan Tengah di bawah Kubah Depan)
+    // Stepped Decorative Wall Niche & Mihrab Framing (Lis/perbedaan ketinggian dinding mimbar)
+    const mihrabWallGroup = new THREE.Group();
+    // Layer 1 (Outer stepped arch tier)
+    const stepArch1 = new THREE.Mesh(
+      new THREE.BoxGeometry(5.2, 5.0, 0.12),
+      matSand
+    );
+    stepArch1.position.set(-1.3, 2.5, D / 2 - 0.12);
+    mihrabWallGroup.add(stepArch1);
+
+    // Gold outer molding trim
+    const trim1 = new THREE.Mesh(new THREE.BoxGeometry(5.26, 0.08, 0.16), matGold);
+    trim1.position.set(-1.3, 5.04, D / 2 - 0.12);
+    mihrabWallGroup.add(trim1);
+
+    // Layer 2 (Middle stepped arch tier - Putih Polos)
+    const stepArch2 = new THREE.Mesh(
+      new THREE.BoxGeometry(3.8, 4.4, 0.14),
+      matInteriorWhite
+    );
+    stepArch2.position.set(-1.3, 2.2, D / 2 - 0.16);
+    mihrabWallGroup.add(stepArch2);
+
+    const trim2 = new THREE.Mesh(new THREE.BoxGeometry(3.86, 0.08, 0.18), matGold);
+    trim2.position.set(-1.3, 4.44, D / 2 - 0.16);
+    mihrabWallGroup.add(trim2);
+
+    // Layer 3 (Inner stepped niche backpanel with gold calligraphy arch)
+    const stepArch3 = new THREE.Mesh(
+      new THREE.BoxGeometry(2.4, 3.8, 0.16),
+      matDarkWood
+    );
+    stepArch3.position.set(-1.3, 1.9, D / 2 - 0.20);
+    mihrabWallGroup.add(stepArch3);
+
+    const innerArchMolding = new THREE.Mesh(
+      new THREE.TorusGeometry(1.0, 0.05, 8, 24, Math.PI),
+      matGold
+    );
+    innerArchMolding.position.set(-1.3, 3.2, D / 2 - 0.28);
+    mihrabWallGroup.add(innerArchMolding);
+
+    group.add(mihrabWallGroup);
+
+    // MIMBAR JATI UKIR
+    // Posisi: "agak ke kolom kiri-tengah dari sudut pandang orang menghadap kiblat" (X = -1.3, Z = D/2 - 2.8)
+    const mimbarX = -1.3;
     const mimbarZ = D / 2 - 2.8;
     const mimbarGroup = new THREE.Group();
+
+    // 3 Stepped Wooden Tiers (Trap Tangga Mimbar)
     for (let i = 0; i < 3; i++) {
       const step = new THREE.Mesh(
-        new THREE.BoxGeometry(1.6 - i * 0.25, 0.28, 1.2 - i * 0.22),
-        i === 2 ? matDarkWood : matGold
+        new THREE.BoxGeometry(1.6 - i * 0.22, 0.26, 1.3 - i * 0.24),
+        matDarkWood
       );
-      step.position.set(0, 0.14 + i * 0.28, -i * 0.08);
+      step.position.set(0, 0.13 + i * 0.26, -i * 0.12);
       step.castShadow = true;
       mimbarGroup.add(step);
+
+      // Gold step edge pinstripe
+      const stepPinstripe = new THREE.Mesh(
+        new THREE.BoxGeometry(1.62 - i * 0.22, 0.03, 1.32 - i * 0.24),
+        matGold
+      );
+      stepPinstripe.position.set(0, 0.26 + i * 0.26, -i * 0.12);
+      mimbarGroup.add(stepPinstripe);
     }
-    // Mimbar podium railing & book stand
-    const podiumRailing = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.85, 0.12), matGold);
-    podiumRailing.position.set(0, 1.25, -0.28);
+
+    // Mimbar podium railing & carved lattice screen
+    const podiumRailing = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.85, 0.12), matDarkWood);
+    podiumRailing.position.set(0, 1.25, -0.36);
     mimbarGroup.add(podiumRailing);
-    mimbarGroup.position.set(0, 0, mimbarZ);
+
+    const podiumRailingGold = new THREE.Mesh(new THREE.BoxGeometry(1.24, 0.06, 0.14), matGold);
+    podiumRailingGold.position.set(0, 1.68, -0.36);
+    mimbarGroup.add(podiumRailingGold);
+
+    // Microphone Gooseneck Condenser & Rehal
+    const micPole = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.45, 8), matGold);
+    micPole.position.set(-0.25, 1.85, -0.36);
+    micPole.rotation.z = -0.2;
+    mimbarGroup.add(micPole);
+
+    const micHead = new THREE.Mesh(new THREE.SphereGeometry(0.025, 8, 8), matGold);
+    micHead.position.set(-0.20, 2.05, -0.36);
+    mimbarGroup.add(micHead);
+
+    mimbarGroup.position.set(mimbarX, 0, mimbarZ);
     group.add(mimbarGroup);
 
     // 6 Chandelier Fixtures hanging from the ceiling
@@ -1457,12 +1741,10 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
 
     chandelierPositions.forEach(([cx, cy, cz]) => {
       const chGroup = new THREE.Group();
-      // Gold Ring
       const ring = new THREE.Mesh(new THREE.TorusGeometry(0.55, 0.04, 10, 24), matGold);
       ring.rotation.x = Math.PI / 2;
       chGroup.add(ring);
 
-      // Center glowing bulb
       const bulb = new THREE.Mesh(
         new THREE.SphereGeometry(0.22, 16, 16),
         new THREE.MeshStandardMaterial({
@@ -1474,7 +1756,6 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       );
       chGroup.add(bulb);
 
-      // Hanging rod
       const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.8, 8), matGold);
       rod.position.set(0, 0.4, 0);
       chGroup.add(rod);
@@ -1483,32 +1764,118 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       group.add(chGroup);
     });
 
-    // Carpet Colors
-    const matCarpetA = new THREE.MeshStandardMaterial({ color: 0x255b41, roughness: 0.88 }); // Male (Green)
-    const matCarpetB = new THREE.MeshStandardMaterial({ color: 0x7a2d24, roughness: 0.88 }); // Female (Burgundy)
-    const matCarpetBorder = new THREE.MeshStandardMaterial({ color: 0xc9a227, roughness: 0.5 });
+    // =========================================================================
+    // 8. AREA LANTAI KERAMIK PUTIH DI SEKITAR PINTU & SIRKULASI
+    // "Area lantai di sekitar tiap pintu menggunakan keramik putih (bukan karpet),
+    // dengan karpet hijau di kiri-kanan jalur keramik tersebut."
+    // =========================================================================
+    const floorGroup = new THREE.Group();
 
-    // Male Saf Carpets (Depan)
-    const rowDepth = 1.2;
-    const carpetWidth = W - 2.4;
-    let zF = mimbarZ - 0.8;
-    for (let i = 0; i < config.safMale; i++) {
-      const z = zF - i * rowDepth;
-      const row = new THREE.Mesh(new THREE.PlaneGeometry(carpetWidth, rowDepth - 0.16), matCarpetA);
-      row.rotation.x = -Math.PI / 2;
-      row.position.set(0, 0.02, z);
-      row.receiveShadow = true;
-      group.add(row);
+    // A. White Ceramic Central Walkway from Back Door to Front Mihrab (Lebar 2.4m)
+    const centralAisleW = 2.4;
+    const centralWalkway = new THREE.Mesh(
+      new THREE.PlaneGeometry(centralAisleW, D - 0.4),
+      matWhiteCeramic
+    );
+    centralWalkway.rotation.x = -Math.PI / 2;
+    centralWalkway.position.set(0, 0.015, 0);
+    centralWalkway.receiveShadow = true;
+    floorGroup.add(centralWalkway);
 
-      // Gold saf line divider
-      const line = new THREE.Mesh(new THREE.PlaneGeometry(carpetWidth, 0.04), matCarpetBorder);
-      line.rotation.x = -Math.PI / 2;
-      line.position.set(0, 0.022, z + (rowDepth - 0.16) / 2 - 0.02);
-      group.add(line);
+    // Ceramic tile divider lines for central walkway
+    for (let t = -D / 2 + 1.2; t <= D / 2 - 1.2; t += 1.2) {
+      const lineT = new THREE.Mesh(new THREE.PlaneGeometry(centralAisleW, 0.02), matCeramicGrout);
+      lineT.rotation.x = -Math.PI / 2;
+      lineT.position.set(0, 0.018, t);
+      floorGroup.add(lineT);
     }
 
-    // Tabir / Hijab Divider (between Male & Female saf)
-    const tabirZ = 0.5;
+    // B. White Ceramic Cross Walkway connecting Left Door & Right Door (at Z = -3.5, Lebar 2.4m)
+    const crossAisleW = 2.4;
+    const crossWalkway = new THREE.Mesh(
+      new THREE.PlaneGeometry(W - 0.4, crossAisleW),
+      matWhiteCeramic
+    );
+    crossWalkway.rotation.x = -Math.PI / 2;
+    crossWalkway.position.set(0, 0.016, doorSideZ);
+    crossWalkway.receiveShadow = true;
+    floorGroup.add(crossWalkway);
+
+    // C. White Ceramic Aprons around Left Door, Right Door & Back Door
+    const backFoyer = new THREE.Mesh(new THREE.PlaneGeometry(doorPortalW + 0.8, 2.2), matWhiteCeramic);
+    backFoyer.rotation.x = -Math.PI / 2;
+    backFoyer.position.set(0, 0.017, -D / 2 + 1.1);
+    floorGroup.add(backFoyer);
+
+    const leftFoyer = new THREE.Mesh(new THREE.PlaneGeometry(2.2, doorPortalW + 0.8), matWhiteCeramic);
+    leftFoyer.rotation.x = -Math.PI / 2;
+    leftFoyer.position.set(-W / 2 + 1.1, 0.017, doorSideZ);
+    floorGroup.add(leftFoyer);
+
+    const rightFoyer = new THREE.Mesh(new THREE.PlaneGeometry(2.2, doorPortalW + 0.8), matWhiteCeramic);
+    rightFoyer.rotation.x = -Math.PI / 2;
+    rightFoyer.position.set(W / 2 - 1.1, 0.017, doorSideZ);
+    floorGroup.add(rightFoyer);
+
+    // Front Mihrab & Rooms Ceramic Apron
+    const frontApron = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.4, 2.2), matWhiteCeramic);
+    frontApron.rotation.x = -Math.PI / 2;
+    frontApron.position.set(0, 0.017, D / 2 - 1.1);
+    floorGroup.add(frontApron);
+
+    group.add(floorGroup);
+
+    // =========================================================================
+    // 9. SAF KARPET (4 SAF DEPAN LAKI-LAKI + 5 SAF BELAKANG PEREMPUAN = TOTAL 9 SAF)
+    // Karpet hijau membentang di kiri-kanan jalur keramik putih
+    // =========================================================================
+    const matCarpetA = new THREE.MeshStandardMaterial({ color: 0x255b41, roughness: 0.88 }); // Male (Hijau Lumut)
+    const matCarpetB = new THREE.MeshStandardMaterial({ color: 0x7a2d24, roughness: 0.88 }); // Female (Burgundy / Hijau)
+    const matCarpetBorder = new THREE.MeshStandardMaterial({ color: 0xc9a227, roughness: 0.5 });
+
+    const carpetWingW = (W - centralAisleW - 0.8) / 2; // Width of carpet wing on left and right
+    const wingCenterX_L = -centralAisleW / 2 - carpetWingW / 2;
+    const wingCenterX_R = centralAisleW / 2 + carpetWingW / 2;
+    const rowDepth = 1.2;
+
+    // Helper to add Saf row with left & right wings flanking central ceramic walkway
+    const addSafRow = (zPos: number, isMale: boolean) => {
+      const mat = isMale ? matCarpetA : matCarpetB;
+
+      // Left Wing Carpet
+      const rowL = new THREE.Mesh(new THREE.PlaneGeometry(carpetWingW, rowDepth - 0.16), mat);
+      rowL.rotation.x = -Math.PI / 2;
+      rowL.position.set(wingCenterX_L, 0.022, zPos);
+      rowL.receiveShadow = true;
+      group.add(rowL);
+
+      const lineL = new THREE.Mesh(new THREE.PlaneGeometry(carpetWingW, 0.04), matCarpetBorder);
+      lineL.rotation.x = -Math.PI / 2;
+      lineL.position.set(wingCenterX_L, 0.024, zPos + (rowDepth - 0.16) / 2 - 0.02);
+      group.add(lineL);
+
+      // Right Wing Carpet
+      const rowR = new THREE.Mesh(new THREE.PlaneGeometry(carpetWingW, rowDepth - 0.16), mat);
+      rowR.rotation.x = -Math.PI / 2;
+      rowR.position.set(wingCenterX_R, 0.022, zPos);
+      rowR.receiveShadow = true;
+      group.add(rowR);
+
+      const lineR = new THREE.Mesh(new THREE.PlaneGeometry(carpetWingW, 0.04), matCarpetBorder);
+      lineR.rotation.x = -Math.PI / 2;
+      lineR.position.set(wingCenterX_R, 0.024, zPos + (rowDepth - 0.16) / 2 - 0.02);
+      group.add(lineR);
+    };
+
+    // A. 4 Saf Depan (Jamaah Laki-laki)
+    const maleSafPositions = [7.5, 6.3, 5.1, 3.9];
+    const actualMaleSafCount = Math.min(config.safMale, maleSafPositions.length);
+    for (let m = 0; m < actualMaleSafCount; m++) {
+      addSafRow(maleSafPositions[m], true);
+    }
+
+    // B. Tabir / Hijab Pembatas Saf
+    const tabirZ = 1.8;
     if (config.showTabir) {
       const matTabir = new THREE.MeshStandardMaterial({
         color: 0x2F6B4F,
@@ -1518,98 +1885,244 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       });
       const tabirPoleMat = new THREE.MeshStandardMaterial({ color: 0xC9A227, metalness: 0.7 });
 
-      // Tabir curtain panel
-      const tabirMesh = new THREE.Mesh(new THREE.BoxGeometry(carpetWidth, 1.6, 0.05), matTabir);
-      tabirMesh.position.set(0, 0.95, tabirZ);
-      group.add(tabirMesh);
+      // Left & Right Tabir Screen Panels (Leaving central ceramic aisle open for walking)
+      const tabirL = new THREE.Mesh(new THREE.BoxGeometry(carpetWingW, 1.6, 0.05), matTabir);
+      tabirL.position.set(wingCenterX_L, 0.95, tabirZ);
+      group.add(tabirL);
 
-      // Tabir Top Rail
-      const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, carpetWidth + 0.2, 8), tabirPoleMat);
-      rail.rotation.z = Math.PI / 2;
-      rail.position.set(0, 1.8, tabirZ);
-      group.add(rail);
+      const railL = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, carpetWingW + 0.1, 8), tabirPoleMat);
+      railL.rotation.z = Math.PI / 2;
+      railL.position.set(wingCenterX_L, 1.8, tabirZ);
+      group.add(railL);
+
+      const tabirR = new THREE.Mesh(new THREE.BoxGeometry(carpetWingW, 1.6, 0.05), matTabir);
+      tabirR.position.set(wingCenterX_R, 0.95, tabirZ);
+      group.add(tabirR);
+
+      const railR = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, carpetWingW + 0.1, 8), tabirPoleMat);
+      railR.rotation.z = Math.PI / 2;
+      railR.position.set(wingCenterX_R, 1.8, tabirZ);
+      group.add(railR);
     }
 
-    // Female Saf Carpets (Belakang)
-    let zB = tabirZ - 1.2;
-    for (let i = 0; i < config.safFemale; i++) {
-      const z = zB - i * rowDepth;
-      if (z < -D / 2 + 1.0) break;
-      const row = new THREE.Mesh(new THREE.PlaneGeometry(carpetWidth, rowDepth - 0.16), matCarpetB);
-      row.rotation.x = -Math.PI / 2;
-      row.position.set(0, 0.02, z);
-      row.receiveShadow = true;
-      group.add(row);
+    // C. 5 Saf Belakang (Jamaah Perempuan)
+    // Sesuai denah: 5 baris saf belakang (Total 4 + 5 = 9 Saf)
+    const femaleSafPositions = [0.6, -0.6, -6.0, -7.2, -8.4];
+    const actualFemaleSafCount = Math.min(config.safFemale, femaleSafPositions.length);
+    for (let f = 0; f < actualFemaleSafCount; f++) {
+      addSafRow(femaleSafPositions[f], false);
+    }
 
-      const line = new THREE.Mesh(new THREE.PlaneGeometry(carpetWidth, 0.04), matCarpetBorder);
-      line.rotation.x = -Math.PI / 2;
-      line.position.set(0, 0.022, z + (rowDepth - 0.16) / 2 - 0.02);
-      group.add(line);
+    // =========================================================================
+    // 10. REVISI POSISI TOA / SPEAKER (TOTAL 2 UNIT)
+    // - 1 unit di dinding kiri, area tengah bangunan (menempel tinggi dekat langit-langit, kabel menjuntai)
+    // - 1 unit di area depan / dekat mimbar (menempel tinggi dekat langit-langit, kabel menjuntai)
+    // =========================================================================
+    const matToaSpeaker = new THREE.MeshStandardMaterial({
+      color: 0xE8ECF0,
+      roughness: 0.35,
+      metalness: 0.3,
+    });
+    const matAudioCable = new THREE.MeshStandardMaterial({
+      color: 0x1A1A1A,
+      roughness: 0.8,
+    });
+
+    const createToaSpeaker = (x: number, y: number, z: number, ry: number, rx: number) => {
+      const spkGroup = new THREE.Group();
+
+      // Horn Speaker Flare Cone
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.65, 16), matToaSpeaker);
+      cone.rotation.x = rx;
+      cone.rotation.y = ry;
+      spkGroup.add(cone);
+
+      // Back Driver Housing
+      const driver = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.25, 14), matToaSpeaker);
+      driver.rotation.x = rx;
+      driver.rotation.y = ry;
+      spkGroup.add(driver);
+
+      // Mounting Wall Bracket
+      const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.35, 0.15), matStainless);
+      spkGroup.add(bracket);
+
+      // Audio Cable Dangling Downward (Kabel Menjuntai ke Bawah)
+      const cableH = 3.6;
+      const cable = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.008, 0.008, cableH, 8),
+        matAudioCable
+      );
+      cable.position.set(0, -cableH / 2, 0);
+      spkGroup.add(cable);
+
+      spkGroup.position.set(x, y, z);
+      group.add(spkGroup);
+      return spkGroup;
+    };
+
+    // TOA Unit 1: Dinding kiri area tengah (X = -W/2 + 0.35, Y = H - 0.75, Z = 0)
+    createToaSpeaker(-W / 2 + 0.35, H - 0.75, 0, Math.PI / 2, -Math.PI * 0.15);
+
+    // TOA Unit 2: Area depan dekat mimbar (X = -2.5, Y = H - 0.75, Z = D/2 - 2.5)
+    createToaSpeaker(-2.5, H - 0.75, D / 2 - 2.5, 0, Math.PI * 0.85);
+
+    // If user configured extra toa units (e.g. 4 or 6)
+    if (config.toaCount >= 4) {
+      createToaSpeaker(W / 2 - 0.35, H - 0.75, 0, -Math.PI / 2, -Math.PI * 0.15);
+      createToaSpeaker(2.5, H - 0.75, D / 2 - 2.5, 0, Math.PI * 0.85);
+    }
+    if (config.toaCount >= 6) {
+      createToaSpeaker(0, H - 0.75, -D / 2 + 1.2, Math.PI, -Math.PI * 0.15);
+      createToaSpeaker(0, H - 0.75, 0, 0, -Math.PI * 0.15);
+    }
+
+    // =========================================================================
+    // 11. KIPAS ANGIN DINDING (WALL FAN 3 UNIT - BUKAN AC)
+    // 3 Unit: Posisi depan (dekat mimbar), Posisi tengah (dinding kiri), Posisi samping (dinding kanan)
+    // =========================================================================
+    const matFanBody = new THREE.MeshStandardMaterial({
+      color: 0xF5F6F8,
+      roughness: 0.3,
+      metalness: 0.2,
+    });
+    const matFanGrill = new THREE.MeshStandardMaterial({
+      color: 0xD0D6DC,
+      roughness: 0.4,
+      metalness: 0.7,
+      wireframe: false,
+    });
+    const matFanBlades = new THREE.MeshPhysicalMaterial({
+      color: 0x2F6B4F,
+      roughness: 0.2,
+      transmission: 0.6,
+      transparent: true,
+      opacity: 0.75,
+    });
+
+    const createWallFan = (x: number, y: number, z: number, ry: number, tilt = 0.22) => {
+      const fanGroup = new THREE.Group();
+
+      // 1. Wall Base Bracket with Speed Switch Dial
+      const baseBracket = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.24, 0.08), matFanBody);
+      fanGroup.add(baseBracket);
+
+      // Speed Dial Knob
+      const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.03, 12), matGold);
+      dial.rotation.x = Math.PI / 2;
+      dial.position.set(0, -0.04, 0.045);
+      fanGroup.add(dial);
+
+      // Pull String / Cord (Tali Tarikan Kipas)
+      const pullCord = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.003, 0.003, 0.65, 6),
+        matWhiteFrame
+      );
+      pullCord.position.set(0.03, -0.42, 0.04);
+      fanGroup.add(pullCord);
+
+      const pullBead = new THREE.Mesh(new THREE.SphereGeometry(0.015, 8, 8), matGold);
+      pullBead.position.set(0.03, -0.74, 0.04);
+      fanGroup.add(pullBead);
+
+      // 2. Articulated Neck & Motor Housing
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.28, 8), matStainless);
+      neck.rotation.x = Math.PI / 3;
+      neck.position.set(0, 0.12, 0.12);
+      fanGroup.add(neck);
+
+      const headGroup = new THREE.Group();
+      headGroup.position.set(0, 0.24, 0.24);
+      headGroup.rotation.x = tilt;
+
+      // Motor Pod
+      const motorPod = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.18, 14), matFanBody);
+      motorPod.rotation.x = Math.PI / 2;
+      headGroup.add(motorPod);
+
+      // 3. Circular Wire Cage Guard (Diameter 0.65m)
+      const cageRim = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.012, 8, 32), matFanGrill);
+      cageRim.position.set(0, 0, 0.10);
+      headGroup.add(cageRim);
+
+      const cageInnerRim = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.008, 8, 24), matFanGrill);
+      cageInnerRim.position.set(0, 0, 0.11);
+      headGroup.add(cageInnerRim);
+
+      // 8 Radial Wire Spokes
+      for (let s = 0; s < 8; s++) {
+        const spokeAng = (s / 8) * Math.PI * 2;
+        const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.64, 6), matFanGrill);
+        spoke.rotation.z = spokeAng;
+        spoke.position.set(0, 0, 0.10);
+        headGroup.add(spoke);
+      }
+
+      // 4. Aerodynamic Fan Blades (3 Blades attached to rotating spinner group)
+      const bladeSpinner = new THREE.Group();
+      bladeSpinner.position.set(0, 0, 0.10);
+
+      const bladeHub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.04, 12), matFanBody);
+      bladeHub.rotation.x = Math.PI / 2;
+      bladeSpinner.add(bladeHub);
+
+      for (let b = 0; b < 3; b++) {
+        const bladeAngle = (b / 3) * Math.PI * 2;
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.26, 0.015), matFanBlades);
+        blade.position.set(Math.sin(bladeAngle) * 0.14, Math.cos(bladeAngle) * 0.14, 0);
+        blade.rotation.z = -bladeAngle;
+        blade.rotation.y = 0.2;
+        bladeSpinner.add(blade);
+      }
+
+      // Center Emblem Badge
+      const emblem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.015, 12), matGold);
+      emblem.rotation.x = Math.PI / 2;
+      emblem.position.set(0, 0, 0.03);
+      bladeSpinner.add(emblem);
+
+      headGroup.add(bladeSpinner);
+      fanBladesRef.current.push(bladeSpinner);
+
+      fanGroup.add(headGroup);
+      fanGroup.rotation.y = ry;
+      fanGroup.position.set(x, y, z);
+      group.add(fanGroup);
+      return fanGroup;
+    };
+
+    // Unit 1: Posisi Depan (Front wall dekat mimbar / mihrab)
+    createWallFan(2.6, 3.4, D / 2 - 0.22, Math.PI, 0.25);
+
+    // Unit 2: Posisi Tengah (Dinding kiri tengah)
+    createWallFan(-W / 2 + 0.22, 3.4, 3.0, Math.PI / 2, 0.22);
+
+    // Unit 3: Posisi Samping (Dinding kanan samping belakang/tengah)
+    createWallFan(W / 2 - 0.22, 3.4, -0.5, -Math.PI / 2, 0.22);
+
+    // If config has 4 or 6 units
+    if (config.acCount >= 4) {
+      createWallFan(-W / 2 + 0.22, 3.4, -7.0, Math.PI / 2, 0.22);
+    }
+    if (config.acCount >= 6) {
+      createWallFan(W / 2 - 0.22, 3.4, -7.0, -Math.PI / 2, 0.22);
+      createWallFan(0, 3.4, -D / 2 + 0.22, 0, 0.22);
     }
 
     // Rak Al-Quran (Dinding Kiri)
     const rakGroup = new THREE.Group();
     const rakBody = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.6, 2.2), matDarkWood);
     rakGroup.add(rakBody);
-    rakGroup.position.set(-W / 2 + 0.35, 0.8, 3.0);
+    rakGroup.position.set(-W / 2 + 0.35, 0.8, 4.5);
     group.add(rakGroup);
 
-    // Kotak Infaq Tromol Stainless
+    // Kotak Infaq Tromol Stainless (Dekat Pintu Belakang)
     const tromol = new THREE.Mesh(
       new THREE.BoxGeometry(0.65, 0.9, 0.65),
       new THREE.MeshStandardMaterial({ color: 0xd0d4d8, metalness: 0.85, roughness: 0.2 })
     );
-    tromol.position.set(W / 2 - 1.2, 0.45, 0);
+    tromol.position.set(2.2, 0.45, -9.5);
     group.add(tromol);
-
-    // Horn Speakers / Toa (Configurable Count)
-    const matWhite = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.5 });
-    const toaPositions: [number, number, number][] = [];
-    if (config.toaCount >= 2) {
-      toaPositions.push([-6.2, H - 0.6, 7.5]);
-      toaPositions.push([6.2, H - 0.6, 7.5]);
-    }
-    if (config.toaCount >= 4) {
-      toaPositions.push([-6.2, H - 0.6, -7.5]);
-      toaPositions.push([6.2, H - 0.6, -7.5]);
-    }
-    if (config.toaCount >= 6) {
-      toaPositions.push([0, H - 0.6, 0]);
-      toaPositions.push([0, H - 0.6, 9.5]);
-    }
-
-    toaPositions.forEach(([tx, ty, tz]) => {
-      const body = new THREE.Mesh(new THREE.ConeGeometry(0.35, 0.7, 16), matWhite);
-      body.rotation.x = Math.PI * 0.9;
-      body.position.set(tx, ty, tz);
-      group.add(body);
-    });
-
-    // AC Units (Configurable Count)
-    const acPositions: [number, number, number][] = [];
-    if (config.acCount >= 1) acPositions.push([-W / 2 + 0.25, H - 1.3, -3.0]);
-    if (config.acCount >= 2) acPositions.push([-W / 2 + 0.25, H - 1.3, 5.0]);
-    if (config.acCount >= 3) acPositions.push([W / 2 - 0.25, H - 1.3, 5.0]);
-    if (config.acCount >= 4) acPositions.push([W / 2 - 0.25, H - 1.3, -3.0]);
-    if (config.acCount >= 5) acPositions.push([-W / 2 + 0.25, H - 1.3, -8.0]);
-    if (config.acCount >= 6) acPositions.push([0, H - 1.3, -D / 2 + 0.25]);
-
-    acPositions.forEach(([ax, ay, az]) => {
-      const acUnit = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 0.35), matWhite);
-      acUnit.position.set(ax, ay, az);
-      if (Math.abs(ax) > 3) {
-        acUnit.rotation.y = ax > 0 ? -Math.PI / 2 : Math.PI / 2;
-      }
-      group.add(acUnit);
-
-      // AC Grill detail
-      const grill = new THREE.Mesh(
-        new THREE.PlaneGeometry(1.4, 0.1),
-        new THREE.MeshBasicMaterial({ color: 0x333333 })
-      );
-      grill.position.set(0, -0.14, 0.18);
-      acUnit.add(grill);
-    });
 
     // Menara / Minaret (Optional 3D Mesh)
     if (config.minaretVisible) {
@@ -1618,31 +2131,36 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       const minZ = -D / 2 + 2.5;
       const minH = 17.5;
 
-      // Base pedestal
-      const mBase = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.5, 3.0), matSand);
+      // Base pedestal (Putih Bersih)
+      const mBase = new THREE.Mesh(new THREE.BoxGeometry(3.0, 1.5, 3.0), matInteriorWhite);
       mBase.position.set(0, 0.75, 0);
       minaretGroup.add(mBase);
 
-      // Shaft octagonal/cylinder
-      const mShaft = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.35, minH, 16), matSand);
+      // Shaft octagonal/cylinder (Putih Bersih)
+      const mShaft = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.35, minH, 16), matInteriorWhite);
       mShaft.position.set(0, minH / 2 + 1.5, 0);
       minaretGroup.add(mShaft);
 
-      // Balcony (Balkon adzan)
-      const mBalcony = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.5, 0.6, 16), matGold);
+      // Balcony (Balkon adzan - Hijau Tua dengan Lis Hijau Muda)
+      const mBalcony = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.5, 0.6, 16), matDarkGreen);
       mBalcony.position.set(0, minH + 1.5, 0);
       minaretGroup.add(mBalcony);
 
-      // Upper Pavilion Columns
+      const mBalconyRing = new THREE.Mesh(new THREE.TorusGeometry(1.82, 0.04, 8, 24), matLightGreen);
+      mBalconyRing.rotation.x = Math.PI / 2;
+      mBalconyRing.position.set(0, minH + 1.8, 0);
+      minaretGroup.add(mBalconyRing);
+
+      // Upper Pavilion Columns (Putih Bersih)
       for (let k = 0; k < 6; k++) {
         const ang = (k / 6) * Math.PI * 2;
-        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.2, 8), matSand);
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.2, 8), matInteriorWhite);
         col.position.set(Math.sin(ang) * 1.2, minH + 1.5 + 1.1, Math.cos(ang) * 1.2);
         minaretGroup.add(col);
       }
 
-      // Minaret Small Dome
-      const mDome = new THREE.Mesh(new THREE.SphereGeometry(1.3, 20, 16, 0, Math.PI * 2, 0, Math.PI / 2), matRoof);
+      // Minaret Small Dome (Kubah Menara - Hijau Muda)
+      const mDome = new THREE.Mesh(new THREE.SphereGeometry(1.3, 20, 16, 0, Math.PI * 2, 0, Math.PI / 2), matLightGreen);
       mDome.position.set(0, minH + 1.5 + 2.2, 0);
       minaretGroup.add(mDome);
 
@@ -1704,13 +2222,26 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     }
   }, [config, hotspots, isInterior, selectedHotspotId]);
 
-  // Handle Mode Change ("Masuk ke Dalam" / "Keluar") Transition
+  // Handle Mode Change ("Masuk ke Dalam" / "Keluar") Transition & Roof Mode Changes
   useEffect(() => {
     if (!cameraRef.current) return;
 
-    // Fade roof opacity
-    const toOpacity = isInterior ? 0.06 : 1.0;
+    // Determine target roof opacity based on roofMode & isInterior
+    let toOpacity = 1.0;
+    let isVisible = true;
+    if (config.roofMode === 'hidden') {
+      toOpacity = 0.0;
+      isVisible = false;
+    } else if (config.roofMode === 'transparent') {
+      toOpacity = 0.22;
+      isVisible = true;
+    } else if (isInterior) {
+      toOpacity = 0.06;
+      isVisible = true;
+    }
+
     roofMeshesRef.current.forEach(mesh => {
+      mesh.visible = isVisible;
       if (Array.isArray(mesh.material)) {
         mesh.material.forEach(m => {
           m.transparent = true;
@@ -1723,9 +2254,10 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     });
 
     // Animate camera target and radius inside room boundary
-    const newTarget = isInterior ? new THREE.Vector3(0, 1.8, 1.5) : new THREE.Vector3(0, 2.0, 0);
-    const newRadius = isInterior ? 5.8 : 28.0;
-    const newPhi = isInterior ? 1.15 : Math.PI / 3.2;
+    const isPortrait = (typeof window !== 'undefined' ? window.innerWidth / Math.max(window.innerHeight, 1) : 1) < 1.0;
+    const newTarget = isInterior ? new THREE.Vector3(0, 1.8, 1.5) : new THREE.Vector3(0, 2.5, 0);
+    const newRadius = isInterior ? 5.8 : (isPortrait ? 46.0 : 30.0);
+    const newPhi = isInterior ? 1.15 : Math.PI / 2.8;
 
     camState.current.fromTarget.copy(camState.current.target);
     camState.current.toTarget.copy(newTarget);
@@ -1740,16 +2272,16 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     // Update marker visibility
     markersRef.current.forEach(m => {
       const h = hotspotsRef.current.find(item => item.id === m.hotspotId);
-      const isVisible = isInterior ? true : !h?.interiorOnly;
-      m.mesh.visible = isVisible;
-      if (m.halo) m.halo.visible = isVisible;
+      const isVis = isInterior ? true : !h?.interiorOnly;
+      m.mesh.visible = isVis && Boolean(config.showHotspots);
+      if (m.halo) m.halo.visible = isVis && Boolean(config.showHotspots);
     });
 
     // Update Kiblat & Compass visibility
     if (qiblaGroupRef.current) {
       qiblaGroupRef.current.visible = config.showQibla;
     }
-  }, [isInterior, config.showQibla]);
+  }, [isInterior, config.showQibla, config.roofMode, config.showHotspots]);
 
   // Focus Camera onto a specific position if requested (with interior safety containment)
   useEffect(() => {

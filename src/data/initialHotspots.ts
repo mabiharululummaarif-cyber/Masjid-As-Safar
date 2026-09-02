@@ -1,42 +1,107 @@
 import { HotspotItem, MosqueConfig } from '../types';
 
 export const DEFAULT_CONFIG: MosqueConfig = {
-  safMale: 5,
-  safFemale: 6,
+  safMale: 4,
+  safFemale: 5,
   width: 16,
   depth: 24,
   height: 6.5,
   doorGap: 3.6,
-  toaCount: 4,
-  acCount: 4,
+  toaCount: 2,
+  acCount: 3,
   minaretVisible: true,
   timeOfDay: 'day',
-  showQibla: true,
-  showHotspots: true,
-  showDimensions: false,
+  showQibla: false,
   showTabir: true,
+  roofMode: 'solid',
+  autoRotate: false,
+  fanSpeed: 1,
+  showHotspots: false,
+  showDimensions: false,
 };
 
 export const INITIAL_HOTSPOTS: HotspotItem[] = [
   {
-    id: 'pintu-depan-utama',
-    pos: [0, 1.7, 12.0],
+    id: 'pintu-belakang-tengah',
+    pos: [0, 1.7, -12.0],
     tag: 'Akses & Pintu',
-    title: 'Pintu Kaca Utama Depan (Main Entrance)',
+    title: 'Pintu Kaca Belakang Tengah (Pintu Ayun 2 Daun)',
     category: 'access',
     rows: [
-      ['Jumlah', '1 Portal Utama (2 Daun Sliding Kaca Tempered)'],
-      ['Dimensi', 'Lebar 3.8m × Tinggi 3.4m'],
-      ['Mekanisme', 'Sliding Otomatis / Tarik-Dorong (Geser Berlawanan)'],
-      ['Letak', 'Poros tengah dinding depan (+Z), entrance utama jamaah'],
-      ['Material', 'Kaca Tempered Clear 12mm & Kusen Aluminium Hijau Emas']
+      ['Tipe', 'Pintu Kaca Ayun/Engsel (Double Swing Glass Door)'],
+      ['Konfigurasi', '2 Daun Kaca Ayun (Engsel Pinggir) + Handle Stainless Vertikal'],
+      ['Sisi Samping', 'Panel Kaca Tetap (Fixed) di Kiri & Kanan Pintu'],
+      ['Transom', 'Jendela Transom Atas Kaca Terbagi 4 Panel Horizontal'],
+      ['Kusen/Frame', 'Frame Putih Minimalis Bersih'],
+      ['Letak', 'Poros tengah dinding belakang (-Z), berlawanan dari mihrab']
     ],
     interiorOnly: false,
     condition: 'Baik',
-    quantity: '1 Set Utama (2 Daun)',
-    lastInspection: '2026-08-28',
+    quantity: '1 Portal Lengkap (2 Daun Ayun + 2 Fixed + Transom 4 Panel)',
+    lastInspection: '2026-08-30',
     pic: 'Divisi Sarana & Prasarana',
-    note: 'Pintu gerbang utama depan menghubungkan serambi luar dengan aula utama masjid.'
+    note: 'Pintu masuk utama bagian belakang dengan daun pintu kaca ayun, kusen putih, dan panel transom 4 segmen.'
+  },
+  {
+    id: 'pintu-kiri',
+    pos: [-8.0, 1.7, -3.5],
+    tag: 'Akses & Pintu',
+    title: 'Pintu Kaca Samping Kiri (Pintu Ayun 2 Daun)',
+    category: 'access',
+    rows: [
+      ['Tipe', 'Pintu Kaca Ayun/Engsel (Double Swing Glass Door)'],
+      ['Konfigurasi', '2 Daun Kaca Ayun + Pull Handle Stainless Vertikal'],
+      ['Sisi Samping', 'Panel Kaca Tetap (Fixed) di Kiri & Kanan Pintu'],
+      ['Transom', 'Jendela Transom Atas 4 Panel Horizontal'],
+      ['Kusen/Frame', 'Frame Putih Minimalis Bersih'],
+      ['Letak', 'Dinding kiri (-X), area belakang-tengah bangunan']
+    ],
+    interiorOnly: false,
+    condition: 'Baik',
+    quantity: '1 Portal Lengkap (2 Daun Ayun + 2 Fixed + Transom 4 Panel)',
+    lastInspection: '2026-08-30',
+    pic: 'Divisi Sarana & Prasarana',
+    note: 'Pintu samping kiri untuk akses sirkulasi jamaah dan arah tempat wudhu.'
+  },
+  {
+    id: 'pintu-kanan',
+    pos: [8.0, 1.7, -3.5],
+    tag: 'Akses & Pintu',
+    title: 'Pintu Kaca Samping Kanan (Pintu Ayun 2 Daun)',
+    category: 'access',
+    rows: [
+      ['Tipe', 'Pintu Kaca Ayun/Engsel (Double Swing Glass Door)'],
+      ['Konfigurasi', '2 Daun Kaca Ayun + Pull Handle Stainless Vertikal'],
+      ['Sisi Samping', 'Panel Kaca Tetap (Fixed) di Kiri & Kanan Pintu'],
+      ['Transom', 'Jendela Transom Atas 4 Panel Horizontal'],
+      ['Kusen/Frame', 'Frame Putih Minimalis Bersih'],
+      ['Letak', 'Dinding kanan (+X), area belakang-tengah (sejajar pintu kiri)']
+    ],
+    interiorOnly: false,
+    condition: 'Baik',
+    quantity: '1 Portal Lengkap (2 Daun Ayun + 2 Fixed + Transom 4 Panel)',
+    lastInspection: '2026-08-30',
+    pic: 'Divisi Sarana & Prasarana',
+    note: 'Pintu samping kanan sejajar dengan pintu kiri memberikan sirkulasi udara silang yang optimal.'
+  },
+  {
+    id: 'jalur-keramik-putih',
+    pos: [0, 0.1, -2.5],
+    tag: 'Lantai & Sirkulasi',
+    title: 'Jalur Akses Lantai Keramik Putih',
+    category: 'structure',
+    rows: [
+      ['Material', 'Granit / Keramik Putih Polished 60×60 cm'],
+      ['Cakupan', 'Area sekitar 3 pintu masuk dan lorong sirkulasi tengah'],
+      ['Penataan', 'Keramik putih membentang di koridor pintu, karpet di kiri-kanan'],
+      ['Kondisi', 'Bersih, Rata & Bebas Licin']
+    ],
+    interiorOnly: true,
+    condition: 'Baik',
+    quantity: 'Area Koridor Pintu',
+    lastInspection: '2026-08-30',
+    pic: 'Divisi Kebersihan',
+    note: 'Area lantai di sekitar tiap pintu menggunakan keramik putih, diapit karpet saf hijau di kiri-kanannya.'
   },
   {
     id: 'kubah-depan',
@@ -56,18 +121,18 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     quantity: '1 Kubah Depan',
     lastInspection: '2026-08-15',
     pic: 'Divisi Arsitektur DKM',
-    note: 'Kubah depan dirancang khusus untuk menandai posisi mimbar dan arah kiblat dari luar bangunan.'
+    note: 'Kubah depan menandai posisi mimbar dan arah kiblat dari luar bangunan.'
   },
   {
     id: 'dinding-kaca',
-    pos: [-8.0, 3.2, 0],
+    pos: [-8.0, 3.2, 3.0],
     tag: 'Arsitektur & Dinding',
     title: 'Dinding Kaca Panoramik (Glass Curtain Wall)',
     category: 'structure',
     rows: [
-      ['Tipe', 'Full Curtain Wall Kaca Transparan'],
+      ['Tipe', 'Curtain Wall Kaca Transparan Tembus Pandang'],
       ['Material', 'Double-Glazed Low-E Glass 12mm & Kusen Hijau Tua Emas'],
-      ['Cakupan', 'Dinding Samping Kiri, Kanan, Depan, dan Belakang'],
+      ['Cakupan', 'Dinding Samping Kiri, Kanan, Belakang & Depan'],
       ['Fitur', 'Tembus pandang dari luar, pencahayaan alami optimal'],
       ['Kondisi', 'Bersih, Kedap Udara & Kokoh']
     ],
@@ -120,174 +185,139 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
   },
   {
     id: 'mimbar',
-    pos: [0, 0.45, 8.8],
+    pos: [-1.3, 0.6, 9.0],
     tag: 'Mimbar & Mihrab',
-    title: 'Mimbar & Ruang Khutbah',
+    title: 'Mimbar Kayu Ukir & Garis Bertingkat Dinding Mihrab',
     category: 'mihrab',
     rows: [
-      ['Jumlah', '1 unit'],
-      ['Material', 'Kayu Jati Ukir Kaligrafi Emas'],
-      ['Letak', 'Depan tengah, dinaungi Kubah Depan'],
-      ['Kondisi', 'Baik'],
-      ['Fasilitas Pendukung', 'Mic Podium Condenser, Stand Mushaf']
+      ['Posisi Mimbar', 'Agak ke Kolom Kiri-Tengah dari Sudut Pandang Menghadap Kiblat'],
+      ['Material', 'Kayu Jati Ukir Jepara Kaligrafi Emas'],
+      ['Ornamen Dinding', 'Dinding/Plafon Bertingkat (Stepped Decorative Wall Niche & Arch)'],
+      ['Dinaungi', 'Tepat di bawah Kubah Depan'],
+      ['Fasilitas Pendukung', 'Mic Gooseneck Condenser, Podium Mushaf Khutbah']
     ],
     interiorOnly: true,
     condition: 'Baik',
-    quantity: '1 Unit',
-    lastInspection: '2026-08-15',
+    quantity: '1 Unit Mimbar Jati',
+    lastInspection: '2026-08-30',
     pic: 'Ustadz Ahmad (Imam Rawatib)',
-    note: 'Mimbar berada di poros depan menghadap kiblat tepat di bawah Kubah Depan.'
+    note: 'Mimbar bergeser sedikit ke kiri-tengah arah kiblat, berlatar dinding dekoratif garis bertingkat berlapis lis emas.'
   },
   {
     id: 'karpet-pria',
-    pos: [0, 0.3, 5.2],
+    pos: [0, 0.3, 5.0],
     tag: 'Karpet & Saf',
-    title: 'Karpet Depan — Jamaah Laki-laki',
+    title: 'Karpet Depan — Jamaah Laki-laki (4 Saf)',
     category: 'carpet',
     rows: [
-      ['Jumlah Saf', '5 Baris Saf (Dapat disesuaikan)'],
-      ['Kapasitas', '± 110 Jamaah (22 orang/saf)'],
-      ['Jenis Karpet', 'Rajut Tebal 14mm Premium Hijau Lumut'],
-      ['Kondisi', 'Baik']
+      ['Jumlah Saf', '4 Baris Saf Depan'],
+      ['Kapasitas', '± 88 Jamaah (22 orang/saf)'],
+      ['Jenis Karpet', 'Rajut Tebal 14mm Premium Hijau Lumut & Lis Emas'],
+      ['Kondisi', 'Bersih & Terawat']
     ],
     interiorOnly: true,
     condition: 'Baik',
-    quantity: '5 Saf (14m x 6.5m)',
-    lastInspection: '2026-08-20',
+    quantity: '4 Saf Pria',
+    lastInspection: '2026-08-30',
     pic: 'Divisi Kebersihan',
-    note: 'Dibersihkan vakum harian sebelum sholat Zhuhur dan Maghrib.'
+    note: 'Saf depan khusus jamaah laki-laki sebanyak 4 baris saf.'
   },
   {
     id: 'karpet-wanita',
-    pos: [0, 0.3, -5.5],
+    pos: [0, 0.3, -6.5],
     tag: 'Karpet & Saf',
-    title: 'Karpet Belakang — Jamaah Perempuan',
+    title: 'Karpet Belakang — Jamaah Perempuan (5 Saf)',
     category: 'carpet',
     rows: [
-      ['Jumlah Saf', '6 Baris Saf (Dapat disesuaikan)'],
-      ['Kapasitas', '± 132 Jamaah (22 orang/saf)'],
-      ['Jenis Karpet', 'Merah Marun Tebal 12mm'],
-      ['Kondisi', 'Baik'],
-      ['Batas Area', 'Dilengkapi Tabir Hijab Geser']
+      ['Jumlah Saf', '5 Baris Saf Belakang (Total 4+5 = 9 Saf)'],
+      ['Kapasitas', '± 110 Jamaah (22 orang/saf)'],
+      ['Jenis Karpet', 'Rajut Tebal 14mm Hijau Lumut / Burgundy'],
+      ['Catatan Saf', 'Total pernah disebut 10 saf, saat ini terpasang 9 saf (4 depan + 5 belakang) — perlu konfirmasi DKM'],
+      ['Batas Area', 'Dilengkapi Tabir Pembatas Saf Hijab']
     ],
     interiorOnly: true,
     condition: 'Baik',
-    quantity: '6 Saf (14m x 7.5m)',
-    lastInspection: '2026-08-20',
+    quantity: '5 Saf Wanita (Total 9 Saf)',
+    lastInspection: '2026-08-30',
     pic: 'Divisi Keputrian DKM',
-    note: 'Jumlah saf jamaah perempuan dapat disesuaikan live di menu Pengaturan Saf.'
-  },
-  {
-    id: 'pintu-kanan',
-    pos: [8.0, 1.7, 0],
-    tag: 'Akses & Pintu',
-    title: 'Pintu Kaca Samping Kanan (Sliding Door)',
-    category: 'access',
-    rows: [
-      ['Jumlah', '1 Pintu Sliding (2 Panel Kaca Tempered)'],
-      ['Dimensi', 'Lebar 3.6m × Tinggi 3.4m'],
-      ['Mekanisme', 'Sliding / Tarik-Dorong (Geser Berlawanan)'],
-      ['Letak', 'Dinding kaca samping kanan, poros tengah aula']
-    ],
-    interiorOnly: false,
-    condition: 'Baik',
-    quantity: '1 Set (2 Daun)',
-    lastInspection: '2026-08-01',
-    pic: 'Divisi Sarana & Prasarana',
-    note: 'Pintu geser kaca sisi kanan untuk akses sirkulasi jamaah ke koridor samping.'
-  },
-  {
-    id: 'pintu-kiri',
-    pos: [-8.0, 1.7, 0],
-    tag: 'Akses & Pintu',
-    title: 'Pintu Kaca Samping Kiri (Sliding Door)',
-    category: 'access',
-    rows: [
-      ['Jumlah', '1 Pintu Sliding (2 Panel Kaca Tempered)'],
-      ['Dimensi', 'Lebar 3.6m × Tinggi 3.4m'],
-      ['Mekanisme', 'Sliding / Tarik-Dorong (Geser Berlawanan)'],
-      ['Letak', 'Dinding kaca samping kiri, simetris pintu kanan']
-    ],
-    interiorOnly: false,
-    condition: 'Baik',
-    quantity: '1 Set (2 Daun)',
-    lastInspection: '2026-08-01',
-    pic: 'Divisi Sarana & Prasarana',
-    note: 'Pintu geser kaca sisi kiri memberikan sirkulasi udara dan akses wudhu.'
+    note: 'Saf belakang untuk jamaah perempuan sebanyak 5 saf (Total aula saat ini 9 saf).'
   },
   {
     id: 'toa-speaker-l',
-    pos: [-6.2, 5.8, 7.5],
+    pos: [-7.6, 5.8, 0],
     tag: 'Tata Suara',
-    title: 'Horn Speaker / Toa Kiri Depan',
+    title: 'Horn Speaker / Toa 1 (Dinding Kiri Tengah)',
     category: 'audio',
     rows: [
-      ['Jumlah', '1 unit (Kiri)'],
-      ['Tipe', 'Horn Ceiling Speaker 50W Impedansi Tinggi'],
-      ['Letak', 'Plafon langit-langit aula depan kiri'],
+      ['Jumlah', '1 Unit TOA Dinding Kiri'],
+      ['Tipe', 'Horn Ceiling/Wall Speaker 50W Impedansi Tinggi'],
+      ['Letak', 'Menempel tinggi dekat langit-langit di dinding kiri area tengah bangunan'],
+      ['Kabel', 'Instalasi kabel audio menjuntai rapi ke bawah'],
       ['Kondisi', 'Baik & Jernih']
     ],
     interiorOnly: true,
     condition: 'Baik',
     quantity: '1 Unit',
-    lastInspection: '2026-08-18',
+    lastInspection: '2026-08-30',
     pic: 'Pak Gunawan (Teknisi Audio)',
-    note: 'Terhubung ke Amplifier Mixer TOA ZA-2120 di ruang imam.'
+    note: 'Toa unit 1 terpasang di dinding kiri tengah menyebarkan suara adzan dan kajian ke aula tengah-belakang.'
   },
   {
-    id: 'toa-speaker-r',
-    pos: [6.2, 5.8, 7.5],
+    id: 'toa-speaker-f',
+    pos: [-2.5, 5.8, 9.2],
     tag: 'Tata Suara',
-    title: 'Horn Speaker / Toa Kanan Depan',
+    title: 'Horn Speaker / Toa 2 (Area Depan Dekat Mimbar)',
     category: 'audio',
     rows: [
-      ['Jumlah', '1 unit (Kanan)'],
-      ['Tipe', 'Horn Ceiling Speaker 50W Impedansi Tinggi'],
-      ['Letak', 'Plafon langit-langit aula depan kanan'],
+      ['Jumlah', '1 Unit TOA Area Depan'],
+      ['Tipe', 'Horn Ceiling/Wall Speaker 50W Impedansi Tinggi'],
+      ['Letak', 'Plafon langit-langit aula depan sisi mimbar/mihrab'],
+      ['Kabel', 'Instalasi kabel audio menjuntai ke mixer central ruang imam'],
       ['Kondisi', 'Baik & Jernih']
     ],
     interiorOnly: true,
     condition: 'Baik',
     quantity: '1 Unit',
-    lastInspection: '2026-08-18',
+    lastInspection: '2026-08-30',
     pic: 'Pak Gunawan (Teknisi Audio)',
-    note: 'Pemeriksaan kabel sinyal rutin tiap awal bulan.'
+    note: 'Toa unit 2 di area depan melayani artikulasi suara imam sholat dan khutbah.'
   },
   {
-    id: 'ac-pendingin',
-    pos: [-7.75, 4.8, -3.0],
+    id: 'kipas-angin-dinding',
+    pos: [-7.7, 3.2, 3.5],
     tag: 'Tata Udara',
-    title: 'AC Split Inverter (Sisi Dinding Kaca Kiri)',
+    title: 'Kipas Angin Dinding (Wall Fan 3 Unit)',
     category: 'cooling',
     rows: [
-      ['Jumlah', '4 Unit Inverter 2.5 PK'],
-      ['Kapasitas', '2.5 PK Inverter R32'],
-      ['Letak', 'Struktur kolom dinding samping kiri & kanan'],
-      ['Kondisi', 'Dingin Optimal (Filter bersih)']
+      ['Jumlah', 'Total 3 Unit Wall Fan Heavy Duty (Bukan AC)'],
+      ['Sebaran', '1 Unit Depan (Mihrab), 1 Unit Dinding Kiri Tengah, 1 Unit Samping Belakang'],
+      ['Tipe', 'Wall Fan 18 Inch 3-Speed Oscillation'],
+      ['Fitur', 'Osilasi 90°, Tarikan Tali Kecepatan, Jaring Pengaman'],
+      ['Kondisi', 'Bersih, Berputar Halus & Tenang']
     ],
     interiorOnly: true,
     condition: 'Baik',
-    quantity: '4 Unit',
-    lastInspection: '2026-08-25',
-    pic: 'Teknisi Servis AC DKM',
-    note: 'Servis cuci filter & cek freon terjadwal setiap 3 bulan sekali.'
+    quantity: '3 Unit Kipas Dinding',
+    lastInspection: '2026-08-30',
+    pic: 'Divisi Sarana & Prasarana',
+    note: 'Pendingin alami ruangan menggunakan 3 unit kipas angin dinding di posisi depan, tengah, dan samping.'
   },
   {
     id: 'jam-jadwal-sholat',
-    pos: [0, 5.2, 11.85],
+    pos: [0, 4.8, 11.8],
     tag: 'Elektronik & Jadwal',
     title: 'Jam Digital Jadwal Sholat & Running Text',
     category: 'other',
     rows: [
       ['Jumlah', '1 unit Display LED Grand'],
       ['Fitur', 'Jadwal 5 Waktu Otomatis, Hitung Mundur Iqomah, Pesan DKM'],
-      ['Letak', 'Dinding Header Pintu Utama Depan'],
+      ['Letak', 'Dinding Header Depan Aula Utama'],
       ['Kondisi', 'Akurat & Menyala Normal']
     ],
     interiorOnly: true,
     condition: 'Baik',
     quantity: '1 Unit',
-    lastInspection: '2026-08-28',
+    lastInspection: '2026-08-30',
     pic: 'Sekretariat DKM',
     note: 'Sinkronisasi waktu otomatis via NTP/GPS.'
   },
@@ -312,20 +342,20 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
   },
   {
     id: 'kotak-infaq',
-    pos: [2.5, 0.5, 10.5],
+    pos: [2.5, 0.5, -9.5],
     tag: 'Keuangan & Infaq',
     title: 'Kotak Infaq Tromol Stainless',
     category: 'furniture',
     rows: [
-      ['Jumlah', '2 unit (Dekat Pintu Depan & Serambi)'],
+      ['Jumlah', '2 unit (Dekat Pintu Belakang & Lorong Pintu Samping)'],
       ['Material', 'Stainless Steel Anti Karat dengan Gembok Ganda'],
-      ['Letak', 'Sisi kanan lorong pintu depan utama'],
+      ['Letak', 'Sisi dekat pintu masuk belakang dan jalur keramik'],
       ['Kondisi', 'Aman & Terkunci']
     ],
     interiorOnly: false,
     condition: 'Baik',
     quantity: '2 Unit',
-    lastInspection: '2026-08-29',
+    lastInspection: '2026-08-30',
     pic: 'Bendahara DKM',
     note: 'Dibuka dan dihitung bersama setiap selesai sholat Jumat.'
   },
@@ -349,4 +379,5 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     note: 'Menara pengumuman adzan untuk jangkauan warga sekitar.'
   }
 ];
+
 

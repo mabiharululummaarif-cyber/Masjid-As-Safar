@@ -1,6 +1,38 @@
 /**
- * Data structures for Masjid As-Safar 3D Facility Inventory
+ * Data structures for Masjid As-Safar 3D Architectural Visualization
  */
+
+export type RoofMode = 'solid' | 'transparent' | 'hidden';
+export type CameraPreset = 
+  | 'overview' 
+  | 'exterior'
+  | 'interior' 
+  | 'mihrab' 
+  | 'backDoor' 
+  | 'leftDoor' 
+  | 'rightDoor' 
+  | 'topView' 
+  | 'qibla';
+
+export interface MosqueConfig {
+  safMale: number;       // default: 4 saf
+  safFemale: number;     // default: 5 saf
+  width: number;         // 16m
+  depth: number;         // 24m
+  height: number;        // 6.5m
+  doorGap: number;       // 3.6m
+  toaCount: number;      // 2 unit
+  acCount: number;       // 3 unit (wall fans)
+  minaretVisible: boolean; // Menara luar
+  timeOfDay: 'day' | 'sunset' | 'night';
+  showQibla: boolean;
+  showTabir: boolean;
+  roofMode: RoofMode;
+  autoRotate: boolean;
+  fanSpeed: number;      // 0 (off), 1 (normal), 2 (fast)
+  showDimensions: boolean;
+  showHotspots?: boolean;
+}
 
 export type FacilityCategory = 
   | 'mihrab'
@@ -16,11 +48,6 @@ export type FacilityCategory =
 
 export type ItemCondition = 'Baik' | 'Perlu Pengecekan' | 'Perlu Perbaikan' | 'Rusak';
 
-export interface HotspotRow {
-  label: string;
-  value: string;
-}
-
 export interface HotspotItem {
   id: string;
   pos: [number, number, number];
@@ -31,24 +58,8 @@ export interface HotspotItem {
   interiorOnly: boolean;
   note?: string;
   condition?: ItemCondition;
-  pic?: string; // Penanggung jawab
+  pic?: string;
   lastInspection?: string;
   quantity?: number | string;
 }
 
-export interface MosqueConfig {
-  safMale: number;       // default: 4 saf
-  safFemale: number;     // default: 5 saf
-  width: number;         // 10m
-  depth: number;         // 16m
-  height: number;        // 5m
-  doorGap: number;       // 3m
-  toaCount: number;      // 2-6 unit
-  acCount: number;       // 1-6 unit
-  minaretVisible: boolean; // Menara luar
-  timeOfDay: 'day' | 'sunset' | 'night';
-  showQibla: boolean;
-  showHotspots: boolean;
-  showDimensions: boolean;
-  showTabir: boolean;
-}

@@ -1,6 +1,6 @@
 import React from 'react';
-import { MosqueConfig } from '../types';
-import { Settings, X, Sliders, Users, Wind, Volume2, Sun, Moon, Sunset, Compass, Shield, RotateCcw } from 'lucide-react';
+import { MosqueConfig, RoofMode } from '../types';
+import { Settings, X, Sliders, Users, Wind, Volume2, Sun, Moon, Sunset, Compass, RotateCcw, RotateCw, Layers } from 'lucide-react';
 
 interface MosqueConfigModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-[#C9A227]" />
             <h3 className="font-serif-islamic text-lg font-bold text-[#F7F3E8]">
-              Pengaturan Saf & Fasilitas 3D
+              Pengaturan Arsitektur & Model 3D
             </h3>
           </div>
           <button
@@ -54,6 +54,69 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
                   ± {totalJamaah} Orang <span className="text-xs font-normal text-[#E8DCC0]/60">({config.safMale + config.safFemale} Total Saf)</span>
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Roof & Animation Control */}
+          <div className="space-y-3 p-4 rounded-xl bg-[#163832]/60 border border-[#E8DCC0]/15">
+            <h4 className="font-bold text-xs text-[#C9A227] flex items-center gap-2">
+              <Layers className="w-4 h-4" /> Mode Tampilan Atap & Kamera
+            </h4>
+
+            {/* Roof Mode Select */}
+            <div className="space-y-1.5">
+              <label className="text-[#E8DCC0] font-medium block">Struktur Atap & Kubah:</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => onUpdateConfig({ ...config, roofMode: 'solid' })}
+                  className={`py-2 px-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                    config.roofMode === 'solid'
+                      ? 'bg-[#C9A227] text-[#163832] font-bold border-[#C9A227]'
+                      : 'bg-[#0f2a25] text-[#E8DCC0] border-[#E8DCC0]/20 hover:bg-[#1a423b]'
+                  }`}
+                >
+                  Atap Solid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdateConfig({ ...config, roofMode: 'transparent' })}
+                  className={`py-2 px-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                    config.roofMode === 'transparent'
+                      ? 'bg-[#C9A227] text-[#163832] font-bold border-[#C9A227]'
+                      : 'bg-[#0f2a25] text-[#E8DCC0] border-[#E8DCC0]/20 hover:bg-[#1a423b]'
+                  }`}
+                >
+                  Transparan (X-Ray)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onUpdateConfig({ ...config, roofMode: 'hidden' })}
+                  className={`py-2 px-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+                    config.roofMode === 'hidden'
+                      ? 'bg-[#C9A227] text-[#163832] font-bold border-[#C9A227]'
+                      : 'bg-[#0f2a25] text-[#E8DCC0] border-[#E8DCC0]/20 hover:bg-[#1a423b]'
+                  }`}
+                >
+                  Buka Atap (Terbuka)
+                </button>
+              </div>
+            </div>
+
+            {/* Auto-rotate Toggle */}
+            <div className="flex items-center justify-between pt-2 border-t border-[#E8DCC0]/10">
+              <span className="text-[#E8DCC0] flex items-center gap-1.5">
+                <RotateCw className="w-3.5 h-3.5 text-[#C9A227]" /> Putar Otomatis (Cinematic Orbit):
+              </span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={config.autoRotate}
+                  onChange={e => onUpdateConfig({ ...config, autoRotate: e.target.checked })}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A227]"></div>
+              </label>
             </div>
           </div>
 
@@ -126,11 +189,11 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
             </div>
           </div>
 
-          {/* AC & Speaker Count */}
+          {/* Kipas Angin & Speaker Count */}
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-[#163832]/60 rounded-xl border border-[#E8DCC0]/15 space-y-2">
               <label className="text-[11px] font-semibold text-[#E8DCC0] flex items-center gap-1.5">
-                <Wind className="w-3.5 h-3.5 text-[#C9A227]" /> Jumlah Unit AC
+                <Wind className="w-3.5 h-3.5 text-[#C9A227]" /> Kipas Angin Dinding
               </label>
               <div className="flex items-center justify-between">
                 <select
@@ -138,18 +201,16 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
                   onChange={e => onUpdateConfig({ ...config, acCount: parseInt(e.target.value) || 1 })}
                   className="w-full bg-[#0f2a25] border border-[#E8DCC0]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#F7F3E8]"
                 >
-                  <option value="1">1 Unit AC (Asumsi Awal)</option>
-                  <option value="2">2 Unit AC</option>
-                  <option value="3">3 Unit AC (Rekomendasi)</option>
-                  <option value="4">4 Unit AC</option>
-                  <option value="6">6 Unit AC (Optimal)</option>
+                  <option value="3">3 Unit (Depan, Tengah, Samping)</option>
+                  <option value="4">4 Unit Kipas Dinding</option>
+                  <option value="6">6 Unit Kipas Dinding</option>
                 </select>
               </div>
             </div>
 
             <div className="p-3 bg-[#163832]/60 rounded-xl border border-[#E8DCC0]/15 space-y-2">
               <label className="text-[11px] font-semibold text-[#E8DCC0] flex items-center gap-1.5">
-                <Volume2 className="w-3.5 h-3.5 text-[#C9A227]" /> Jumlah Toa / Speaker
+                <Volume2 className="w-3.5 h-3.5 text-[#C9A227]" /> Unit TOA / Speaker
               </label>
               <div className="flex items-center justify-between">
                 <select
@@ -157,8 +218,8 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
                   onChange={e => onUpdateConfig({ ...config, toaCount: parseInt(e.target.value) || 2 })}
                   className="w-full bg-[#0f2a25] border border-[#E8DCC0]/20 rounded-lg px-2.5 py-1.5 text-xs text-[#F7F3E8]"
                 >
-                  <option value="2">2 Unit (Langit-langit Depan)</option>
-                  <option value="4">4 Unit (Depan & Belakang)</option>
+                  <option value="2">2 Unit (Kiri Tengah & Depan Mimbar)</option>
+                  <option value="4">4 Unit Menyebar</option>
                   <option value="6">6 Unit Surround</option>
                 </select>
               </div>
@@ -186,27 +247,13 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
             {/* Qibla & Compass Toggle */}
             <div className="flex items-center justify-between pt-2 border-t border-[#E8DCC0]/10">
               <span className="text-[#E8DCC0] flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 text-[#C9A227]" /> Kompas & Arah Kiblat (Luar & Dalam):
+                <Compass className="w-3.5 h-3.5 text-[#C9A227]" /> Kompas & Arah Kiblat (295°):
               </span>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
                   checked={config.showQibla}
                   onChange={e => onUpdateConfig({ ...config, showQibla: e.target.checked })}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A227]"></div>
-              </label>
-            </div>
-
-            {/* Hotspots Marker Toggle */}
-            <div className="flex items-center justify-between pt-2 border-t border-[#E8DCC0]/10">
-              <span className="text-[#E8DCC0]">Marker Titik Emas Hotspot:</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={config.showHotspots}
-                  onChange={e => onUpdateConfig({ ...config, showHotspots: e.target.checked })}
                   className="sr-only peer"
                 />
                 <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#C9A227]"></div>
@@ -287,3 +334,4 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
     </div>
   );
 };
+

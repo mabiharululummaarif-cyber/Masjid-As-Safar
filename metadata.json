@@ -1,6 +1,6 @@
 {
-  "name": "Masjid As-Safar — Inventaris Fasilitas 3D",
-  "description": "Visualisasi 3D interaktif Three.js untuk inventaris dan denah fasilitas Masjid As-Safar dengan simulasi saf, tata ruang, dan manajemen data fasilitas.",
+  "name": "Masjid As-Safar — Visualisasi Arsitektur 3D",
+  "description": "Visualisasi 3D interaktif arsitektur Masjid As-Safar dengan simulasi interior, denah saf, sirkulasi pintu kaca ayun, mihrab, dan pencahayaan dinamis.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
