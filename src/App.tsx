@@ -1,139 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { MosqueConfig, CameraPreset } from './types';
-import { DEFAULT_CONFIG } from './data/initialHotspots';
-import { MosqueCanvas3D } from './components/MosqueCanvas3D';
-import { MosqueConfigModal } from './components/MosqueConfigModal';
-import { ControlOverlay } from './components/ControlOverlay';
+import React from 'react';
 
-const STORAGE_CONFIG_KEY = 'masjid_as_safar_config_arch_v2';
+const activities = [
+  { icon: '☾', title: 'Ibadah Harian', text: 'Menjadi ruang yang nyaman untuk salat berjamaah dan mendekatkan diri kepada Allah.' },
+  { icon: '۞', title: 'Pembinaan Umat', text: 'Wadah untuk belajar, berbagi ilmu, dan menumbuhkan kebersamaan.' },
+  { icon: '♡', title: 'Kegiatan Sosial', text: 'Mendorong kepedulian, silaturahmi, dan semangat saling membantu.' },
+];
 
 export default function App() {
-  const [config, setConfig] = useState<MosqueConfig>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_CONFIG_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return { ...parsed, showQibla: false, autoRotate: false, fanSpeed: 0 };
-      }
-    } catch (e) {
-      console.warn('Failed to load saved config', e);
-    }
-    return { ...DEFAULT_CONFIG, showQibla: false, autoRotate: false, fanSpeed: 0 };
-  });
-
-  // UI States
-  const [isInterior, setIsInterior] = useState(false);
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [focusPosition, setFocusPosition] = useState<[number, number, number] | null>(null);
-
-  // Persist config to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(config));
-    } catch (e) {
-      console.warn('Failed to save config', e);
-    }
-  }, [config]);
-
-  // Camera presets
-  const handleSelectPreset = (preset: CameraPreset) => {
-    switch (preset) {
-      case 'mihrab':
-        setIsInterior(true);
-        setFocusPosition([0, 1.6, 6.5]);
-        break;
-      case 'backDoor':
-        setIsInterior(true);
-        setFocusPosition([0, 1.6, -7.0]);
-        break;
-      case 'leftDoor':
-        setIsInterior(true);
-        setFocusPosition([-4.5, 1.6, -2.5]);
-        break;
-      case 'rightDoor':
-        setIsInterior(true);
-        setFocusPosition([4.5, 1.6, -2.5]);
-        break;
-      case 'topView':
-        setFocusPosition([0, 28, 0.1]);
-        break;
-      case 'exterior':
-        setIsInterior(false);
-        setFocusPosition([0, 2.5, 0]);
-        break;
-      case 'interior':
-        setIsInterior(true);
-        setFocusPosition([0, 1.5, 0.5]);
-        break;
-    }
-  };
-
-  const handleCycleTimeOfDay = () => {
-    const sequence: ('day' | 'sunset' | 'night')[] = ['day', 'sunset', 'night'];
-    const currIdx = sequence.indexOf(config.timeOfDay);
-    const nextTime = sequence[(currIdx + 1) % sequence.length];
-    setConfig(prev => ({ ...prev, timeOfDay: nextTime }));
-  };
-
-  const handleResetView = () => {
-    setFocusPosition(isInterior ? [0, 2.4, 0.5] : [0, 2.0, 0]);
-  };
-
-  const handleToggleQibla = () => {
-    setConfig(prev => ({ ...prev, showQibla: !prev.showQibla }));
-  };
-
-  const handleOrientQibla = () => {
-    setFocusPosition([0, isInterior ? 1.8 : 2.5, 9.5]);
-  };
-
-  const handleResetDefaults = () => {
-    setConfig(DEFAULT_CONFIG);
-    localStorage.removeItem(STORAGE_CONFIG_KEY);
-  };
-
-  const handleUpdateConfig = (cfg: Partial<MosqueConfig>) => {
-    setConfig(prev => ({ ...prev, ...cfg }));
-  };
-
-  return (
-    <div className="w-screen h-screen bg-[#D8DEE4] font-sans relative overflow-hidden select-none">
-      {/* 100% Fullscreen 3D Canvas of the Mosque Building */}
-      <main className="w-full h-full relative overflow-hidden">
-        <MosqueCanvas3D
-          hotspots={[]}
-          config={config}
-          isInterior={isInterior}
-          selectedHotspotId={null}
-          onSelectHotspot={() => {}}
-          focusPosition={focusPosition}
-        />
-
-        {/* Minimal On-Demand Controls (Hanya muncul jika diklik) */}
-        <ControlOverlay
-          isInterior={isInterior}
-          onToggleInterior={() => setIsInterior(prev => !prev)}
-          config={config}
-          onUpdateConfig={handleUpdateConfig}
-          onCycleTimeOfDay={handleCycleTimeOfDay}
-          onResetView={handleResetView}
-          onSelectPreset={handleSelectPreset}
-          onToggleQibla={handleToggleQibla}
-          onOrientQibla={handleOrientQibla}
-          onOpenArchSettings={() => setIsConfigModalOpen(true)}
-        />
-      </main>
-
-      {/* Architecture & 3D Model Configuration Modal */}
-      <MosqueConfigModal
-        isOpen={isConfigModalOpen}
-        config={config}
-        onClose={() => setIsConfigModalOpen(false)}
-        onUpdateConfig={newConfig => setConfig(newConfig)}
-        onResetDefaults={handleResetDefaults}
-      />
-    </div>
-  );
+  return <div className="site">
+    <header className="nav"><a className="brand" href="#home"><span className="brand-mark">۞</span><span><b>MASJID AS-SAFAR</b><small>BIHARUL ULUM MA'ARIF</small></span></a><nav><a href="#tentang">Tentang</a><a href="#kegiatan">Kegiatan</a><a href="#kontak">Kontak</a></nav></header>
+    <main>
+      <section className="hero" id="home"><div className="hero-pattern"></div><div className="hero-copy"><span className="eyebrow">RUMAH IBADAH • RUANG KEBERSAMAAN</span><h1>Melangkah dalam<br/><em>iman & kebersamaan.</em></h1><p>Selamat datang di Masjid As-Safar Biharul Ulum Ma'arif. Semoga masjid ini menjadi tempat ibadah, menuntut ilmu, dan mempererat ukhuwah.</p><a className="cta" href="#tentang">Mengenal Masjid <span>↗</span></a></div><div className="hero-art" aria-label="Ilustrasi masjid"><div className="moon"></div><div className="star s1">✦</div><div className="star s2">✧</div><div className="mosque"><div className="minaret left"><i></i></div><div className="minaret right"><i></i></div><div className="dome"><div className="crescent">☾</div></div><div className="building"><div className="arch"><div></div></div><div className="window w1"></div><div className="window w2"></div><div className="door"></div></div><div className="base"></div></div><div className="art-caption">MASJID AS-SAFAR</div></div><div className="hero-bottom"><span>مَرْحَبًا بِكُمْ</span><span>TERBUKA UNTUK UMAT</span></div></section>
+      <section className="intro section" id="tentang"><div className="section-label">01 / TENTANG KAMI</div><div className="intro-content"><h2>Tempat berlabuh,<br/><em>menguatkan langkah.</em></h2><div><p>Masjid As-Safar Biharul Ulum Ma'arif hadir sebagai ruang ibadah dan kebersamaan bagi jamaah. Setelah pembangunan selesai, masjid kini telah mulai beroperasi dan menyambut jamaah dalam aktivitas sehari-hari.</p><p className="muted">Kami terus menata pelayanan dan kegiatan agar masjid dapat tumbuh bersama masyarakat.</p></div></div></section>
+      <section className="activities section" id="kegiatan"><div className="section-label">02 / PERAN MASJID</div><div className="activities-head"><h2>Ruang untuk<br/><em>bertumbuh bersama.</em></h2><p>Masjid bukan hanya tempat singgah untuk beribadah, tetapi juga ruang untuk saling menguatkan.</p></div><div className="cards">{activities.map((a,i)=><article className="activity" key={a.title}><span className="activity-num">0{i+1}</span><div className="activity-icon">{a.icon}</div><h3>{a.title}</h3><p>{a.text}</p></article>)}</div></section>
+      <section className="quote"><span>“</span><p>Dan sesungguhnya masjid-masjid itu adalah untuk Allah.</p><small>QS. Al-Jinn: 18 · Pengingat untuk memakmurkan rumah Allah</small></section>
+      <section className="contact section" id="kontak"><div><div className="section-label">03 / SILATURAHMI</div><h2>Mari makmurkan<br/><em>rumah Allah.</em></h2><p>Jamaah dan masyarakat dipersilakan hadir serta berpartisipasi dalam kegiatan masjid.</p></div><div className="contact-card"><span className="contact-symbol">۞</span><h3>Masjid As-Safar</h3><p>Biharul Ulum Ma'arif</p><div className="contact-line"></div><small>Informasi alamat dan kontak pengurus akan ditambahkan.</small></div></section>
+    </main><footer><a className="brand footer-brand" href="#home"><span className="brand-mark">۞</span><span><b>MASJID AS-SAFAR</b><small>BIHARUL ULUM MA'ARIF</small></span></a><span>© {new Date().getFullYear()} Masjid As-Safar. Semoga membawa keberkahan.</span><a href="#home">Kembali ke atas ↑</a></footer>
+  </div>;
 }
-
-
