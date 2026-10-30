@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { MosqueConfig, CameraPreset } from './types';
 import { DEFAULT_CONFIG } from './data/initialHotspots';
-import { MosqueCanvas3D } from './components/MosqueCanvas3D';
-import { MosqueConfigModal } from './components/MosqueConfigModal';
+import { CanvasLoadingFallback } from './components/CanvasLoadingFallback';
+
 import { ControlOverlay } from './components/ControlOverlay';
-import { ShareModal } from './components/ShareModal';
-import { MosqueInfoModal } from './components/MosqueInfoModal';
-import { SimasDossierModal } from './components/SimasDossierModal';
+
+const MosqueCanvas3D = React.lazy(() => import('./components/MosqueCanvas3D'));
+const MosqueConfigModal = React.lazy(() => import('./components/MosqueConfigModal').then(m => ({ default: m.MosqueConfigModal })));
+const ShareModal = React.lazy(() => import('./components/ShareModal').then(m => ({ default: m.ShareModal })));
+const MosqueInfoModal = React.lazy(() => import('./components/MosqueInfoModal').then(m => ({ default: m.MosqueInfoModal })));
+const SimasDossierModal = React.lazy(() => import('./components/SimasDossierModal').then(m => ({ default: m.SimasDossierModal })));
 import { HeaderNav } from './components/HeaderNav';
 import { HeroSection } from './components/HeroSection';
 import { PrayerTimesSection } from './components/PrayerTimesSection';
@@ -140,7 +143,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 font-sans selection:bg-[#D4AF37] selection:text-[#0F2A25]">
+    <div className="min-h-screen bg-[#0F2A25] text-slate-800 font-sans selection:bg-[#D4AF37] selection:text-[#0F2A25]">
       
       {/* ============================================================== */}
       {/* MODE 1: OFFICIAL WEBSITE PORTAL (FOR SIMAS KEMENAG & PILGRIMS) */}
@@ -202,15 +205,16 @@ export default function App() {
             onOpenShare={() => setIsShareModalOpen(true)}
           />
 
-          {/* Floating Action Button: Quick 3D Fullscreen Jump */}
-          <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
+          {/* Floating Action Button: Quick 3D Fullscreen Jump (Compact circular on mobile, expanded on desktop) */}
+          <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30">
             <button
               onClick={() => setViewMode('fullscreen3D')}
-              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-full shadow-2xl transition-all cursor-pointer transform hover:scale-105 active:scale-95 border-2 border-white/60"
+              className="w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-full shadow-2xl transition-all cursor-pointer transform hover:scale-105 active:scale-95 border-2 border-white/80 flex items-center justify-center gap-2"
               title="Buka Mode Tur 3D Fullscreen"
+              aria-label="Jelajah Tur 3D Fullscreen"
             >
-              <Eye className="w-4 h-4" />
-              <span className="text-xs sm:text-sm">Jelajah 3D Fullscreen</span>
+              <Eye className="w-5 h-5 sm:w-4 sm:h-4 shrink-0" />
+              <span className="text-xs sm:text-sm hidden sm:inline">Jelajah 3D Fullscreen</span>
             </button>
           </div>
 
@@ -221,14 +225,16 @@ export default function App() {
         /* ============================================================== */
         <div className="w-screen h-screen bg-[#D8DEE4] font-sans relative overflow-hidden select-none">
           <main className="w-full h-full relative overflow-hidden">
-            <MosqueCanvas3D
-              hotspots={[]}
-              config={config}
-              isInterior={isInterior}
-              selectedHotspotId={null}
-              onSelectHotspot={() => {}}
-              focusPosition={focusPosition}
-            />
+            <Suspense fallback={<CanvasLoadingFallback label="Membuka Mode Tur 3D Fullscreen..." />}>
+              <MosqueCanvas3D
+                hotspots={[]}
+                config={config}
+                isInterior={isInterior}
+                selectedHotspotId={null}
+                onSelectHotspot={() => {}}
+                focusPosition={focusPosition}
+              />
+            </Suspense>
 
             {/* Controls Overlay with Back to Website Button */}
             <ControlOverlay
@@ -263,33 +269,40 @@ export default function App() {
       {/* GLOBAL MODALS (SIMAS DOSSIER, SHARE, INFO, CONFIG) */}
       {/* ============================================================== */}
 
-      {/* Official SIMAS Kemenag Printable Dossier Modal */}
-      <SimasDossierModal
-        isOpen={isSimasDossierOpen}
-        onClose={() => setIsSimasDossierOpen(false)}
-      />
+      {/* Official SIMAS Kemenag Printable Dossier Modal, Share, Info & Config */}
+      <Suspense fallback={null}>
+        {isSimasDossierOpen && (
+          <SimasDossierModal
+            isOpen={isSimasDossierOpen}
+            onClose={() => setIsSimasDossierOpen(false)}
+          />
+        )}
 
-      {/* Share Modal with Kemenag SIMAS export options */}
-      <ShareModal
-        isOpen={isShareModalOpen}
-        onClose={() => setIsShareModalOpen(false)}
-      />
+        {isShareModalOpen && (
+          <ShareModal
+            isOpen={isShareModalOpen}
+            onClose={() => setIsShareModalOpen(false)}
+          />
+        )}
 
-      {/* Mosque Architecture Info & Specs Modal */}
-      <MosqueInfoModal
-        isOpen={isInfoModalOpen}
-        onClose={() => setIsInfoModalOpen(false)}
-        onOpenShare={() => setIsShareModalOpen(true)}
-      />
+        {isInfoModalOpen && (
+          <MosqueInfoModal
+            isOpen={isInfoModalOpen}
+            onClose={() => setIsInfoModalOpen(false)}
+            onOpenShare={() => setIsShareModalOpen(true)}
+          />
+        )}
 
-      {/* Architecture & 3D Model Configuration Modal */}
-      <MosqueConfigModal
-        isOpen={isConfigModalOpen}
-        config={config}
-        onClose={() => setIsConfigModalOpen(false)}
-        onUpdateConfig={newConfig => setConfig(newConfig)}
-        onResetDefaults={handleResetDefaults}
-      />
+        {isConfigModalOpen && (
+          <MosqueConfigModal
+            isOpen={isConfigModalOpen}
+            config={config}
+            onClose={() => setIsConfigModalOpen(false)}
+            onUpdateConfig={newConfig => setConfig(newConfig)}
+            onResetDefaults={handleResetDefaults}
+          />
+        )}
+      </Suspense>
 
     </div>
   );

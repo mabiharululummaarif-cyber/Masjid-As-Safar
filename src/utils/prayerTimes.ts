@@ -1,35 +1,48 @@
 /**
- * Prayer Times calculation utility tailored for Western Indonesia (WIB) / Kemenag standard
+ * Prayer Times calculation utility tailored for Central Indonesian Time (WITA: UTC+8)
+ * Reference coordinates: Desa Lero, Kecamatan Suppa, Kabupaten Pinrang, Sulawesi Selatan
+ * (Approx. Lat: -3.987°, Lng: 119.623°)
+ * 
+ * Catatan: Jadwal sholat ini merupakan estimasi awal berbasis waktu perkiraan wilayah Kecamatan Suppa, Pinrang (WITA).
+ * Bukan hisab astronomis murni terkalibrasi Kemenag. Titik koordinat GPS presisi masjid masih menunggu konfirmasi lapangan dari pengurus DKM.
  */
 
 export interface PrayerTimeItem {
   id: string;
   name: string;
   arabic: string;
-  timeStr: string; // e.g. "04:38"
+  timeStr: string; // e.g. "04:45 WITA"
   hour: number;
   minute: number;
   isNext?: boolean;
   isCurrent?: boolean;
 }
 
+export const PRAYER_CALCULATION_INFO = {
+  wilayah: 'Desa Lero, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan',
+  zonaWaktu: 'WITA (UTC+8)',
+  referensiLat: -3.987,
+  referensiLng: 119.623,
+  disclaimer: 'Estimasi waktu sholat wilayah Suppa, Pinrang (WITA). Jadwal masih berupa perkiraan awal dan menunggu konfirmasi titik koordinat serta kalibrasi resmi dari Kemenag/BHR.'
+};
+
 export function getTodayPrayerTimes(date: Date = new Date()): PrayerTimeItem[] {
-  // Base calculation standard for Depok/Jakarta (WIB: UTC+7)
-  // Subuh: ~04:36, Terbit: ~05:50, Dzuhur: ~11:58, Ashar: ~15:14, Maghrib: ~18:03, Isya: ~19:14
+  // Day of year
   const dayOfYear = Math.floor(
     (date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24
   );
   
-  // Minor seasonal fluctuation wave (approx +/- 15 mins across year)
-  const seasonOffset = Math.sin((dayOfYear / 365) * 2 * Math.PI) * 12;
+  // Seasonal fluctuation wave for tropical South Sulawesi (~3.9° South)
+  const seasonOffset = Math.sin((dayOfYear / 365) * 2 * Math.PI) * 11;
 
+  // Base prayer times for Suppa / Pinrang (WITA: UTC+8)
   const prayers = [
-    { id: 'subuh', name: 'Subuh', arabic: 'الفجر', h: 4, m: Math.round(36 + seasonOffset * 0.4) },
-    { id: 'terbit', name: 'Terbit / Syuruq', arabic: 'الشروق', h: 5, m: Math.round(52 + seasonOffset * 0.4) },
-    { id: 'dzuhur', name: 'Dzuhur', arabic: 'الظهر', h: 11, m: Math.round(58 + seasonOffset * 0.2) },
-    { id: 'ashar', name: 'Ashar', arabic: 'العصر', h: 15, m: Math.round(14 + seasonOffset * 0.1) },
-    { id: 'maghrib', name: 'Maghrib', arabic: 'المغرب', h: 18, m: Math.round(3 - seasonOffset * 0.3) },
-    { id: 'isya', name: 'Isya\'', arabic: 'العشاء', h: 19, m: Math.round(14 - seasonOffset * 0.3) }
+    { id: 'subuh', name: 'Subuh', arabic: 'الفجر', h: 4, m: Math.round(45 + seasonOffset * 0.35) },
+    { id: 'terbit', name: 'Terbit / Syuruq', arabic: 'الشروق', h: 6, m: Math.round(2 + seasonOffset * 0.35) },
+    { id: 'dzuhur', name: 'Dzuhur', arabic: 'الظهر', h: 12, m: Math.round(8 + seasonOffset * 0.15) },
+    { id: 'ashar', name: 'Ashar', arabic: 'العصر', h: 15, m: Math.round(26 + seasonOffset * 0.1) },
+    { id: 'maghrib', name: 'Maghrib', arabic: 'المغرب', h: 18, m: Math.round(12 - seasonOffset * 0.25) },
+    { id: 'isya', name: 'Isya\'', arabic: 'العشاء', h: 19, m: Math.round(22 - seasonOffset * 0.25) }
   ];
 
   const nowH = date.getHours();
@@ -39,7 +52,6 @@ export function getTodayPrayerTimes(date: Date = new Date()): PrayerTimeItem[] {
   let nextFound = false;
 
   const result: PrayerTimeItem[] = prayers.map(p => {
-    // Normalize minute bounds
     let adjustedH = p.h;
     let adjustedM = p.m;
     if (adjustedM < 0) {
@@ -59,7 +71,7 @@ export function getTodayPrayerTimes(date: Date = new Date()): PrayerTimeItem[] {
       id: p.id,
       name: p.name,
       arabic: p.arabic,
-      timeStr: `${pad(adjustedH)}:${pad(adjustedM)} WIB`,
+      timeStr: `${pad(adjustedH)}:${pad(adjustedM)} WITA`,
       hour: adjustedH,
       minute: adjustedM,
       isNext
@@ -114,8 +126,6 @@ export function getIndonesianDateString(date: Date = new Date()): { masehi: stri
   const monthName = months[date.getMonth()];
   const year = date.getFullYear();
 
-  // Approximate Hijri year calculation for display
-  // 1447 - 1448 H
   const hijriYear = Math.round(1447 + (year - 2025));
 
   return {

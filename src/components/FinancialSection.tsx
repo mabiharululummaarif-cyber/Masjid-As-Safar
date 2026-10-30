@@ -1,215 +1,204 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FINANCIAL_DATA, MASJID_SIMAS_DATA } from '../data/simasData';
 import { 
   HeartHandshake, QrCode, Copy, Check, TrendingUp, 
-  TrendingDown, ShieldCheck, Wallet, ArrowUpRight, CheckCircle2
+  TrendingDown, Wallet, AlertCircle, Landmark
 } from 'lucide-react';
-import QRCode from 'qrcode';
 
 export const FinancialSection: React.FC = () => {
-  const [qrisUrl, setQrisUrl] = useState<string>('');
   const [copiedRekening, setCopiedRekening] = useState(false);
 
-  useEffect(() => {
-    // Generate QRIS string simulation for DKM Masjid As-Safar
-    const qrisMockPayload = `00020101021226600016ID.CO.QRIS.WWW011893600914321098765402150000000000000000303UMI51440014ID.GO.KEMENAG01180141204010001285204581453033605802ID5920DKM MASJID AS-SAFAR6005DEPOK6105164156304ABCD`;
-    QRCode.toDataURL(qrisMockPayload, {
-      width: 220,
-      margin: 1,
-      color: {
-        dark: '#0F2A25',
-        light: '#FFFFFF'
-      }
-    }).then(setQrisUrl).catch(console.error);
-  }, []);
-
-  const formatRupiah = (num: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      maximumFractionDigits: 0
-    }).format(num);
-  };
-
   const handleCopyRekening = () => {
-    navigator.clipboard.writeText(MASJID_SIMAS_DATA.kontak.rekeningInfaq.nomorRekening.replace(/-/g, ''));
+    const textToCopy = `Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang) - Status Rekening Infaq: ${MASJID_SIMAS_DATA.kontak.rekeningInfaq.bank} (${MASJID_SIMAS_DATA.kontak.rekeningInfaq.nomorRekening})`;
+    navigator.clipboard.writeText(textToCopy);
     setCopiedRekening(true);
     setTimeout(() => setCopiedRekening(false), 2500);
   };
 
   return (
-    <section id="infaq" className="py-16 bg-[#0F2A25] text-white">
+    <section id="infaq" className="py-10 sm:py-16 bg-[#0F2A25] text-white border-b border-[#1E4D40]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/80 text-emerald-300 text-xs font-bold border border-emerald-700/80 mb-2">
-            <HeartHandshake className="w-3.5 h-3.5 text-[#D4AF37]" />
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#10382E] text-emerald-200 text-[10px] sm:text-xs font-bold border border-emerald-600/60 mb-2">
+            <HeartHandshake className="w-3.5 h-3.5 text-[#F3D063] shrink-0" />
             <span>AKUNTABILITAS & AMANAH UMMAT</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-serif font-black tracking-tight text-white">
-            Laporan Keuangan & Infaq Digital
+          <h2 className="text-2xl xs:text-3xl sm:text-4xl font-serif font-black tracking-tight text-white drop-shadow-sm">
+            Laporan Keuangan & Saluran Infaq
           </h2>
-          <p className="text-emerald-200/80 text-sm sm:text-base mt-2">
-            Transparansi pengelolaan dana kas DKM Masjid As-Safar yang diaudit berkala serta saluran 
-            infaq non-tunai resmi berbasis QRIS dan Bank Syariah Indonesia.
+          <p className="text-slate-200 text-xs sm:text-base mt-2 leading-relaxed">
+            Prinsip keterbukaan dan transparansi pengelolaan kas DKM Masjid As-Safar, 
+            Desa Lero, Kecamatan Suppa, Kabupaten Pinrang.
           </p>
         </div>
 
-        {/* Top 3 Financial KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+        {/* Top 3 Financial Status Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-10">
           
-          <div className="bg-[#143730] border border-emerald-700/60 rounded-2xl p-5">
-            <div className="flex items-center justify-between text-xs text-emerald-200/80 mb-1">
-              <span className="uppercase tracking-wider font-bold">Total Pemasukan Kas</span>
+          <div className="bg-[#0B211C] border border-[#1E4D40] rounded-2xl p-4 sm:p-5 shadow-md">
+            <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
+              <span className="uppercase tracking-wider font-bold text-[10px] sm:text-xs">Pemasukan Kas</span>
               <TrendingUp className="w-4 h-4 text-emerald-400" />
             </div>
-            <span className="text-2xl font-black font-mono text-emerald-400">
-              {formatRupiah(FINANCIAL_DATA.totalPemasukan)}
+            <span className="text-lg sm:text-2xl font-bold font-sans text-amber-200 block">
+              Menunggu Rilis
             </span>
-            <span className="text-[10px] text-emerald-300/70 block mt-1">
-              Infaq Jum'at, QRIS, & Kotak Tromol
+            <span className="text-[10px] sm:text-[11px] text-slate-300 block mt-1">
+              Dalam proses konfirmasi Bendahara DKM
             </span>
           </div>
 
-          <div className="bg-[#143730] border border-emerald-700/60 rounded-2xl p-5">
-            <div className="flex items-center justify-between text-xs text-emerald-200/80 mb-1">
-              <span className="uppercase tracking-wider font-bold">Total Pengeluaran</span>
+          <div className="bg-[#0B211C] border border-[#1E4D40] rounded-2xl p-4 sm:p-5 shadow-md">
+            <div className="flex items-center justify-between text-xs text-slate-300 mb-1">
+              <span className="uppercase tracking-wider font-bold text-[10px] sm:text-xs">Pengeluaran Operasional</span>
               <TrendingDown className="w-4 h-4 text-rose-400" />
             </div>
-            <span className="text-2xl font-black font-mono text-rose-300">
-              {formatRupiah(FINANCIAL_DATA.totalPengeluaran)}
+            <span className="text-lg sm:text-2xl font-bold font-sans text-amber-200 block">
+              Menunggu Rilis
             </span>
-            <span className="text-[10px] text-rose-200/70 block mt-1">
-              Operasional, Listrik, Bisyarah & Sosial
+            <span className="text-[10px] sm:text-[11px] text-slate-300 block mt-1">
+              Dalam proses konfirmasi Bendahara DKM
             </span>
           </div>
 
-          <div className="bg-gradient-to-br from-[#1C4E44] to-[#12362F] border-2 border-[#D4AF37] rounded-2xl p-5 shadow-xl">
-            <div className="flex items-center justify-between text-xs text-emerald-200/80 mb-1">
-              <span className="uppercase tracking-wider font-bold text-[#D4AF37]">Saldo Kas Berjalan</span>
-              <Wallet className="w-4 h-4 text-[#D4AF37]" />
+          <div className="bg-[#0B211C] bg-gradient-to-br from-[#1C4E44] to-[#12362F] border-2 border-[#D4AF37] rounded-2xl p-4 sm:p-5 shadow-xl">
+            <div className="flex items-center justify-between text-xs text-emerald-200 mb-1">
+              <span className="uppercase tracking-wider font-bold text-[#F3D063] text-[10px] sm:text-xs">Status Kas Berjalan</span>
+              <Wallet className="w-4 h-4 text-[#F3D063]" />
             </div>
-            <span className="text-2xl font-black font-mono text-[#D4AF37]">
-              {formatRupiah(FINANCIAL_DATA.saldoAkhir)}
+            <span className="text-lg sm:text-2xl font-bold font-sans text-[#F3D063] block">
+              Tahap Rekonsiliasi
             </span>
-            <span className="text-[10px] text-emerald-200/80 block mt-1">
-              Status Terverifikasi Bendahara DKM
+            <span className="text-[10px] sm:text-[11px] text-slate-200 block mt-1">
+              Pencatatan kas fisik Desa Lero
             </span>
           </div>
 
         </div>
 
-        {/* 2-Columns: Detailed Breakdown Table vs QRIS Box */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* 2-Columns: Detailed Breakdown Status vs Infaq Channel Box */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
           
           {/* Detailed Ledger breakdown (7 cols) */}
-          <div className="lg:col-span-7 bg-[#0B211C] border border-emerald-800/80 rounded-3xl p-6 sm:p-7 space-y-6">
+          <div className="lg:col-span-7 bg-[#0B211C] border border-[#1E4D40] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-7 space-y-4 sm:space-y-6 shadow-md">
             <div>
-              <h3 className="font-serif font-bold text-lg text-white mb-1">
-                Rincian Arus Kas DKM ({FINANCIAL_DATA.periode})
+              <h3 className="font-serif font-bold text-base sm:text-lg text-white mb-1">
+                Transparansi Pembukuan Kas Masjid
               </h3>
-              <p className="text-xs text-slate-300">
-                Pencatatan terbuka setiap Jum'at sebelum pelaksanaan Sholat Jum'at.
+              <p className="text-xs text-slate-200 leading-relaxed">
+                Laporan kas operasional rutin diumumkan kepada jamaah sebelum pelaksanaan Sholat Jum'at di Desa Lero.
               </p>
             </div>
 
-            {/* Pemasukan */}
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-2">
-                Pemasukan Bulan Berjalan:
+            {/* Status Information Box */}
+            <div className="p-3.5 sm:p-4 rounded-xl bg-[#091F1A] border border-amber-500/50 text-xs text-amber-100 space-y-2">
+              <div className="flex items-center gap-2 font-bold text-amber-200">
+                <AlertCircle className="w-4 h-4 text-amber-300 shrink-0" />
+                <span>Status Data Keuangan: Belum Terpublikasi</span>
+              </div>
+              <p className="leading-relaxed text-[11px] sm:text-xs text-slate-200">
+                {FINANCIAL_DATA.keterangan}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300 block">
+                Struktur Pos Pengelolaan Dana DKM:
               </span>
-              <div className="space-y-1.5 text-xs">
-                {FINANCIAL_DATA.rincianPemasukan.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-2 px-3 rounded-lg bg-white/5 border border-white/5">
-                    <span className="text-slate-200">{item.label}</span>
-                    <span className="font-mono font-bold text-emerald-300">{formatRupiah(item.amount)}</span>
+              <div className="space-y-2 text-xs">
+                <div className="p-3 rounded-xl bg-[#091D18] border border-[#184639] flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-semibold text-white block truncate">• Infaq Jum'at & Tromol Rutin</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Penerimaan jamaah Desa Lero & musafir</span>
                   </div>
-                ))}
+                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola DKM</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#091D18] border border-[#184639] flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-semibold text-white block truncate">• Biaya Operasional & Sarana</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Listrik, air bersih, kebersihan sarana</span>
+                  </div>
+                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola DKM</span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-[#091D18] border border-[#184639] flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <span className="font-semibold text-white block truncate">• ZISWAF & Santunan Sosial</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Penyaluran kemakmuran warga sekitar</span>
+                  </div>
+                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola DKM</span>
+                </div>
               </div>
             </div>
 
-            {/* Pengeluaran */}
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-rose-300 block mb-2">
-                Pengeluaran Operasional & Program:
-              </span>
-              <div className="space-y-1.5 text-xs">
-                {FINANCIAL_DATA.rincianPengeluaran.map((item, idx) => (
-                  <div key={idx} className="flex justify-between items-center py-2 px-3 rounded-lg bg-white/5 border border-white/5">
-                    <span className="text-slate-200">{item.label}</span>
-                    <span className="font-mono font-bold text-rose-200">{formatRupiah(item.amount)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-emerald-800 flex items-center justify-between text-xs text-slate-400">
-              <span>Laporan disahkan oleh Bendahara DKM As-Safar</span>
-              <span>Update: Tiap Pekan</span>
+            <div className="pt-3 border-t border-[#184639] flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-300">
+              <span>Draf estimasi neraca — Menunggu laporan resmi pengurus DKM</span>
+              <span>Wilayah: Desa Lero, Kec. Suppa</span>
             </div>
           </div>
 
           {/* QRIS & Infaq Bank Box (5 cols) */}
-          <div className="lg:col-span-5 bg-gradient-to-b from-[#163E35] to-[#0E2822] border-2 border-[#D4AF37]/60 rounded-3xl p-6 sm:p-7 text-center shadow-2xl space-y-5">
+          <div className="lg:col-span-5 bg-[#0D2620] bg-gradient-to-b from-[#163E35] to-[#0E2822] border-2 border-[#D4AF37] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-7 text-center shadow-2xl space-y-4 sm:space-y-5">
             
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/20 text-[#D4AF37] text-xs font-bold">
-              <QrCode className="w-3.5 h-3.5" />
-              <span>QRIS STANDAR BANK INDONESIA</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/20 text-[#F3D063] text-[10px] sm:text-xs font-bold border border-[#D4AF37]/50">
+              <Landmark className="w-3.5 h-3.5 shrink-0" />
+              <span>SALURAN INFAQ & SEDEKAH</span>
             </div>
 
-            <h3 className="text-xl font-serif font-black text-white">
+            <h3 className="text-lg sm:text-xl font-serif font-black text-white">
               Salurkan Infaq & Sedekah
             </h3>
 
-            {/* QR Code Container */}
-            <div className="bg-white p-4 rounded-2xl w-fit mx-auto shadow-lg border border-slate-300">
-              {qrisUrl && (
-                <img 
-                  src={qrisUrl} 
-                  alt="QRIS DKM Masjid As-Safar" 
-                  className="w-48 h-48 mx-auto"
-                />
-              )}
-              <div className="mt-2 text-center">
-                <span className="text-[11px] font-sans font-bold text-[#0F2A25] uppercase tracking-wider block">
-                  NMID: ID1022091432109
+            {/* QRIS Status Box */}
+            <div className="bg-[#091E1A] p-4 sm:p-6 rounded-2xl border border-[#2D6A4F] text-center space-y-2 sm:space-y-3 shadow-inner">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-[#143B33] border-2 border-amber-400/50 flex items-center justify-center mx-auto text-amber-300 shadow">
+                <QrCode className="w-6 h-6 sm:w-8 sm:h-8" />
+              </div>
+              <div className="space-y-1">
+                <span className="font-bold text-white text-xs sm:text-sm block">
+                  Kanal QRIS DKM
                 </span>
-                <span className="text-[10px] font-sans text-slate-500 block">
-                  DKM MASJID AS-SAFAR
+                <span className="text-xs text-amber-200 font-bold block">
+                  Belum Tersedia — Menunggu Konfirmasi DKM
                 </span>
+                <p className="text-[10px] sm:text-[11px] text-slate-200 leading-relaxed max-w-xs mx-auto font-normal">
+                  Kanal pembayaran QRIS saat ini belum tersedia dan belum aktif. Pembayaran digital akan dipublikasikan setelah ada konfirmasi resmi dari pengurus DKM Masjid As-Safar.
+                </p>
               </div>
             </div>
 
-            {/* Bank Transfer Details */}
-            <div className="bg-black/30 rounded-2xl p-4 text-left border border-white/10 space-y-2">
-              <span className="text-[10px] uppercase font-bold text-emerald-300 tracking-wider block">
-                Transfer Rekening Bank Syariah:
+            {/* Bank Transfer Details Box */}
+            <div className="bg-[#091E1A] rounded-2xl p-3.5 sm:p-4 text-left border border-[#2D6A4F] space-y-2 shadow-inner">
+              <span className="text-[10px] uppercase font-bold text-amber-200 tracking-wider block">
+                Status Rekening Bank DKM:
               </span>
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-bold text-white text-sm block">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <span className="font-bold text-white text-xs sm:text-sm block truncate">
                     {MASJID_SIMAS_DATA.kontak.rekeningInfaq.bank}
                   </span>
-                  <span className="font-mono text-base font-bold text-[#D4AF37]">
+                  <span className="font-mono text-xs sm:text-sm font-bold text-[#F3D063] block truncate">
                     {MASJID_SIMAS_DATA.kontak.rekeningInfaq.nomorRekening}
                   </span>
-                  <span className="text-[10px] text-slate-300 block">
-                    a.n. {MASJID_SIMAS_DATA.kontak.rekeningInfaq.atasNama}
+                  <span className="text-[10px] text-slate-200 block">
+                    {MASJID_SIMAS_DATA.kontak.rekeningInfaq.catatan}
                   </span>
                 </div>
 
                 <button
                   onClick={handleCopyRekening}
-                  className="px-3 py-1.5 bg-[#D4AF37] hover:bg-[#c29e2e] text-[#0F2A25] font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer shadow"
+                  className="min-h-[44px] px-3.5 py-2 bg-[#D4AF37] hover:bg-[#c29e2e] text-[#0F2A25] font-black text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow active:scale-95 shrink-0"
                 >
                   {copiedRekening ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedRekening ? 'Tersalin' : 'Salin'}</span>
+                  <span>{copiedRekening ? 'Tersalin' : 'Salin Info'}</span>
                 </button>
               </div>
             </div>
 
-            <p className="text-[11px] text-emerald-200/70 italic">
+            <p className="text-[10px] sm:text-[11px] text-emerald-200 italic leading-relaxed">
               "Perumpamaan orang yang menginfakkan hartanya di jalan Allah seperti sebutir biji yang menumbuhkan tujuh tangkai..." (QS. Al-Baqarah: 261)
             </p>
 

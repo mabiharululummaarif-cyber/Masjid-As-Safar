@@ -160,7 +160,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Ruangan (Sisi Kanan)',
     lastInspection: '2026-08-20',
-    pic: 'Sekretariat DKM & Ustadz Ahmad',
+    pic: 'Sekretariat DKM',
     note: 'Ruang khusus imam rawatib dan pusat kontrol tata suara masjid.'
   },
   {
@@ -200,7 +200,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit Mimbar Jati',
     lastInspection: '2026-08-30',
-    pic: 'Ustadz Ahmad (Imam Rawatib)',
+    pic: 'Imam Rawatib (Menunggu Konfirmasi)',
     note: 'Mimbar bergeser sedikit ke kiri-tengah arah kiblat, berlatar dinding dekoratif garis bertingkat berlapis lis emas.'
   },
   {
@@ -259,7 +259,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit',
     lastInspection: '2026-08-30',
-    pic: 'Pak Gunawan (Teknisi Audio)',
+    pic: 'Teknisi Audio / Marbot (Menunggu Konfirmasi)',
     note: 'Toa unit 1 terpasang di dinding kiri tengah menyebarkan suara adzan dan kajian ke aula tengah-belakang.'
   },
   {
@@ -279,7 +279,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit',
     lastInspection: '2026-08-30',
-    pic: 'Pak Gunawan (Teknisi Audio)',
+    pic: 'Teknisi Audio / Marbot (Menunggu Konfirmasi)',
     note: 'Toa unit 2 di area depan melayani artikulasi suara imam sholat dan khutbah.'
   },
   {

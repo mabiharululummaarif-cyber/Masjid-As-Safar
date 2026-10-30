@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { MASJID_SIMAS_DATA } from '../data/simasData';
 import { 
-  ShieldCheck, FileText, CheckCircle2, Copy, Check, 
-  ExternalLink, MapPin, Building, Award, Landmark, ScrollText, Compass
+  ShieldCheck, FileText, Copy, Check, 
+  Building, Landmark, ScrollText, AlertCircle
 } from 'lucide-react';
 
 interface SimasSectionProps {
@@ -13,219 +13,202 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
   const [copiedId, setCopiedId] = useState(false);
 
   const handleCopyId = () => {
-    navigator.clipboard.writeText(MASJID_SIMAS_DATA.idSimas);
+    const textToCopy = MASJID_SIMAS_DATA.idSimas === 'Belum Dikonfirmasi'
+      ? `Masjid As-Safar, Desa Lero, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan (Status SIMAS: Belum Dikonfirmasi DKM)`
+      : MASJID_SIMAS_DATA.idSimas;
+    navigator.clipboard.writeText(textToCopy);
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 2500);
   };
 
   return (
-    <section id="simas" className="py-16 bg-[#FAF8F5] text-slate-800">
+    <section id="simas" className="py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold border border-emerald-300 mb-3">
-            <ShieldCheck className="w-4 h-4 text-emerald-700" />
-            <span>KEMENTERIAN AGAMA REPUBLIK INDONESIA</span>
+        <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-100 text-[#0F2A25] text-[10px] sm:text-xs font-bold border border-emerald-300 mb-2 sm:mb-3 shadow-sm">
+            <ShieldCheck className="w-4 h-4 text-emerald-800 shrink-0" />
+            <span>STANDAR DATA SISTEM INFORMASI MASJID (SIMAS)</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-serif font-black text-[#0F2A25] tracking-tight">
-            Profil & Legalitas SIMAS Kemenag
+          <h2 className="text-2xl xs:text-3xl sm:text-4xl font-serif font-black text-[#0F2A25] tracking-tight">
+            Profil & Inventarisasi Legalitas SIMAS
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base mt-2">
-            Data resmi Masjid As-Safar yang telah diverifikasi dan tercatat dalam Sistem Informasi Masjid (SIMAS) 
-            Direktorat Jenderal Bimbingan Masyarakat Islam Kementerian Agama RI.
+          <p className="text-slate-700 text-xs sm:text-base mt-2 leading-relaxed font-normal">
+            Inventarisasi data administratif Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang) untuk 
+            persiapan koordinasi dan pencatatan resmi di KUA Kecamatan Suppa dan Kementerian Agama Kabupaten Pinrang.
           </p>
         </div>
 
-        {/* Highlight Card: SIMAS National Registration */}
-        <div className="bg-gradient-to-r from-[#0F2A25] to-[#18463C] rounded-3xl p-6 sm:p-8 text-white shadow-xl mb-10 border border-emerald-700/50">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+        {/* Highlight Card: SIMAS National Registration Status */}
+        <div className="bg-[#0F2A25] bg-gradient-to-r from-[#0F2A25] to-[#18463C] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-2xl mb-8 sm:mb-10 border-2 border-[#2D6A4F]">
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 sm:gap-6">
             
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 border border-[#D4AF37]/50 flex items-center justify-center shrink-0">
-                <Landmark className="w-8 h-8 sm:w-10 sm:h-10 text-[#D4AF37]" />
+            <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl bg-[#143B33] border-2 border-[#D4AF37] flex items-center justify-center shrink-0 shadow-md">
+                <Landmark className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-[#F3D063]" />
               </div>
-              <div>
-                <span className="text-xs uppercase tracking-widest font-bold text-emerald-300">
-                  ID SIMAS Nasional Kemenag RI
+              <div className="min-w-0">
+                <span className="text-[10px] sm:text-xs uppercase tracking-widest font-bold text-amber-200 block">
+                  Status ID SIMAS Nasional
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-mono font-black text-[#D4AF37] tracking-wider mt-0.5">
+                <h3 className="text-xl sm:text-3xl font-mono font-black text-[#F3D063] tracking-wider mt-0.5 truncate drop-shadow-sm">
                   {MASJID_SIMAS_DATA.idSimas}
                 </h3>
-                <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-emerald-100">
-                  <span className="inline-flex items-center gap-1 bg-emerald-800/80 px-2.5 py-0.5 rounded-full font-semibold">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                    Terverifikasi KUA
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 text-[11px] sm:text-xs text-slate-100">
+                  <span className="inline-flex items-center gap-1 bg-[#0A221C] text-amber-200 px-2.5 py-1 rounded-full font-bold border border-amber-500/50 text-[10px] sm:text-[11px]">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                    <span>Menunggu Konfirmasi DKM / KUA Kec. Suppa</span>
                   </span>
-                  <span>•</span>
-                  <span>Tipologi: <strong>{MASJID_SIMAS_DATA.tipologi}</strong></span>
+                  <span className="hidden sm:inline text-slate-300">•</span>
+                  <span className="hidden sm:inline text-slate-100">Tipologi: <strong className="text-white">{MASJID_SIMAS_DATA.tipologi}</strong></span>
                 </div>
               </div>
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto pt-2 lg:pt-0">
               <button
                 onClick={handleCopyId}
-                className="flex-1 sm:flex-none px-4 py-2.5 bg-white/10 hover:bg-white/20 border border-emerald-400/30 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="min-h-[44px] px-4 py-2.5 bg-[#143B33] hover:bg-[#1A4C40] border border-[#2D6A4F] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shadow-sm"
               >
-                {copiedId ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-[#D4AF37]" />}
-                <span>{copiedId ? 'ID Berhasil Disalin!' : 'Salin Nomor ID'}</span>
+                {copiedId ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4 text-[#F3D063]" />}
+                <span>{copiedId ? 'Keterangan Disalin!' : 'Salin Info Status'}</span>
               </button>
 
               <button
                 onClick={onOpenDossier}
-                className="flex-1 sm:flex-none px-5 py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+                className="min-h-[44px] px-5 py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-xl text-xs flex items-center justify-center gap-2 shadow-xl transition-all cursor-pointer active:scale-95 border border-[#FFEAA7]/40"
               >
-                <FileText className="w-4 h-4" />
-                <span>Lihat Dokumen SIMAS</span>
+                <FileText className="w-4 h-4 shrink-0 text-[#0F2A25]" />
+                <span>Lihat Draf Berkas SIMAS</span>
               </button>
             </div>
 
           </div>
         </div>
 
-        {/* 4 Core Pillars of SIMAS Kemenag */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* 4 Core Pillars of Data Inventarisasi */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
           
-          {/* Card 1: Tipologi & Kapasitas */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center mb-4">
+          {/* Card 1: Tipologi & Bangunan */}
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center mb-3 sm:mb-4 border border-emerald-300">
               <Building className="w-5 h-5" />
             </div>
             <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-2">
               Tipologi & Bangunan
             </h4>
-            <ul className="text-xs space-y-2 text-slate-600">
+            <ul className="text-xs space-y-2 text-slate-700">
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Tipologi:</span>
-                <span className="font-semibold text-slate-800 text-right">Masjid Jami' / Publik</span>
+                <span className="font-bold text-slate-900 text-right">Masjid Jami' (Draf)</span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Luas Bangunan:</span>
-                <span className="font-semibold text-slate-800">484 m² (22m × 22m)</span>
+                <span className="font-bold text-slate-900">484 m² (Model 3D)</span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Luas Tanah:</span>
-                <span className="font-semibold text-slate-800">1.250 m²</span>
+                <span className="font-bold text-amber-800">Perlu Konfirmasi</span>
               </li>
               <li className="flex justify-between">
-                <span>Kapasitas:</span>
-                <span className="font-semibold text-emerald-800">± 350 Jamaah</span>
+                <span>Estimasi Kapasitas:</span>
+                <span className="font-bold text-emerald-900">± 350 Jamaah (Model 3D)</span>
               </li>
             </ul>
           </div>
 
           {/* Card 2: Legalitas Wakaf */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center mb-4">
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center mb-3 sm:mb-4 border border-amber-300">
               <ScrollText className="w-5 h-5" />
             </div>
             <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-2">
-              Legalitas Tanah Wakaf
+              Status Tanah & Wakaf
             </h4>
-            <ul className="text-xs space-y-2 text-slate-600">
+            <ul className="text-xs space-y-2 text-slate-700">
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Status:</span>
-                <span className="font-bold text-emerald-700">Wakaf Bersertifikat</span>
+                <span>Status Tanah:</span>
+                <span className="font-bold text-amber-800">Menunggu Bukti</span>
               </li>
               <li className="flex flex-col border-b border-slate-100 pb-1.5">
-                <span className="text-[10px] text-slate-400">No. Sertifikat Wakaf:</span>
-                <span className="font-mono font-semibold text-slate-800 text-[11px] truncate">
-                  {MASJID_SIMAS_DATA.nomorSertifikatWakaf}
+                <span className="text-[10px] text-slate-500">No. Sertifikat Wakaf:</span>
+                <span className="font-mono font-bold text-slate-800 text-[11px] truncate">
+                  Belum Dikonfirmasi
                 </span>
               </li>
               <li className="flex flex-col border-b border-slate-100 pb-1.5">
-                <span className="text-[10px] text-slate-400">Akta Ikrar Wakaf (AIW):</span>
-                <span className="font-mono font-semibold text-slate-800 text-[11px] truncate">
-                  {MASJID_SIMAS_DATA.nomorAIW}
+                <span className="text-[10px] text-slate-500">Akta Ikrar Wakaf (AIW):</span>
+                <span className="font-mono font-bold text-slate-800 text-[11px] truncate">
+                  Belum Dikonfirmasi
                 </span>
               </li>
               <li className="flex justify-between">
-                <span>Nadzir:</span>
-                <span className="font-semibold text-slate-800">BWI / DKM Resmi</span>
+                <span>Status Nadzir:</span>
+                <span className="font-bold text-slate-800">DKM Masjid As-Safar</span>
               </li>
             </ul>
           </div>
 
-          {/* Card 3: Geospasial & Kiblat */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-800 flex items-center justify-center mb-4">
-              <Compass className="w-5 h-5" />
+          {/* Card 3: Legalitas DKM & SK */}
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center mb-3 sm:mb-4 border border-emerald-300">
+              <ShieldCheck className="w-5 h-5" />
             </div>
             <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-2">
-              Arah Kiblat & Geospasial
+              Legalitas & SK DKM
             </h4>
-            <ul className="text-xs space-y-2 text-slate-600">
+            <ul className="text-xs space-y-2 text-slate-700">
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Azimuth Kiblat:</span>
-                <span className="font-bold text-emerald-700">295° 12' Barat Laut</span>
+                <span>SK DKM KUA:</span>
+                <span className="font-bold text-amber-800">Menunggu Rilis</span>
               </li>
-              <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Pengukur:</span>
-                <span className="font-semibold text-slate-800">BHR Kemenag RI</span>
-              </li>
-              <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Latitude:</span>
-                <span className="font-mono font-semibold text-slate-800">{MASJID_SIMAS_DATA.koordinat.lat}</span>
-              </li>
-              <li className="flex justify-between">
-                <span>Longitude:</span>
-                <span className="font-mono font-semibold text-slate-800">{MASJID_SIMAS_DATA.koordinat.lng}</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Card 4: SK DKM Resmi */}
-          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-800 flex items-center justify-center mb-4">
-              <Award className="w-5 h-5" />
-            </div>
-            <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-2">
-              SK Pengukuhan DKM
-            </h4>
-            <ul className="text-xs space-y-2 text-slate-600">
               <li className="flex flex-col border-b border-slate-100 pb-1.5">
-                <span className="text-[10px] text-slate-400">Nomor SK KUA:</span>
-                <span className="font-mono font-semibold text-slate-800 text-[11px] truncate">
-                  {MASJID_SIMAS_DATA.nomorSkDkm}
+                <span className="text-[10px] text-slate-500">Penerbit SK:</span>
+                <span className="font-bold text-slate-900 text-[11px]">
+                  KUA Kec. Suppa
                 </span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Masa Bakti:</span>
-                <span className="font-semibold text-slate-800">2024 - 2027</span>
-              </li>
-              <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Penerbit SK:</span>
-                <span className="font-semibold text-slate-800">KUA Kemenag</span>
+                <span>Tahun Berdiri:</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.tahunBerdiri}</span>
               </li>
               <li className="flex justify-between">
-                <span>Ketua DKM:</span>
-                <span className="font-semibold text-slate-800">H. M. Ridwan, S.T.</span>
+                <span>Rekomendasi SIMAS:</span>
+                <span className="font-bold text-amber-800">Draf Persiapan</span>
               </li>
             </ul>
           </div>
 
-        </div>
-
-        {/* Note / Accreditation footer */}
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-950">
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
-            <span>
-              <strong>Pangkalan Data Nasional:</strong> Seluruh dokumen fisik dan sertifikat asli tersimpan di arsip Sekretariat DKM Masjid As-Safar dan tercatat pada Kantor Urusan Agama (KUA) setempat.
-            </span>
+          {/* Card 4: Geografis & Wilayah */}
+          <div className="bg-white rounded-2xl p-4 sm:p-6 border-2 border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 flex items-center justify-center mb-3 sm:mb-4 border border-blue-300">
+              <Landmark className="w-5 h-5" />
+            </div>
+            <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-2">
+              Wilayah Administratif
+            </h4>
+            <ul className="text-xs space-y-2 text-slate-700">
+              <li className="flex justify-between border-b border-slate-100 pb-1.5">
+                <span>Desa / Kelurahan:</span>
+                <span className="font-bold text-slate-900">Desa Lero</span>
+              </li>
+              <li className="flex justify-between border-b border-slate-100 pb-1.5">
+                <span>Kecamatan:</span>
+                <span className="font-bold text-slate-900">Suppa</span>
+              </li>
+              <li className="flex justify-between border-b border-slate-100 pb-1.5">
+                <span>Kabupaten:</span>
+                <span className="font-bold text-slate-900">Pinrang</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Zona Waktu:</span>
+                <span className="font-bold text-slate-900">WITA (UTC+8)</span>
+              </li>
+            </ul>
           </div>
 
-          <a 
-            href="https://simas.kemenag.go.id" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg transition-colors shrink-0"
-          >
-            <span>Kunjungi SIMAS Kemenag Pusat</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
         </div>
 
       </div>

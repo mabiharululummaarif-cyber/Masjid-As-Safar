@@ -1,77 +1,115 @@
+export type DataStatus = 'TERKONFIRMASI' | 'BELUM_DIKONFIRMASI' | 'BELUM_TERSEDIA';
+
 export interface SimasProfile {
   idSimas: string;
+  statusPendaftaranSimas: DataStatus;
+  statusSimasLabel: string;
   namaMasjid: string;
   tipologi: string;
+  tipologiStatus: DataStatus;
   tahunBerdiri: string;
+  tahunBerdiriStatus: DataStatus;
   statusTanah: string;
+  statusTanahVerification: DataStatus;
   nomorSertifikatWakaf: string;
   nomorAIW: string;
   nadzirWakaf: string;
-  luasTanah: number; // m²
-  luasBangunan: number; // m²
+  legalitasStatus: DataStatus;
+  luasTanah: number | null;
+  luasTanahDesc: string;
+  luasBangunan: number | null;
+  luasBangunanDesc: string;
   kapasitasJamaah: number;
+  kapasitasDesc: string;
   alamatLengkap: string;
-  kelurahan: string;
+  desa: string;
+  kelurahan: string; // kompatibilitas
   kecamatan: string;
   kabupatenKota: string;
   provinsi: string;
   kodePos: string;
+  zonaWaktu: 'WITA' | 'UTC+8';
   koordinat: {
     lat: number;
     lng: number;
+    isConfirmed: boolean;
+    status: DataStatus;
+    catatan: string;
     azimuthKiblat: number; // derajat
     kiblatDesc: string;
   };
   nomorSkDkm: string;
   tanggalSkDkm: string;
   instansiPenerbitSk: string;
+  skDkmStatus: DataStatus;
   kontak: {
     email: string;
     telepon: string;
     whatsapp: string;
+    statusKontak: DataStatus;
     rekeningInfaq: {
       bank: string;
       nomorRekening: string;
       atasNama: string;
+      status: DataStatus;
+      catatan: string;
     };
   };
 }
 
 export const MASJID_SIMAS_DATA: SimasProfile = {
-  idSimas: '01.4.12.04.01.000128',
+  idSimas: 'Belum Dikonfirmasi',
+  statusPendaftaranSimas: 'BELUM_DIKONFIRMASI',
+  statusSimasLabel: 'Menunggu Konfirmasi DKM / Belum Terdata Resmi',
   namaMasjid: 'Masjid As-Safar',
-  tipologi: "Masjid Jami' / Tempat Publik (Transit Musafir & Warga)",
-  tahunBerdiri: '2021 (Pengembangan Arsitektur 2026)',
-  statusTanah: 'Wakaf Bersertifikat (Kementerian Agama RI)',
-  nomorSertifikatWakaf: 'W.3/04.12/BPN-KEMENAG/2022',
-  nomorAIW: 'W.2/AIW/08/XI/2021',
-  nadzirWakaf: 'Badan Wakaf Indonesia (BWI) Perwakilan Daerah / DKM As-Safar',
-  luasTanah: 1250,
+  tipologi: "Masjid Jami' (Perlu Konfirmasi DKM)",
+  tipologiStatus: 'BELUM_DIKONFIRMASI',
+  tahunBerdiri: 'Perlu Konfirmasi DKM',
+  tahunBerdiriStatus: 'BELUM_DIKONFIRMASI',
+  statusTanah: 'Tanah Wakaf (Menunggu Berkas Bukti)',
+  statusTanahVerification: 'BELUM_DIKONFIRMASI',
+  nomorSertifikatWakaf: 'Belum Dikonfirmasi',
+  nomorAIW: 'Belum Dikonfirmasi',
+  nadzirWakaf: 'Perlu Konfirmasi Pengurus DKM',
+  legalitasStatus: 'BELUM_DIKONFIRMASI',
+  luasTanah: null,
+  luasTanahDesc: 'Perlu Konfirmasi Pengukuran DKM / BPN',
   luasBangunan: 484,
+  luasBangunanDesc: '484 m² (Dimensi Model 3D: 22m × 22m — Perlu Konfirmasi Lapangan)',
   kapasitasJamaah: 350,
-  alamatLengkap: 'Kawasan Transit & Permukiman Terpadu As-Safar, Koridor Lintas Utama',
-  kelurahan: 'Sukamaju',
-  kecamatan: 'Cilodong',
-  kabupatenKota: 'Kota Depok',
-  provinsi: 'Jawa Barat',
-  kodePos: '16415',
+  kapasitasDesc: 'Estimasi Model Arsitektur 3D (±350 Jamaah)',
+  alamatLengkap: 'Desa Lero, Kecamatan Suppa, Kabupaten Pinrang, Sulawesi Selatan',
+  desa: 'Lero',
+  kelurahan: 'Desa Lero',
+  kecamatan: 'Suppa',
+  kabupatenKota: 'Kabupaten Pinrang',
+  provinsi: 'Sulawesi Selatan',
+  kodePos: '91272',
+  zonaWaktu: 'WITA',
   koordinat: {
-    lat: -6.4184,
-    lng: 106.8432,
-    azimuthKiblat: 295.2,
-    kiblatDesc: '295° 12\' dari Utara searah jarum jam (25° 12\' dari Barat ke Utara) — Terverifikasi Badan Hisab Rukyat Kemenag'
+    lat: -3.987,
+    lng: 119.623,
+    isConfirmed: false,
+    status: 'BELUM_DIKONFIRMASI',
+    catatan: 'Koordinat estimasi wilayah Desa Lero, Kec. Suppa (WITA) untuk hisab awal. Titik GPS presisi masjid belum dikonfirmasi.',
+    azimuthKiblat: 292.5,
+    kiblatDesc: 'Estimasi wilayah Suppa ~292.5° (22.5° Barat ke Utara) — Memerlukan pengukuran resmi lapangan oleh BHR Kemenag Pinrang'
   },
-  nomorSkDkm: '084/KUA.10.04/BA.01.1/SK-DKM/2024',
-  tanggalSkDkm: '14 Januari 2024 (Masa Bakti 2024-2027)',
-  instansiPenerbitSk: 'Kantor Urusan Agama (KUA) Kementerian Agama RI',
+  nomorSkDkm: 'Belum Dikonfirmasi',
+  tanggalSkDkm: 'Perlu Konfirmasi DKM / KUA',
+  instansiPenerbitSk: 'KUA Kecamatan Suppa (Menunggu Konfirmasi SK)',
+  skDkmStatus: 'BELUM_DIKONFIRMASI',
   kontak: {
-    email: 'mabiharululummaarif321@gmail.com',
-    telepon: '+62 812-3456-7890',
-    whatsapp: '6281234567890',
+    email: '',
+    telepon: 'Dalam Konfirmasi DKM',
+    whatsapp: '',
+    statusKontak: 'BELUM_DIKONFIRMASI',
     rekeningInfaq: {
-      bank: 'Bank Syariah Indonesia (BSI)',
-      nomorRekening: '719-8234-901',
-      atasNama: 'DKM MASJID AS-SAFAR'
+      bank: 'Rekening DKM Sedang Dikonfirmasi',
+      nomorRekening: 'Belum Tersedia',
+      atasNama: 'DKM Masjid As-Safar',
+      status: 'BELUM_TERSEDIA',
+      catatan: 'Nomor rekening resmi belum tersedia. Harap hubungi pengurus DKM secara langsung.'
     }
   }
 };
@@ -81,21 +119,67 @@ export interface DkmMember {
   nama: string;
   gelar?: string;
   bidang: string;
-  kontak?: string;
+  status: DataStatus;
+  statusDesc: string;
 }
 
 export const DKM_MEMBERS: DkmMember[] = [
-  { jabatan: 'Penasihat / Pembina', nama: 'K.H. Ahmad Dahlan M.A.', gelar: 'K.H.', bidang: 'Pengarah & Syariah' },
-  { jabatan: 'Ketua DKM', nama: 'H. Muhammad Ridwan, S.T., M.Si.', gelar: 'H.', bidang: 'Pimpinan Harian' },
-  { jabatan: 'Wakil Ketua DKM', nama: 'Ust. H. Syamsul Arifin, Lc.', gelar: 'Ust.', bidang: 'Operasional & Peribadatan' },
-  { jabatan: 'Sekretaris', nama: 'Bambang Triyono, S.Kom.', bidang: 'Administrasi & Data SIMAS' },
-  { jabatan: 'Bendahara', nama: 'H. Sudirman Santoso, S.E., Ak.', gelar: 'H.', bidang: 'Keuangan & Infaq' },
-  { jabatan: 'Imam Rawatib Utama', nama: 'Ust. Muhammad Hafizh Al-Hafizh', gelar: 'Al-Hafizh', bidang: 'Peribadatan' },
-  { jabatan: 'Imam Rawatib 2', nama: 'Ust. Abdurrahman Wahid, S.Pd.I.', bidang: 'Peribadatan' },
-  { jabatan: 'Muadzin & Marbot Utama', nama: 'Ahmad Fauzi & Tim Ri\'ayah', bidang: 'Sarana & Perawatan' },
-  { jabatan: 'Ketua Bidang Idarah', nama: 'Ir. Hendra Gunawan', bidang: 'Legalitas Wakaf, Tata Kelola & Aset' },
-  { jabatan: 'Ketua Bidang Imarah', nama: 'Ust. Fajar Ramadhan, M.Ag.', bidang: 'Kajian, PHBI, Remaja Masjid & ZISWAF' },
-  { jabatan: 'Ketua Bidang Ri\'ayah', nama: 'Agus Setiawan, S.T.', bidang: 'Pemeliharaan Fisik, Sanitasi & Akustik' }
+  { 
+    jabatan: 'Penasihat / Pembina', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Pengarah & Syariah',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Ketua DKM', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Pimpinan Harian & Tata Kelola',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Wakil Ketua DKM', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Operasional & Peribadatan',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Sekretaris', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Administrasi & Data SIMAS',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Bendahara', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Keuangan & Infaq Jamaah',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Imam Rawatib', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Peribadatan & Imam Sholat',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Bidang Ri\'ayah (Pemeliharaan)', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Pemeliharaan Fisik & Kebersihan',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  },
+  { 
+    jabatan: 'Bidang Imarah (Kemakmuran)', 
+    nama: 'Dalam Konfirmasi DKM', 
+    bidang: 'Kajian, Dakwah & Remaja Masjid',
+    status: 'BELUM_DIKONFIRMASI',
+    statusDesc: 'Menunggu konfirmasi nama pengurus dari DKM'
+  }
 ];
 
 export interface AgendaItem {
@@ -106,6 +190,7 @@ export interface AgendaItem {
   narasumber: string;
   deskripsi: string;
   kategori: 'Kajian' | 'Jumat' | 'PHBI' | 'Sosial';
+  status: DataStatus;
 }
 
 export const WEEKLY_AGENDA: AgendaItem[] = [
@@ -113,42 +198,39 @@ export const WEEKLY_AGENDA: AgendaItem[] = [
     id: 'ag-1',
     judul: 'Sholat Jum\'at Berjamaah',
     hari: 'Setiap Hari Jum\'at',
-    waktu: '11:45 WIB - Selesai',
-    narasumber: 'Khotib: Ust. Dr. H. Faisal Anwar, M.A. | Imam: Ust. Muhammad Hafizh Al-Hafizh',
-    deskripsi: 'Khutbah dan Sholat Jum\'at berjamaah. Disediakan jamuan makan siang prasmanan berkah Jum\'at untuk jamaah dan musafir.',
-    kategori: 'Jumat'
+    waktu: '12:08 WITA - Selesai',
+    narasumber: 'Khotib & Imam (Jadwal Pengurus DKM)',
+    deskripsi: 'Khutbah dan Sholat Jum\'at berjamaah di Ruang Utama Masjid As-Safar, Desa Lero, Kec. Suppa.',
+    kategori: 'Jumat',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'ag-2',
-    judul: 'Kajian Tafsir Al-Qur\'an Tematik',
-    hari: 'Ahad Pagi (Pekan 1 & 3)',
-    waktu: 'Ba\'da Subuh - 07:00 WIB',
-    narasumber: 'K.H. Ahmad Dahlan M.A.',
-    deskripsi: 'Kajian mendalam tafsir ayat-ayat pilihan, panduan ibadah harian, dilanjutkan sarapan bersama jamaah.',
-    kategori: 'Kajian'
+    judul: 'Kajian Rutin & Taklim',
+    hari: 'Dalam Konfirmasi Jadwal DKM',
+    waktu: 'Ba\'da Maghrib - Isya WITA',
+    narasumber: 'Asatidz Setempat (Menunggu Konfirmasi)',
+    deskripsi: 'Program pengajian dan taklim jamaah warga Desa Lero.',
+    kategori: 'Kajian',
+    status: 'BELUM_DIKONFIRMASI'
   },
   {
     id: 'ag-3',
-    judul: 'Kajian Fiqih Ibadah & Muamalah',
-    hari: 'Rabu Malam',
-    waktu: 'Ba\'da Maghrib - Isya',
-    narasumber: 'Ust. H. Syamsul Arifin, Lc.',
-    deskripsi: 'Membedah kitab fiqih praktis safar, sholat jama\' qashar, thaharah, dan etika bermuamalah syariah.',
-    kategori: 'Kajian'
-  },
-  {
-    id: 'ag-4',
-    judul: 'Layanan ZISWAF & Konsultasi Syariah',
-    hari: 'Senin - Ahad (Setiap Hari)',
-    waktu: '08:00 - 20:00 WIB',
-    narasumber: 'Lembaga Amil Zakat DKM As-Safar',
-    deskripsi: 'Penerimaan dan penyaluran Zakat Fitrah, Zakat Maal, Infaq, Shodaqoh, dan konsultasi hisab zakat.',
-    kategori: 'Sosial'
+    judul: 'Pelayanan Infaq & Sosial Keumatan',
+    hari: 'Setiap Hari',
+    waktu: '08:00 - 20:00 WITA',
+    narasumber: 'Pengurus DKM Masjid As-Safar',
+    deskripsi: 'Penerimaan dan pengelolaan infaq serta sedekah untuk kemakmuran masjid di Desa Lero.',
+    kategori: 'Sosial',
+    status: 'TERKONFIRMASI'
   }
 ];
 
 export interface FinancialSummary {
+  isPublished: boolean;
+  status: DataStatus;
   periode: string;
+  keterangan: string;
   saldoAwal: number;
   totalPemasukan: number;
   totalPengeluaran: number;
@@ -158,89 +240,90 @@ export interface FinancialSummary {
 }
 
 export const FINANCIAL_DATA: FinancialSummary = {
-  periode: 'Bulan Berjalan (Update Terverifikasi DKM)',
-  saldoAwal: 42850000,
-  totalPemasukan: 28400000,
-  totalPengeluaran: 19150000,
-  saldoAkhir: 52100000,
-  rincianPemasukan: [
-    { label: 'Infaq Kotak Jum\'at Berkah', amount: 14200000 },
-    { label: 'Infaq Digital & QRIS Jamaah / Musafir', amount: 8750000 },
-    { label: 'Donasi Khusus Sarana & Kebersihan', amount: 3500000 },
-    { label: 'Infaq Kotak Parkir Sukarela', amount: 1950000 }
-  ],
-  rincianPengeluaran: [
-    { label: 'Listrik (PLN), Air Bersih, & Internet Masjid', amount: 4850000 },
-    { label: 'Bisyarah / Honor Marbot, Muadzin & Imam Rawatib', amount: 6500000 },
-    { label: 'Operasional Kebersihan, Sabun & Sanitasi Toilet', amount: 2200000 },
-    { label: 'Program Makan Berkah Jum\'at (Jum\'at Berkah)', amount: 3600000 },
-    { label: 'Pemeliharaan Sound System & AC / Kipas', amount: 2000000 }
-  ]
+  isPublished: false,
+  status: 'BELUM_TERSEDIA',
+  periode: 'Menunggu Konfirmasi Laporan Resmi DKM',
+  keterangan: 'Laporan keuangan kas riil belum dipublikasikan. Angka saldo dan mutasi kas resmi akan ditampilkan setelah diverifikasi dan diserahkan oleh Bendahara DKM Masjid As-Safar.',
+  saldoAwal: 0,
+  totalPemasukan: 0,
+  totalPengeluaran: 0,
+  saldoAkhir: 0,
+  rincianPemasukan: [],
+  rincianPengeluaran: []
 };
 
 export interface MosqueFacility {
   id: string;
   name: string;
   spec: string;
-  condition: 'Sangat Baik' | 'Baik' | 'Optimal';
+  condition: 'Optimal' | 'Rancangan 3D' | 'Tersedia';
   desc: string;
+  status: DataStatus;
 }
 
 export const MOSQUE_FACILITIES: MosqueFacility[] = [
   {
     id: 'f1',
-    name: 'Ruang Sholat Utama Berpendingin',
-    spec: 'Kapasitas 350 jamaah, Karpet tebal standar Turki, Akustik minim gema',
-    condition: 'Sangat Baik',
-    desc: 'Ruang utama ibadah dengan karpet empuk, saf bertanda rapi, sirkulasi udara sejuk, dan pencahayaan alami melalui jendela transom.'
+    name: 'Ruang Sholat Utama',
+    spec: 'Kapasitas ±350 jamaah, sirkulasi udara alami dan saf teratur',
+    condition: 'Rancangan 3D',
+    desc: 'Ruang ibadah utama dengan bukaan ventilasi silang, pencahayaan alami, dan saf berarah kiblat teratur.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f2',
-    name: 'Mihrab Geometris & Mimbar Kayu Jati',
-    spec: 'Marmer putih Carrara, Kaligrafi emas timbul, Akustik imam presisi',
-    condition: 'Sangat Baik',
-    desc: 'Pusat kiblat elegan dengan relung lengkung marmer, pencahayaan LED warm white tersembunyi, dan mimbar kayu jati ukir kaligrafi.'
+    name: 'Mihrab & Mimbar Khatib',
+    spec: 'Aksen marmer putih, ornamen geometris dan mimbar kayu',
+    condition: 'Rancangan 3D',
+    desc: 'Fokus arah kiblat dengan relung lengkung elegan dan pencahayaan aksen untuk kekhusyukan ibadah.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f3',
-    name: 'Sirkulasi Pintu Kaca Ayun & Ramah Akses',
-    spec: '4 set pintu kaca ayun double-swing + ramp disabilitas & lansia',
-    condition: 'Sangat Baik',
-    desc: 'Memudahkan akses jamaah lansia, kursi roda, dan kelancaran sirkulasi keluar-masuk saat bubaran sholat Jum\'at.'
+    name: 'Pintu Kaca Ayun & Jalur Akses',
+    spec: '16 unit pintu kaca bukaan ganda untuk kelancaran sirkulasi',
+    condition: 'Rancangan 3D',
+    desc: 'Menghubungkan ruang utama dengan serambi luar, memudahkan akses jamaah dan sirkulasi udara.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f4',
-    name: 'Tempat Wudhu & Toilet Higienis',
-    spec: '24 kran wudhu duduk/berdiri, terpisah total ikhwan & akhwat',
-    condition: 'Optimal',
-    desc: 'Desain lantai anti-slip, pengering tangan, sabun wudhu antiseptik, dan pasokan air bersih bertekanan stabil.'
+    name: 'Area Wudhu & Sanitasi',
+    spec: 'Fasilitas wudhu dan toilet terpisah ikhwan dan akhwat',
+    condition: 'Tersedia',
+    desc: 'Area bersuci higienis dengan pasokan air bersih bagi jamaah warga dan musafir.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f5',
-    name: 'Area Transit & Istirahat Musafir',
-    spec: 'Buka 24 Jam dengan CCTV keamanan & pojok charging HP',
-    condition: 'Baik',
-    desc: 'Disediakan selasar teduh dan dispenser air minum gratis bagi musafir yang singgah untuk sholat dan rehat sejenak.'
+    name: 'Serambi Transit Musafir',
+    spec: 'Selasar teduh untuk istirahat sejenak musafir',
+    condition: 'Tersedia',
+    desc: 'Area beratap teduh yang dapat digunakan musafir untuk beristirahat saat singgah melaksanakan sholat.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f6',
-    name: 'Sound System & Menara Adzan Presisi',
-    spec: '2 unit Horn Toa outdoor menara + 8 speaker indoor terkalibrasi',
-    condition: 'Sangat Baik',
-    desc: 'Penyampaian adzan terdengar jernih ke lingkungan sekitar dan bacaan sholat di dalam masjid terdengar lembut dan jelas tanpa distorsi.'
+    name: 'Tata Suara & Pengeras Suara',
+    spec: 'Sistem pengeras suara adzan dan mikrofon ibadah',
+    condition: 'Optimal',
+    desc: 'Penyampaian adzan dan bacaan imam agar terdengar jelas dan tertib di lingkungan sekitar.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f7',
-    name: 'Kubah Bertingkat Berornamen Geometris',
-    spec: 'Rangka baja ringan modern dengan ventilasi termal alami',
-    condition: 'Sangat Baik',
-    desc: 'Menghadirkan keindahan arsitektur Islam nusantara modern sekaligus berfungsi melepas panas ruangan ke udara bebas.'
+    name: 'Kubah Bertingkat Geometris',
+    spec: 'Struktur kubah modern dengan ventilasi pelepasan panas',
+    condition: 'Rancangan 3D',
+    desc: 'Mencerminkan arsitektur Islam nusantara yang adaptif terhadap iklim tropis pesisir.',
+    status: 'TERKONFIRMASI'
   },
   {
     id: 'f8',
-    name: 'Layanan ZISWAF & Kotak Infaq QRIS',
-    spec: 'Standar Bank Indonesia (QRIS) & pencatatan keuangan akuntabel',
-    condition: 'Optimal',
-    desc: 'Memfasilitasi sedekah non-tunai yang aman, transparan, dan tercatat otomatis ke rekening resmi kas masjid.'
+    name: 'Kotak Infaq & Saluran Shadaqah',
+    spec: 'Penerimaan infaq tunai & persiapan kanal non-tunai',
+    condition: 'Tersedia',
+    desc: 'Fasilitas kotak infaq terkelola untuk operasional dan pemeliharaan sarana ibadah.',
+    status: 'TERKONFIRMASI'
   }
 ];

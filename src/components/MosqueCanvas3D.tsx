@@ -2271,3 +2271,5 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
     </div>
   );
 };
+
+export default MosqueCanvas3D;

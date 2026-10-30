@@ -318,14 +318,14 @@ export const MosqueConfigModal: React.FC<MosqueConfigModalProps> = ({
                 onResetDefaults();
               }
             }}
-            className="flex items-center gap-1 text-[11px] text-[#E8DCC0]/60 hover:text-[#C9A227] transition-colors cursor-pointer"
+            className="min-h-[40px] flex items-center gap-1 text-[11px] text-[#E8DCC0]/60 hover:text-[#C9A227] transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset Default
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-[#C9A227] hover:bg-[#dbb334] text-[#1B2420] rounded-lg text-xs font-bold shadow-md transition-all cursor-pointer"
+            className="min-h-[44px] px-5 py-2.5 bg-[#C9A227] hover:bg-[#dbb334] text-[#1B2420] rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer active:scale-95"
           >
             Terapkan & Tutup
           </button>
