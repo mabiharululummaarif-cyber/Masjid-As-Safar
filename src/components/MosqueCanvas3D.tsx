@@ -121,6 +121,7 @@ export const MosqueCanvas3D: React.FC<MosqueCanvas3DProps> = ({
       powerPreference: 'high-performance',
       precision: 'highp',
       stencil: false,
+      preserveDrawingBuffer: true,
     });
     rendererRef.current = renderer;
     renderer.setSize(width, height);

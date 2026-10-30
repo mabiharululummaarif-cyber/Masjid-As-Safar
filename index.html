@@ -3,16 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#173b31" />
-    <title>Masjid As-Safar Biharul Ulum Ma'arif</title>
-    <meta name="description" content="Profil Masjid As-Safar Biharul Ulum Ma'arif — ruang ibadah, ilmu, dan kebersamaan." />
-    <meta property="og:title" content="Masjid As-Safar Biharul Ulum Ma'arif" />
-    <meta property="og:description" content="Ruang ibadah, ilmu, dan kebersamaan." />
+    <title>Website Resmi Masjid As-Safar — Terdata SIMAS Kemenag RI & Tur 3D</title>
+    
+    <!-- SEO & Metadata -->
+    <meta name="description" content="Website Resmi Masjid As-Safar. Terdaftar resmi di SIMAS Kementerian Agama RI (ID: 01.4.12.04.01.000128). Menampilkan profil legalitas wakaf, jadwal sholat hisab Kemenag, struktur DKM, transparansi kas, serta visualisasi arsitektur 3D interaktif 360°." />
+    <meta name="keywords" content="Masjid As-Safar, SIMAS Kemenag, Sistem Informasi Masjid, Kemenag RI, jadwal sholat, DKM masjid, arsitektur masjid, visualisasi 3D masjid, wakaf masjid, kiblat Kemenag" />
+    <meta name="author" content="DKM Masjid As-Safar & SIMAS Kemenag" />
+    <meta name="theme-color" content="#0F2A25" />
+
+    <!-- Open Graph / WhatsApp / Facebook Share -->
+    <meta property="og:title" content="Website Resmi Masjid As-Safar — Terdata SIMAS Kemenag RI" />
+    <meta property="og:description" content="Portal resmi Masjid As-Safar (ID SIMAS: 01.4.12.04.01.000128). Akses jadwal sholat real-time, dokumen legalitas wakaf Kemenag, transparansi kas, dan tur arsitektur virtual 3D 360°." />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Masjid As-Safar Resmi" />
+    <meta property="og:locale" content="id_ID" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Website Resmi Masjid As-Safar — Terdata SIMAS Kemenag RI" />
+    <meta name="twitter:description" content="Portal resmi Masjid As-Safar (ID SIMAS: 01.4.12.04.01.000128). Profil legalitas wakaf, jadwal sholat, dan tur arsitektur 3D interaktif." />
+
+    <!-- Custom Islamic Mosque Dome Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%231B4332'/%3E%3Cpath d='M50 15 C48 24 32 36 32 54 C32 68 40 76 50 76 C60 76 68 68 68 54 C68 36 52 24 50 15 Z' fill='%23D4AF37'/%3E%3Ccircle cx='50' cy='12' r='4' fill='%23FFEAA7'/%3E%3Cpath d='M50 8 C52 8 54 6.5 54 4 C52 5 49 5 47 4 C47.5 6.5 49 8 50 8 Z' fill='%23FFEAA7'/%3E%3Crect x='24' y='76' width='52' height='10' rx='3' fill='%23D4AF37'/%3E%3C/svg%3E" />
+
+    <!-- Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Schema.org JSON-LD Structured Data for Mosque & WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": ["Place", "Mosque"],
+          "name": "Masjid As-Safar",
+          "description": "Rancangan arsitektur tropis modern Masjid As-Safar dengan kapasitas ±350 jamaah, kubah geometris bertingkat, mihrab marmer, dan sirkulasi pintu kaca ayun.",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "ID"
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "name": "Masjid As-Safar 3D Visualizer",
+          "applicationCategory": "DesignApplication",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires WebGL support",
+          "description": "Aplikasi visualisasi 3D arsitektur Masjid As-Safar interaktif 360 derajat berbasis WebGL dan Three.js."
+        }
+      ]
+    }
+    </script>
   </head>
-  <body>
+  <body class="bg-[#FAF8F5] text-slate-800 overflow-x-hidden min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

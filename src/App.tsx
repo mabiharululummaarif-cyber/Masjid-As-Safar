@@ -1,64 +1,296 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { MosqueConfig, CameraPreset } from './types';
+import { DEFAULT_CONFIG } from './data/initialHotspots';
+import { MosqueCanvas3D } from './components/MosqueCanvas3D';
+import { MosqueConfigModal } from './components/MosqueConfigModal';
+import { ControlOverlay } from './components/ControlOverlay';
+import { ShareModal } from './components/ShareModal';
+import { MosqueInfoModal } from './components/MosqueInfoModal';
+import { SimasDossierModal } from './components/SimasDossierModal';
+import { HeaderNav } from './components/HeaderNav';
+import { HeroSection } from './components/HeroSection';
+import { PrayerTimesSection } from './components/PrayerTimesSection';
+import { VirtualTourSection } from './components/VirtualTourSection';
+import { SimasSection } from './components/SimasSection';
+import { FacilitiesSection } from './components/FacilitiesSection';
+import { DkmSection } from './components/DkmSection';
+import { FinancialSection } from './components/FinancialSection';
+import { Footer } from './components/Footer';
+import { capture3DScreenshot } from './utils/screenshot';
+import { Check, Eye, Maximize2, ShieldCheck, ArrowUp } from 'lucide-react';
 
-const activities = [
-  { number: '01', icon: '☾', title: 'Ibadah', text: 'Ruang yang teduh untuk menunaikan ibadah dan mendekatkan diri kepada Allah.' },
-  { number: '02', icon: '۞', title: 'Ilmu', text: 'Tempat bertumbuh melalui pembelajaran, nasihat, dan berbagi pengetahuan.' },
-  { number: '03', icon: '♡', title: 'Kebersamaan', text: 'Menguatkan silaturahmi, kepedulian, dan semangat saling membantu.' },
-];
-
-function Emblem() {
-  return <span className="brand-emblem" aria-hidden="true"><svg viewBox="0 0 48 48" role="img"><path d="M24 4 29 14 40 9 35 20 45 24 35 29 40 40 29 35 24 45 19 35 8 40 13 29 3 24 13 20 8 9 19 14Z" /><circle cx="24" cy="24" r="8"/><path d="M24 18v12M18 24h12"/></svg></span>;
-}
-
-function MosqueIllustration() {
-  return <div className="mosque-scene" aria-label="Ilustrasi arsitektur masjid">
-    <div className="scene-sun" />
-    <div className="scene-moon">☾</div>
-    <div className="scene-minaret"><i /></div>
-    <div className="scene-roof" />
-    <div className="scene-building">
-      <div className="scene-window window-one" /><div className="scene-window window-two" />
-      <div className="scene-door" />
-    </div>
-    <div className="scene-steps" />
-    <div className="scene-caption"><span>MASJID AS-SAFAR</span><span>BIHARUL ULUM MA'ARIF</span></div>
-  </div>;
-}
+const STORAGE_CONFIG_KEY = 'masjid_as_safar_config_arch_v3';
 
 export default function App() {
-  return <div className="site">
-    <header className="nav">
-      <a className="brand" href="#home" aria-label="Masjid As-Safar, beranda"><Emblem/><span className="brand-copy"><b>MASJID AS-SAFAR</b><small>BIHARUL ULUM MA'ARIF</small></span></a>
-      <nav aria-label="Navigasi utama"><a href="#tentang">Tentang</a><a href="#kegiatan">Kegiatan</a><a href="#galeri">Galeri</a><a href="#kontak">Kontak</a></nav>
-    </header>
-    <main>
-      <section className="hero" id="home">
-        <div className="hero-text">
-          <span className="eyebrow"><i/> RUMAH IBADAH · RUANG UKHUWAH</span>
-          <h1>Tempat hati<br/>menemukan <em>teduh.</em></h1>
-          <p>Selamat datang di Masjid As-Safar Biharul Ulum Ma'arif. Rumah ibadah, tempat menuntut ilmu, dan ruang untuk merawat kebersamaan.</p>
-          <a className="cta" href="#tentang">Mengenal Masjid <span>↗</span></a>
+  const [viewMode, setViewMode] = useState<'website' | 'fullscreen3D'>('website');
+  const [activeSection, setActiveSection] = useState('beranda');
+
+  const [config, setConfig] = useState<MosqueConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_CONFIG_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...parsed, showQibla: false, autoRotate: false, fanSpeed: 0 };
+      }
+    } catch (e) {
+      console.warn('Failed to load saved config', e);
+    }
+    return { ...DEFAULT_CONFIG, showQibla: false, autoRotate: false, fanSpeed: 0 };
+  });
+
+  // UI States for 3D fullscreen viewer
+  const [isInterior, setIsInterior] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [isSimasDossierOpen, setIsSimasDossierOpen] = useState(false);
+  const [focusPosition, setFocusPosition] = useState<[number, number, number] | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Persist config to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(config));
+    } catch (e) {
+      console.warn('Failed to save config', e);
+    }
+  }, [config]);
+
+  // Smooth scroll navigation on website
+  const handleNavigate = (sectionId: string) => {
+    setActiveSection(sectionId);
+    if (viewMode === 'fullscreen3D') {
+      setViewMode('website');
+    }
+    setTimeout(() => {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
+  };
+
+  // Camera presets for 3D mode
+  const handleSelectPreset = (preset: CameraPreset) => {
+    switch (preset) {
+      case 'mihrab':
+        setIsInterior(true);
+        setFocusPosition([0, 1.6, 6.5]);
+        break;
+      case 'backDoor':
+        setIsInterior(true);
+        setFocusPosition([0, 1.6, -7.0]);
+        break;
+      case 'leftDoor':
+        setIsInterior(true);
+        setFocusPosition([-4.5, 1.6, -2.5]);
+        break;
+      case 'rightDoor':
+        setIsInterior(true);
+        setFocusPosition([4.5, 1.6, -2.5]);
+        break;
+      case 'topView':
+        setFocusPosition([0, 28, 0.1]);
+        break;
+      case 'exterior':
+        setIsInterior(false);
+        setFocusPosition([0, 2.5, 0]);
+        break;
+      case 'interior':
+        setIsInterior(true);
+        setFocusPosition([0, 1.5, 0.5]);
+        break;
+    }
+  };
+
+  const handleCycleTimeOfDay = () => {
+    const sequence: ('day' | 'sunset' | 'night')[] = ['day', 'sunset', 'night'];
+    const currIdx = sequence.indexOf(config.timeOfDay);
+    const nextTime = sequence[(currIdx + 1) % sequence.length];
+    setConfig(prev => ({ ...prev, timeOfDay: nextTime }));
+  };
+
+  const handleResetView = () => {
+    setFocusPosition(isInterior ? [0, 2.4, 0.5] : [0, 2.0, 0]);
+  };
+
+  const handleToggleQibla = () => {
+    setConfig(prev => ({ ...prev, showQibla: !prev.showQibla }));
+  };
+
+  const handleOrientQibla = () => {
+    setFocusPosition([0, isInterior ? 1.8 : 2.5, 9.5]);
+  };
+
+  const handleResetDefaults = () => {
+    setConfig(DEFAULT_CONFIG);
+    localStorage.removeItem(STORAGE_CONFIG_KEY);
+  };
+
+  const handleUpdateConfig = (cfg: Partial<MosqueConfig>) => {
+    setConfig(prev => ({ ...prev, ...cfg }));
+  };
+
+  const handleTakeScreenshot = async () => {
+    const res = await capture3DScreenshot();
+    if (res.success) {
+      setToastMessage('Foto desain 3D ber-watermark berhasil diunduh!');
+      setTimeout(() => setToastMessage(null), 3500);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FAF8F5] text-slate-800 font-sans selection:bg-[#D4AF37] selection:text-[#0F2A25]">
+      
+      {/* ============================================================== */}
+      {/* MODE 1: OFFICIAL WEBSITE PORTAL (FOR SIMAS KEMENAG & PILGRIMS) */}
+      {/* ============================================================== */}
+      {viewMode === 'website' ? (
+        <div className="flex flex-col min-h-screen">
+          
+          {/* Header Navigation with SIMAS Ticker & Prayer Times */}
+          <HeaderNav
+            activeSection={activeSection}
+            onNavigate={handleNavigate}
+            onLaunchFullscreen3D={() => setViewMode('fullscreen3D')}
+            onOpenSimasDossier={() => setIsSimasDossierOpen(true)}
+            onOpenShare={() => setIsShareModalOpen(true)}
+          />
+
+          {/* Main Website Sections */}
+          <main className="flex-1">
+            {/* 1. Hero Welcome & Quick Stats */}
+            <HeroSection
+              onLaunch3D={() => {
+                const el = document.getElementById('tur-3d');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              onOpenSimasDossier={() => setIsSimasDossierOpen(true)}
+              onNavigateToInfaq={() => handleNavigate('infaq')}
+            />
+
+            {/* 2. Jadwal Sholat Kemenag & Countdown */}
+            <PrayerTimesSection />
+
+            {/* 3. Interactive 3D Virtual Tour Viewer */}
+            <VirtualTourSection
+              config={config}
+              onUpdateConfig={handleUpdateConfig}
+              onLaunchFullscreen={() => setViewMode('fullscreen3D')}
+              onOpenSpecsModal={() => setIsInfoModalOpen(true)}
+            />
+
+            {/* 4. Profil & Legalitas SIMAS Kemenag */}
+            <SimasSection
+              onOpenDossier={() => setIsSimasDossierOpen(true)}
+            />
+
+            {/* 5. Fasilitas & Sarana Ibadah */}
+            <FacilitiesSection />
+
+            {/* 6. Pengurus DKM & Agenda Kajian */}
+            <DkmSection />
+
+            {/* 7. Transparansi Kas & Infaq QRIS */}
+            <FinancialSection />
+          </main>
+
+          {/* Footer */}
+          <Footer
+            onNavigate={handleNavigate}
+            onOpenSimasDossier={() => setIsSimasDossierOpen(true)}
+            onOpenShare={() => setIsShareModalOpen(true)}
+          />
+
+          {/* Floating Action Button: Quick 3D Fullscreen Jump */}
+          <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
+            <button
+              onClick={() => setViewMode('fullscreen3D')}
+              className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-full shadow-2xl transition-all cursor-pointer transform hover:scale-105 active:scale-95 border-2 border-white/60"
+              title="Buka Mode Tur 3D Fullscreen"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="text-xs sm:text-sm">Jelajah 3D Fullscreen</span>
+            </button>
+          </div>
+
         </div>
-        <MosqueIllustration/>
-        <div className="hero-foot"><span>مَرْحَبًا بِكُمْ</span><span>MENJALIN UKHUWAH · MENUMBUHKAN KEBAIKAN</span></div>
-      </section>
-      <section className="intro section" id="tentang">
-        <div className="section-label"><span>01</span> TENTANG MASJID</div>
-        <div className="intro-grid">
-          <h2>Bernaung dalam iman,<br/><em>bertumbuh bersama.</em></h2>
-          <div className="intro-copy"><p>Masjid As-Safar Biharul Ulum Ma'arif hadir sebagai ruang ibadah dan kebersamaan bagi jamaah serta masyarakat sekitar.</p><p className="muted">Dengan semangat ukhuwah, masjid menjadi tempat untuk mendekatkan diri kepada Allah, menimba ilmu, dan menumbuhkan kepedulian.</p></div>
+      ) : (
+        /* ============================================================== */
+        /* MODE 2: FULLSCREEN 3D IMMERSIVE ARCHITECTURAL TOUR */
+        /* ============================================================== */
+        <div className="w-screen h-screen bg-[#D8DEE4] font-sans relative overflow-hidden select-none">
+          <main className="w-full h-full relative overflow-hidden">
+            <MosqueCanvas3D
+              hotspots={[]}
+              config={config}
+              isInterior={isInterior}
+              selectedHotspotId={null}
+              onSelectHotspot={() => {}}
+              focusPosition={focusPosition}
+            />
+
+            {/* Controls Overlay with Back to Website Button */}
+            <ControlOverlay
+              isInterior={isInterior}
+              onToggleInterior={() => setIsInterior(prev => !prev)}
+              config={config}
+              onUpdateConfig={handleUpdateConfig}
+              onCycleTimeOfDay={handleCycleTimeOfDay}
+              onResetView={handleResetView}
+              onSelectPreset={handleSelectPreset}
+              onToggleQibla={handleToggleQibla}
+              onOrientQibla={handleOrientQibla}
+              onOpenArchSettings={() => setIsConfigModalOpen(true)}
+              onOpenShare={() => setIsShareModalOpen(true)}
+              onOpenInfo={() => setIsInfoModalOpen(true)}
+              onTakeScreenshot={handleTakeScreenshot}
+              onBackToWebsite={() => setViewMode('website')}
+            />
+
+            {/* Toast for Actions */}
+            {toastMessage && (
+              <div className="absolute top-20 left-1/2 -translate-x-1/2 z-40 bg-[#0F2A25]/95 text-white border border-[#D4AF37] px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-top-2 duration-200">
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span>{toastMessage}</span>
+              </div>
+            )}
+          </main>
         </div>
-        <div className="intro-rule"><span>۞</span></div>
-      </section>
-      <section className="activities section" id="kegiatan">
-        <div className="section-label"><span>02</span> PERAN MASJID</div>
-        <div className="activities-head"><h2>Ruang untuk<br/><em>hal-hal bermakna.</em></h2><p>Memakmurkan masjid melalui ibadah, ilmu, dan hubungan baik antarsesama.</p></div>
-        <div className="cards">{activities.map(a=><article className="activity" key={a.number}><div className="activity-top"><span>{a.number}</span><span className="activity-icon">{a.icon}</span></div><h3>{a.title}</h3><p>{a.text}</p><div className="activity-line"/></article>)}</div>
-      </section>
-      <section className="verse"><div className="verse-mark">۞</div><p className="arabic" lang="ar" dir="rtl">وَأَنَّ الْمَسَاجِدَ لِلَّهِ فَلَا تَدْعُوا مَعَ اللَّهِ أَحَدًا</p><p className="translation">“Dan sesungguhnya masjid-masjid itu adalah untuk Allah.”</p><small>QS. Al-Jinn: 18</small></section>
-      <section className="gallery section" id="galeri"><div className="section-label"><span>03</span> GALERI</div><div className="gallery-head"><h2>Rumah ibadah<br/><em>kita bersama.</em></h2><p>Potret Masjid As-Safar akan ditampilkan di sini.</p></div><div className="gallery-note"><span>MASJID AS-SAFAR</span><p>Galeri foto sedang disiapkan.</p></div></section>
-      <section className="contact section" id="kontak"><div className="contact-copy"><div className="section-label"><span>04</span> SILATURAHMI</div><h2>Mari bersama<br/><em>memakmurkan masjid.</em></h2><p>Jamaah dan masyarakat dipersilakan hadir serta berpartisipasi dalam kegiatan Masjid As-Safar.</p></div><div className="contact-card"><Emblem/><h3>Masjid As-Safar</h3><p>Biharul Ulum Ma'arif</p><div className="contact-rule"/><small>Informasi alamat dan kontak pengurus akan ditambahkan setelah tersedia.</small></div></section>
-    </main>
-    <footer><a className="brand" href="#home"><Emblem/><span className="brand-copy"><b>MASJID AS-SAFAR</b><small>BIHARUL ULUM MA'ARIF</small></span></a><span className="copyright">© {new Date().getFullYear()} Masjid As-Safar · Semoga membawa keberkahan.</span><a className="back-top" href="#home">Kembali ke atas ↑</a></footer>
-  </div>;
+      )}
+
+      {/* ============================================================== */}
+      {/* GLOBAL MODALS (SIMAS DOSSIER, SHARE, INFO, CONFIG) */}
+      {/* ============================================================== */}
+
+      {/* Official SIMAS Kemenag Printable Dossier Modal */}
+      <SimasDossierModal
+        isOpen={isSimasDossierOpen}
+        onClose={() => setIsSimasDossierOpen(false)}
+      />
+
+      {/* Share Modal with Kemenag SIMAS export options */}
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+      />
+
+      {/* Mosque Architecture Info & Specs Modal */}
+      <MosqueInfoModal
+        isOpen={isInfoModalOpen}
+        onClose={() => setIsInfoModalOpen(false)}
+        onOpenShare={() => setIsShareModalOpen(true)}
+      />
+
+      {/* Architecture & 3D Model Configuration Modal */}
+      <MosqueConfigModal
+        isOpen={isConfigModalOpen}
+        config={config}
+        onClose={() => setIsConfigModalOpen(false)}
+        onUpdateConfig={newConfig => setConfig(newConfig)}
+        onResetDefaults={handleResetDefaults}
+      />
+
+    </div>
+  );
 }

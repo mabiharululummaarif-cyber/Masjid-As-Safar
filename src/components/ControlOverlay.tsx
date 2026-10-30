@@ -3,7 +3,7 @@ import { MosqueConfig, CameraPreset } from '../types';
 import { 
   Sun, Moon, Sunset,
   RotateCw, SlidersHorizontal, 
-  X, RotateCcw, Eye, Layers
+  X, RotateCcw, Share2, Camera, Info, Sparkles, Building2, ArrowLeft
 } from 'lucide-react';
 
 interface ControlOverlayProps {
@@ -17,6 +17,10 @@ interface ControlOverlayProps {
   onToggleQibla?: () => void;
   onOrientQibla?: () => void;
   onOpenArchSettings: () => void;
+  onOpenShare: () => void;
+  onOpenInfo: () => void;
+  onTakeScreenshot: () => void;
+  onBackToWebsite?: () => void;
 }
 
 export const ControlOverlay: React.FC<ControlOverlayProps> = ({
@@ -28,6 +32,10 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
   onResetView,
   onSelectPreset,
   onOpenArchSettings,
+  onOpenShare,
+  onOpenInfo,
+  onTakeScreenshot,
+  onBackToWebsite,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -59,13 +67,73 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
 
   return (
     <>
-      {/* 1. TOP FLOATING PRIMARY VIEW SELECTOR (Selalu Muncul di Atas - Sangat Mudah Diakses) */}
-      <div className="absolute top-3 inset-x-0 z-20 flex flex-col items-center pointer-events-none px-3 gap-1.5">
+      {/* 1. TOP HEADER BAR: BRANDING + SHARING */}
+      <header className="absolute top-0 inset-x-0 z-20 pointer-events-none p-3 sm:p-4 flex items-start justify-between gap-2">
+        {/* Left: Back to Website & Project Branding */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          {onBackToWebsite && (
+            <button
+              onClick={onBackToWebsite}
+              className="px-3 py-2 rounded-2xl bg-[#0F2A25]/95 hover:bg-[#1B4332] text-white border border-[#D4AF37]/70 shadow-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              title="Kembali ke Portal Website Resmi"
+            >
+              <ArrowLeft className="w-4 h-4 text-[#D4AF37]" />
+              <span className="hidden sm:inline">Portal Resmi</span>
+            </button>
+          )}
+
+          <div className="bg-[#0F2A25]/90 backdrop-blur-md text-white p-2 px-3 rounded-2xl border border-[#D4AF37]/50 shadow-xl flex items-center gap-2.5">
+            <span className="text-xl">🕌</span>
+            <div className="text-left hidden sm:block">
+              <h1 className="text-xs font-serif font-bold text-[#FFEAA7] tracking-wide leading-tight">
+                Masjid As-Safar
+              </h1>
+              <span className="text-[10px] text-emerald-300 block leading-none mt-0.5">
+                SIMAS Kemenag RI
+              </span>
+            </div>
+            <button
+              onClick={onOpenInfo}
+              title="Informasi & Spesifikasi Bangunan"
+              className="ml-1 px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-[#FFEAA7] text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer border border-white/10"
+            >
+              <Info className="w-3.5 h-3.5" />
+              <span>Info Desain</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right: Screenshot & Share Buttons */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          {/* Quick Photo / Screenshot Button */}
+          <button
+            onClick={onTakeScreenshot}
+            title="Ambil Foto / Screenshot Desain 3D"
+            className="px-3 py-2 rounded-2xl bg-white/95 hover:bg-white text-[#1B4332] border border-gray-200/90 shadow-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+          >
+            <Camera className="w-4 h-4 text-amber-600" />
+            <span className="hidden sm:inline">Ambil Foto</span>
+          </button>
+
+          {/* Primary Share Button */}
+          <button
+            onClick={onOpenShare}
+            title="Bagikan Tautan ke Jamaah / WhatsApp"
+            className="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-[#1B4332] to-[#2D6A4F] hover:from-[#153427] hover:to-[#22543d] text-white border border-[#D4AF37]/70 shadow-xl font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ring-2 ring-emerald-500/20"
+          >
+            <Share2 className="w-4 h-4 text-[#FFEAA7]" />
+            <span className="text-[#FFEAA7]">Bagikan</span>
+          </button>
+        </div>
+      </header>
+
+      {/* 2. TOP FLOATING PRIMARY VIEW SELECTOR (Di tengah atas layar) */}
+      <div className="absolute top-16 sm:top-4 inset-x-0 z-20 flex flex-col items-center pointer-events-none px-3 gap-1.5">
         {/* Main Segmented Pill */}
-        <div className="pointer-events-auto flex items-center bg-[#1B4332]/90 backdrop-blur-md p-1 rounded-2xl border border-[#40916C]/40 shadow-xl gap-1">
+        <div className="pointer-events-auto flex items-center bg-[#1B4332]/92 backdrop-blur-md p-1 rounded-2xl border border-[#40916C]/40 shadow-xl gap-1">
           <button
             onClick={handleSetExterior}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               !isInterior && config.roofMode !== 'hidden'
                 ? 'bg-white text-[#1B4332] shadow-md scale-102'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -77,7 +145,7 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
 
           <button
             onClick={handleSetInterior}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               isInterior
                 ? 'bg-white text-[#1B4332] shadow-md scale-102'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -89,7 +157,7 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
 
           <button
             onClick={handleSetCutaway}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               isCutaway
                 ? 'bg-white text-[#1B4332] shadow-md scale-102'
                 : 'text-white/80 hover:text-white hover:bg-white/10'
@@ -102,8 +170,8 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
 
         {/* Quick Spot Pill according to Mode */}
         {isInterior ? (
-          <div className="pointer-events-auto flex items-center bg-white/90 backdrop-blur-md px-2 py-1 rounded-full border border-gray-200 shadow-lg gap-1 animate-in fade-in zoom-in-95 duration-200">
-            <span className="text-[10px] font-bold text-[#1B4332] px-1.5">Area Dalam:</span>
+          <div className="pointer-events-auto flex items-center bg-white/92 backdrop-blur-md px-2 py-1 rounded-full border border-gray-200 shadow-lg gap-1 animate-in fade-in zoom-in-95 duration-200">
+            <span className="text-[10px] font-bold text-[#1B4332] px-1.5">Area:</span>
             <button
               onClick={() => onSelectPreset('mihrab')}
               className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#1B4332]/10 hover:bg-[#1B4332] hover:text-white text-[#1B4332] transition-colors cursor-pointer"
@@ -124,8 +192,8 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
             </button>
           </div>
         ) : (
-          <div className="pointer-events-auto flex items-center bg-white/90 backdrop-blur-md px-2 py-1 rounded-full border border-gray-200 shadow-lg gap-1 animate-in fade-in zoom-in-95 duration-200">
-            <span className="text-[10px] font-bold text-[#1B4332] px-1.5">Sudut Pandang:</span>
+          <div className="pointer-events-auto flex items-center bg-white/92 backdrop-blur-md px-2 py-1 rounded-full border border-gray-200 shadow-lg gap-1 animate-in fade-in zoom-in-95 duration-200">
+            <span className="text-[10px] font-bold text-[#1B4332] px-1.5">Sudut:</span>
             <button
               onClick={() => onSelectPreset('exterior')}
               className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#1B4332]/10 hover:bg-[#1B4332] hover:text-white text-[#1B4332] transition-colors cursor-pointer"
@@ -142,7 +210,7 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
         )}
       </div>
 
-      {/* 2. Floating Action Button (Kanan Bawah untuk Pengaturan Lengkap) */}
+      {/* 3. FLOATING ACTION BUTTONS (Kanan Bawah) */}
       <div className="absolute bottom-4 right-4 z-20 pointer-events-auto flex items-center gap-2">
         <button
           onClick={onCycleTimeOfDay}
@@ -163,9 +231,9 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
         </button>
       </div>
 
-      {/* 3. Floating Modal Detail (Jika Membuka Menu Pengaturan) */}
+      {/* 4. FLOATING SETTINGS DRAWER */}
       {isOpen && (
-        <div className="absolute inset-x-3 bottom-18 sm:bottom-auto sm:top-18 sm:right-4 sm:left-auto sm:w-[320px] max-h-[80vh] overflow-y-auto bg-white/98 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl p-4 text-[#1B4332] z-30 pointer-events-auto space-y-3.5 animate-in fade-in slide-in-from-bottom-3 sm:slide-in-from-top-3 duration-200">
+        <div className="absolute inset-x-3 bottom-18 sm:bottom-auto sm:top-18 sm:right-4 sm:left-auto sm:w-[320px] max-h-[80vh] overflow-y-auto bg-white/98 backdrop-blur-xl border border-gray-200 rounded-2xl shadow-2xl p-4 text-[#1B4332] z-30 pointer-events-auto space-y-3 animate-in fade-in slide-in-from-bottom-3 sm:slide-in-from-top-3 duration-200">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
             <div className="flex items-center gap-2">
@@ -235,6 +303,30 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
             <span className="text-[10px] uppercase font-bold">{config.autoRotate ? 'ON' : 'OFF'}</span>
           </button>
 
+          {/* Share & Info Shortcut in Menu */}
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-100">
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                onOpenInfo();
+              }}
+              className="py-2 px-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-xs font-semibold text-gray-800 flex items-center justify-center gap-1.5 border border-gray-200 transition-colors cursor-pointer"
+            >
+              <Building2 className="w-3.5 h-3.5 text-amber-600" />
+              <span>Info Desain</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                onOpenShare();
+              }}
+              className="py-2 px-2.5 bg-emerald-50 hover:bg-emerald-100 text-[#1B4332] rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border border-emerald-200 transition-colors cursor-pointer"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Bagikan</span>
+            </button>
+          </div>
+
           {/* Reset View */}
           <button
             onClick={() => {
@@ -251,6 +343,3 @@ export const ControlOverlay: React.FC<ControlOverlayProps> = ({
     </>
   );
 };
-
-
-
