@@ -152,7 +152,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     rows: [
       ['Jumlah', '1 Ruangan Simetris (3.4m × 3.6m)'],
       ['Letak', 'Bagian depan sisi kanan (+X), samping area mimbar'],
-      ['Fungsi', 'Ruang Transit Imam, Kantor DKM, & Central Mixer Audio'],
+      ['Fungsi', 'Ruang Transit Imam, Kantor Takmir, & Central Mixer Audio'],
       ['Perlengkapan', 'Rak Sound System TOA, Meja Kerja, Lemari Jubah, Kotak P3K'],
       ['Kondisi', 'Baik & Lengkap']
     ],
@@ -160,7 +160,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Ruangan (Sisi Kanan)',
     lastInspection: '2026-08-20',
-    pic: 'Sekretariat DKM',
+    pic: 'Tasbih, S.Pd. (Sekretaris Takmir)',
     note: 'Ruang khusus imam rawatib dan pusat kontrol tata suara masjid.'
   },
   {
@@ -180,7 +180,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Ruangan (Sisi Kiri)',
     lastInspection: '2026-08-20',
-    pic: 'Divisi Takmir & Marbot Masjid',
+    pic: 'Abdullah (Marbot / Kebersihan)',
     note: 'Ruang marbot untuk operasional harian dan penyimpanan perlengkapan ibadah jamaah.'
   },
   {
@@ -200,7 +200,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit Mimbar Jati',
     lastInspection: '2026-08-30',
-    pic: 'Imam Rawatib (Menunggu Konfirmasi)',
+    pic: 'Husain (Imam Rawatib Utama)',
     note: 'Mimbar bergeser sedikit ke kiri-tengah arah kiblat, berlatar dinding dekoratif garis bertingkat berlapis lis emas.'
   },
   {
@@ -219,7 +219,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '4 Saf Pria',
     lastInspection: '2026-08-30',
-    pic: 'Divisi Kebersihan',
+    pic: 'Abdullah (Marbot / Kebersihan)',
     note: 'Saf depan khusus jamaah laki-laki sebanyak 4 baris saf.'
   },
   {
@@ -230,17 +230,17 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     category: 'carpet',
     rows: [
       ['Jumlah Saf', '5 Baris Saf Belakang (Total 4+5 = 9 Saf)'],
-      ['Kapasitas', '± 110 Jamaah (22 orang/saf)'],
+      ['Kapasitas', '± 110 Jamaah (22 orang/saf) — Total Kapasitas Aula ~200 Jamaah'],
       ['Jenis Karpet', 'Rajut Tebal 14mm Hijau Lumut / Burgundy'],
-      ['Catatan Saf', 'Total pernah disebut 10 saf, saat ini terpasang 9 saf (4 depan + 5 belakang) — perlu konfirmasi DKM'],
+      ['Catatan Saf', 'Total 9 saf (4 depan + 5 belakang) sesuai daya tampung 200 jamaah'],
       ['Batas Area', 'Dilengkapi Tabir Pembatas Saf Hijab']
     ],
     interiorOnly: true,
     condition: 'Baik',
     quantity: '5 Saf Wanita (Total 9 Saf)',
     lastInspection: '2026-08-30',
-    pic: 'Divisi Keputrian DKM',
-    note: 'Saf belakang untuk jamaah perempuan sebanyak 5 saf (Total aula saat ini 9 saf).'
+    pic: "Bidang Imarah (Meliani, S.Ag.)",
+    note: 'Saf belakang untuk jamaah perempuan sebanyak 5 saf (Total daya tampung aula 200 jamaah sesuai data SIMAS).'
   },
   {
     id: 'toa-speaker-l',
@@ -259,7 +259,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit',
     lastInspection: '2026-08-30',
-    pic: 'Teknisi Audio / Marbot (Menunggu Konfirmasi)',
+    pic: 'Kesal (Muazin Utama) / Amin Rahim (Bilal)',
     note: 'Toa unit 1 terpasang di dinding kiri tengah menyebarkan suara adzan dan kajian ke aula tengah-belakang.'
   },
   {
@@ -279,7 +279,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit',
     lastInspection: '2026-08-30',
-    pic: 'Teknisi Audio / Marbot (Menunggu Konfirmasi)',
+    pic: 'Kesal (Muazin Utama) / Amin Rahim (Bilal)',
     note: 'Toa unit 2 di area depan melayani artikulasi suara imam sholat dan khutbah.'
   },
   {
@@ -299,7 +299,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '3 Unit Kipas Dinding',
     lastInspection: '2026-08-30',
-    pic: 'Divisi Sarana & Prasarana',
+    pic: "Nurul Fani Darwis, S.Pd. (Koord. Ri'ayah)",
     note: 'Pendingin alami ruangan menggunakan 3 unit kipas angin dinding di posisi depan, tengah, dan samping.'
   },
   {
@@ -310,7 +310,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     category: 'other',
     rows: [
       ['Jumlah', '1 unit Display LED Grand'],
-      ['Fitur', 'Jadwal 5 Waktu Otomatis, Hitung Mundur Iqomah, Pesan DKM'],
+      ['Fitur', 'Jadwal 5 Waktu Otomatis, Hitung Mundur Iqomah, Pesan Takmir'],
       ['Letak', 'Dinding Header Depan Aula Utama'],
       ['Kondisi', 'Akurat & Menyala Normal']
     ],
@@ -318,7 +318,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Unit',
     lastInspection: '2026-08-30',
-    pic: 'Sekretariat DKM',
+    pic: 'Tasbih, S.Pd. (Sekretaris Takmir)',
     note: 'Sinkronisasi waktu otomatis via NTP/GPS.'
   },
   {
@@ -337,7 +337,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '2 Rak Kayu',
     lastInspection: '2026-08-22',
-    pic: 'Divisi Takmir Masjid',
+    pic: 'Meliani, S.Ag. (Koord. Imarah)',
     note: 'Disediakan juga buku doa dan zikir pagi-petang.'
   },
   {
@@ -356,7 +356,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '2 Unit',
     lastInspection: '2026-08-30',
-    pic: 'Bendahara DKM',
+    pic: 'Khaerunnisyah Hasbua, S.Pd. (Bendahara Takmir)',
     note: 'Dibuka dan dihitung bersama setiap selesai sholat Jumat.'
   },
   {
@@ -375,7 +375,7 @@ export const INITIAL_HOTSPOTS: HotspotItem[] = [
     condition: 'Baik',
     quantity: '1 Menara',
     lastInspection: '2026-07-20',
-    pic: 'Divisi Sarana & Prasarana',
+    pic: "Nurul Fani Darwis, S.Pd. (Koord. Ri'ayah)",
     note: 'Menara pengumuman adzan untuk jangkauan warga sekitar.'
   }
 ];

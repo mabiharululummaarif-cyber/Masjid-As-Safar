@@ -64,12 +64,12 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <span className="inline-flex items-center gap-1 bg-[#10382E] text-emerald-200 font-bold px-2 py-0.5 rounded-full border border-emerald-600/50 text-[9px] sm:text-[10px] shrink-0">
               <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#F3D063]" />
-              <span className="hidden xs:inline">Desa Lero, Suppa, Pinrang</span>
+              <span className="hidden xs:inline">Desa Wiringtasi, Suppa, Pinrang</span>
               <span className="xs:hidden">Suppa, Pinrang</span>
             </span>
             <span className="hidden md:inline text-slate-400">|</span>
             <span className="hidden md:inline text-amber-200 text-[10px] font-semibold truncate">
-              Status SIMAS: Menunggu Konfirmasi DKM
+              Status SIMAS: Belum tersedia
             </span>
           </div>
 
@@ -109,11 +109,11 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
                 MASJID AS-SAFAR
               </span>
               <span className="hidden xs:inline-block text-[9px] sm:text-[10px] bg-emerald-800 text-emerald-100 border border-emerald-600/60 font-bold px-1.5 py-0.2 rounded font-sans uppercase shrink-0">
-                Lero
+                Suppa
               </span>
             </div>
             <p className="text-[10px] text-emerald-300 font-medium tracking-wide font-sans truncate">
-              Desa Lero, Kec. Suppa • WITA (UTC+8)
+              Desa Wiringtasi, Kec. Suppa • WITA (UTC+8)
             </p>
           </div>
         </div>
@@ -186,7 +186,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
       {mobileMenuOpen && (
         <div className="xl:hidden bg-[#0B211C] border-t border-[#184639] px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200 shadow-2xl">
           <div className="pb-3 border-b border-[#184639] flex items-center justify-between text-xs text-slate-200">
-            <span>Status SIMAS: <strong className="text-amber-200">Menunggu Konfirmasi DKM</strong></span>
+            <span>Status SIMAS: <strong className="text-amber-200">Belum tersedia</strong></span>
             <span className="text-[#F3D063] font-semibold">{dates.hijri}</span>
           </div>
 

@@ -19,11 +19,9 @@ export interface PrayerTimeItem {
 }
 
 export const PRAYER_CALCULATION_INFO = {
-  wilayah: 'Desa Lero, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan',
+  wilayah: 'Kecamatan Suppa, Kabupaten Pinrang, Sulawesi Selatan',
   zonaWaktu: 'WITA (UTC+8)',
-  referensiLat: -3.987,
-  referensiLng: 119.623,
-  disclaimer: 'Estimasi waktu sholat wilayah Suppa, Pinrang (WITA). Jadwal masih berupa perkiraan awal dan menunggu konfirmasi titik koordinat serta kalibrasi resmi dari Kemenag/BHR.'
+  disclaimer: 'Perkiraan waktu sholat wilayah Kecamatan Suppa, Pinrang (WITA). Jadwal merupakan estimasi awal dan menunggu rilis jadwal resmi dari Kemenag Pinrang.'
 };
 
 export function getTodayPrayerTimes(date: Date = new Date()): PrayerTimeItem[] {

@@ -44,20 +44,21 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
 
 Berikut kami sampaikan tautan Website Informasi & Portofolio Arsitektur 3D Masjid As-Safar untuk keperluan inventarisasi dan verifikasi pendaftaran data SIMAS:
 • Nama Masjid: ${MASJID_SIMAS_DATA.namaMasjid}
+• Alamat: ${MASJID_SIMAS_DATA.alamatLengkap}
 • Lokasi: Desa ${MASJID_SIMAS_DATA.desa}, Kec. ${MASJID_SIMAS_DATA.kecamatan}, Kab. ${MASJID_SIMAS_DATA.kabupatenKota}, ${MASJID_SIMAS_DATA.provinsi}
 • Zona Waktu: ${MASJID_SIMAS_DATA.zonaWaktu} (UTC+8)
-• Status ID SIMAS: ${MASJID_SIMAS_DATA.idSimas} (Menunggu Konfirmasi DKM / KUA Kec. Suppa)
-• Titik Geospasial: Lat ${MASJID_SIMAS_DATA.koordinat.lat}, Lng ${MASJID_SIMAS_DATA.koordinat.lng} (Estimasi Wilayah Suppa — Menunggu Titik GPS Presisi)
-• Estimasi Arah Kiblat: ~${MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°
+• Status ID SIMAS: ${MASJID_SIMAS_DATA.idSimas}
+• Azimut Arah Kiblat: ${MASJID_SIMAS_DATA.koordinat.azimuthKiblat}° (Verifikasi Lapangan)
+• Luas Bangunan / Tanah: ${MASJID_SIMAS_DATA.luasBangunan} m² / ${MASJID_SIMAS_DATA.luasTanah} m²
 • Tautan Website & Tur 3D: ${currentUrl}
 
 Mohon dapat menjadi bahan informasi untuk proses pendaftaran resmi pada pangkalan data SIMAS Kemenag. Terima kasih.
 Wassalamu'alaikum Wr. Wb.
-- DKM Masjid As-Safar (Desa Lero, Kec. Suppa)`;
+- Pengurus Takmir Masjid As-Safar (Desa Wiringtasi, Kec. Suppa)`;
 
   const generalShareText = `Assalamu'alaikum Wr. Wb. 
-Kunjungi Website Informasi & Tur Virtual 3D Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan):
-Jelajahi rancangan arsitektur 360°, interior mihrab marmer, jadwal sholat wilayah Suppa (WITA), dan profil persiapan SIMAS Kemenag di: ${currentUrl}`;
+Kunjungi Website Informasi & Tur Virtual 3D Masjid As-Safar (Desa Wiringtasi, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan):
+Jelajahi rancangan arsitektur 360°, interior mihrab marmer, perkiraan waktu sholat wilayah Suppa (WITA), dan informasi resmi pendaftaran SIMAS Kemenag di: ${currentUrl}`;
 
   const activeText = shareType === 'simas' ? simasSubmissionText : generalShareText;
 
@@ -99,8 +100,8 @@ Jelajahi rancangan arsitektur 360°, interior mihrab marmer, jadwal sholat wilay
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Website Masjid As-Safar — Desa Lero, Kec. Suppa, Kab. Pinrang',
-          text: `Website Informasi Masjid As-Safar, Desa Lero, Kec. Suppa, Kab. Pinrang & Tur Virtual 3D`,
+          title: 'Website Masjid As-Safar — Desa Wiringtasi, Kec. Suppa, Kab. Pinrang',
+          text: `Website Informasi Masjid As-Safar, Desa Wiringtasi, Kec. Suppa, Kab. Pinrang & Tur Virtual 3D`,
           url: currentUrl,
         });
       } catch (err) {
@@ -140,7 +141,7 @@ Jelajahi rancangan arsitektur 360°, interior mihrab marmer, jadwal sholat wilay
                 </h3>
                 <p className="text-[11px] sm:text-xs text-emerald-200/90 flex items-center gap-1 mt-0.5 truncate">
                   <MapPin className="w-3 h-3 text-[#D4AF37] shrink-0" />
-                  <span className="truncate">Desa Lero, Kec. Suppa, Pinrang (WITA)</span>
+                  <span className="truncate">Desa Wiringtasi, Kec. Suppa, Pinrang (WITA)</span>
                 </p>
               </div>
             </div>
@@ -228,7 +229,7 @@ Jelajahi rancangan arsitektur 360°, interior mihrab marmer, jadwal sholat wilay
                 <span>Foto Desain 3D Ber-Watermark</span>
               </div>
               <p className="text-[11px] text-slate-600 leading-relaxed">
-                Unduh foto resolusi tinggi berstempel Masjid As-Safar (Desa Lero, Kec. Suppa)
+                Unduh foto resolusi tinggi berstempel Masjid As-Safar (Desa Wiringtasi, Kec. Suppa)
               </p>
             </div>
             <button

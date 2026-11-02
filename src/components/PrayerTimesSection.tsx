@@ -31,7 +31,7 @@ export const PrayerTimesSection: React.FC = () => {
               Jadwal Sholat Fardhu
             </h2>
             <p className="text-slate-200 text-xs sm:text-sm mt-1 max-w-2xl leading-relaxed">
-              Perkiraan waktu sholat wilayah Desa Lero, Kecamatan Suppa, Kabupaten Pinrang (WITA). Jadwal ini merupakan estimasi awal dan menunggu kalibrasi resmi dari Kemenag Pinrang.
+              Perkiraan waktu sholat wilayah Desa Wiringtasi, Kecamatan Suppa, Kabupaten Pinrang (WITA). Jadwal ini merupakan estimasi awal dan menunggu rilis resmi dari Kemenag Pinrang.
             </p>
           </div>
 
@@ -103,9 +103,9 @@ export const PrayerTimesSection: React.FC = () => {
               <Compass className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div className="text-xs">
-              <span className="font-bold text-white block">Arah Kiblat Estimasi Suppa</span>
+              <span className="font-bold text-white block">Azimut Arah Kiblat</span>
               <p className="text-slate-200 text-[11px] mt-0.5 leading-relaxed">
-                Azimuth <strong>~{MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°</strong> (22.5° Barat ke Utara) — Menunggu kalibrasi resmi BHR Kemenag Pinrang.
+                Azimut <strong>{MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°</strong> (Berdasarkan pengukuran formulir pendaftaran SIMAS).
               </p>
             </div>
           </div>

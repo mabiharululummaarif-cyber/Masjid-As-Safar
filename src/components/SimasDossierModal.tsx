@@ -34,7 +34,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
 
   const handleCopyId = () => {
     navigator.clipboard.writeText(
-      `Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang) - Status SIMAS: ${MASJID_SIMAS_DATA.idSimas}`
+      `Masjid As-Safar Yayasan Biharul Ulum Ma'arif (Desa Wiringtasi, Kec. Suppa, Kab. Pinrang) - Status SIMAS: ${MASJID_SIMAS_DATA.idSimas}`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -49,7 +49,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
             <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-[#D4AF37] shrink-0" />
             <h2 className="font-semibold text-xs sm:text-base truncate">
-              <span className="sm:hidden">Draf SIMAS Kemenag</span>
+              <span className="sm:hidden">Draf Formulir SIMAS</span>
               <span className="hidden sm:inline">Draf Lembar Data SIMAS Kemenag</span>
             </h2>
           </div>
@@ -77,7 +77,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
         <div className="bg-amber-50 border-b border-amber-200 px-4 sm:px-6 py-2.5 flex items-start sm:items-center gap-2 text-xs text-amber-900 font-sans print:bg-white print:border-b-2 print:border-slate-400">
           <AlertCircle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5 sm:mt-0" />
           <span className="leading-relaxed">
-            <strong>Draf Dokumen Persiapan:</strong> Lembar ini memuat rincian inventarisasi data awal untuk persiapan data profil masjid. Bukan dokumen resmi dan belum diverifikasi oleh pihak KUA Kecamatan Suppa.
+            <strong>Draf Formulir SIMAS:</strong> Lembar ini memuat inventarisasi data Masjid As-Safar Yayasan Biharul Ulum Ma'arif berdasarkan formulir pendaftaran SIMAS dan SK Pengurus Nomor 017/MA.21.17.0008/IX/2026.
           </span>
         </div>
 
@@ -101,7 +101,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
                   FORMAT INVENTARISASI DATA SISTEM INFORMASI MASJID (SIMAS)
                 </h1>
                 <p className="text-[10px] font-sans text-slate-500">
-                  Formulir Draf Pendaftaran & Verifikasi Lapangan Profil Masjid
+                  Formulir Pendaftaran & Verifikasi Lapangan Profil Masjid
                 </p>
               </div>
             </div>
@@ -111,7 +111,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
               {qrDataUrl && (
                 <img src={qrDataUrl} alt="QR Link Website" className="w-16 h-16 sm:w-20 sm:h-20 border border-slate-300 rounded p-1 mx-auto" />
               )}
-              <span className="text-[9px] font-sans font-semibold text-amber-800 block mt-0.5">DRAF KONFIRMASI</span>
+              <span className="text-[9px] font-sans font-semibold text-amber-800 block mt-0.5">DRAF SIMAS</span>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
               </span>
               <div className="flex items-center gap-1.5 text-xs text-amber-800 mt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                <span>Status: <strong>Menunggu Konfirmasi Pengurus DKM</strong></span>
+                <span>Status: <strong>Belum tersedia</strong></span>
               </div>
             </div>
 
@@ -145,8 +145,12 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
               I. IDENTITAS & TIPOLOGI MASJID
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs">
+              <div className="flex justify-between py-1 border-b border-slate-200 md:col-span-2">
+                <span className="text-slate-500">Nama Resmi</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.namaResmi}</span>
+              </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Nama Resmi Masjid</span>
+                <span className="text-slate-500">Nama Masjid</span>
                 <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.namaMasjid}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
@@ -154,20 +158,28 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
                 <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.tipologi}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Tahun Berdiri</span>
-                <span className="font-semibold text-amber-800">{MASJID_SIMAS_DATA.tahunBerdiri}</span>
+                <span className="text-slate-500">Tahun Mulai Dibangun</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.tahunMulaiDibangun}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Tahun Mulai Digunakan</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.tahunMulaiDigunakan}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="text-slate-500">Daya Tampung Jamaah</span>
-                <span className="font-semibold text-slate-900">± {MASJID_SIMAS_DATA.kapasitasJamaah} Jamaah (Estimasi 3D)</span>
+                <span className="font-bold text-emerald-900">{MASJID_SIMAS_DATA.kapasitasJamaah} Jamaah</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="text-slate-500">Luas Bangunan</span>
-                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.luasBangunan} m² (Dimensi Model 3D: 22m × 22m)</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.luasBangunanDesc}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="text-slate-500">Luas Tanah</span>
-                <span className="font-semibold text-amber-800">{MASJID_SIMAS_DATA.luasTanahDesc}</span>
+                <span className="font-bold text-emerald-900">{MASJID_SIMAS_DATA.luasTanahDesc}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Kondisi Bangunan</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.kondisiBangunan}</span>
               </div>
             </div>
           </div>
@@ -180,31 +192,31 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs">
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="text-slate-500">Status Tanah</span>
-                <span className="font-bold text-amber-800">{MASJID_SIMAS_DATA.statusTanah}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">No. Sertifikat Wakaf</span>
-                <span className="font-mono font-semibold text-slate-600">{MASJID_SIMAS_DATA.nomorSertifikatWakaf}</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">No. Akta Ikrar Wakaf (AIW)</span>
-                <span className="font-mono font-semibold text-slate-600">{MASJID_SIMAS_DATA.nomorAIW}</span>
+                <span className="font-bold text-emerald-900">{MASJID_SIMAS_DATA.statusTanah}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
                 <span className="text-slate-500">Nadzir Wakaf</span>
-                <span className="font-semibold text-amber-800">{MASJID_SIMAS_DATA.nadzirWakaf}</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.nadzirWakaf}</span>
+              </div>
+              <div className="flex flex-col py-1 border-b border-slate-200">
+                <span className="text-slate-500">Nomor Sertifikat Wakaf</span>
+                <span className="font-mono font-bold text-slate-900 text-[11px]">{MASJID_SIMAS_DATA.nomorSertifikatWakaf}</span>
+              </div>
+              <div className="flex flex-col py-1 border-b border-slate-200">
+                <span className="text-slate-500">Nomor Akta Ikrar Wakaf (AIW)</span>
+                <span className="font-mono font-bold text-slate-900 text-[11px]">{MASJID_SIMAS_DATA.nomorAIW}</span>
               </div>
             </div>
           </div>
 
-          {/* Tabel Bagian III: Lokasi Geospasial & Kalibrasi Arah Kiblat */}
+          {/* Tabel Bagian III: Lokasi Geografis & Azimut Kiblat */}
           <div className="font-sans space-y-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 bg-slate-100 px-3 py-1.5 border-l-4 border-[#0F2A25]">
-              III. LOKASI GEOGRAFIS & KOORDINAT
+              III. LOKASI GEOGRAFIS & PENGUKURAN KIBLAT
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Alamat Wilayah</span>
+              <div className="flex justify-between py-1 border-b border-slate-200 md:col-span-2">
+                <span className="text-slate-500">Alamat Lengkap</span>
                 <span className="font-semibold text-slate-900 text-right">{MASJID_SIMAS_DATA.alamatLengkap}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
@@ -216,33 +228,45 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
                 <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.kabupatenKota}, {MASJID_SIMAS_DATA.provinsi} {MASJID_SIMAS_DATA.kodePos}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Titik Koordinat Referensi</span>
-                <span className="font-mono font-semibold text-amber-800">{MASJID_SIMAS_DATA.koordinat.lat}, {MASJID_SIMAS_DATA.koordinat.lng} (Perkiraan)</span>
+                <span className="text-slate-500">Titik Koordinat Lokasi</span>
+                <span className="font-semibold text-amber-800">Belum terverifikasi resmi</span>
               </div>
-              <div className="md:col-span-2 flex justify-between py-1 border-b border-slate-200 bg-amber-50/60 px-2 rounded">
-                <span className="text-slate-700 font-medium">Azimuth Arah Kiblat</span>
-                <span className="font-bold text-slate-900 text-right">{MASJID_SIMAS_DATA.koordinat.kiblatDesc}</span>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Azimut Arah Kiblat</span>
+                <span className="font-bold text-emerald-900 font-mono text-right">{MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°</span>
               </div>
             </div>
           </div>
 
-          {/* Tabel Bagian IV: Legalitas SK DKM */}
+          {/* Tabel Bagian IV: Legalitas SK Takmir & PIC */}
           <div className="font-sans space-y-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 bg-slate-100 px-3 py-1.5 border-l-4 border-[#0F2A25]">
-              IV. SURAT KEPUTUSAN (SK) PENGURUS DKM
+              IV. SURAT KEPUTUSAN (SK) PENGURUS & KONTAK
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-xs">
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Nomor SK Pengukuhan DKM</span>
-                <span className="font-mono font-semibold text-amber-800">{MASJID_SIMAS_DATA.nomorSkDkm}</span>
+                <span className="text-slate-500">Nomor SK Pengurus</span>
+                <span className="font-mono font-bold text-slate-900">{MASJID_SIMAS_DATA.nomorSkDkm}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200">
-                <span className="text-slate-500">Masa Bakti</span>
-                <span className="font-semibold text-amber-800">{MASJID_SIMAS_DATA.tanggalSkDkm}</span>
+                <span className="text-slate-500">Masa Bakti / Periode</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.periodeKepengurusan}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-200 md:col-span-2">
-                <span className="text-slate-500">Instansi Yang Berwenang</span>
-                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.instansiPenerbitSk}</span>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Ketua Umum</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.ketuaUmum}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">PIC Pendaftaran SIMAS</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.kontak.picSimas.nama}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Telepon Resmi Masjid</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.kontak.telepon}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-200">
+                <span className="text-slate-500">Email Resmi</span>
+                <span className="font-semibold text-slate-900">{MASJID_SIMAS_DATA.kontak.email}</span>
               </div>
             </div>
           </div>
@@ -251,13 +275,13 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
           <div className="pt-6 font-sans border-t border-slate-300 grid grid-cols-2 gap-8 text-center text-xs">
             <div>
               <p className="text-slate-600">Disiapkan Oleh,</p>
-              <p className="font-bold text-slate-800">Dewan Kemakmuran Masjid (DKM)</p>
-              <p className="font-semibold text-[#0F2A25]">{MASJID_SIMAS_DATA.namaMasjid}</p>
+              <p className="font-bold text-slate-800">Pengurus Takmir Masjid As-Safar</p>
+              <p className="font-semibold text-[#0F2A25]">{MASJID_SIMAS_DATA.namaResmi}</p>
               <div className="h-16 flex items-center justify-center">
-                <span className="text-[10px] text-slate-400 italic">[Ruang Tanda Tangan & Stempel DKM]</span>
+                <span className="text-[10px] text-slate-400 italic">[Tanda Tangan & Stempel Takmir]</span>
               </div>
-              <p className="font-bold text-slate-700 underline">[Nama Ketua DKM - Dalam Konfirmasi]</p>
-              <p className="text-[10px] text-slate-500">Ketua DKM</p>
+              <p className="font-bold text-slate-900 underline">{MASJID_SIMAS_DATA.ketuaUmum}</p>
+              <p className="text-[10px] text-slate-500">Ketua Umum Takmir</p>
             </div>
 
             <div>
@@ -274,7 +298,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
 
           {/* Catatan Kaki */}
           <div className="text-[9px] font-sans text-slate-400 border-t border-slate-200 pt-3 flex flex-col sm:flex-row justify-between items-center gap-2">
-            <span>Draf formulir inventarisasi data profil masjid — bukan surat penetapan resmi. Menunggu konfirmasi pengurus DKM.</span>
+            <span>Draf formulir inventarisasi data SIMAS Masjid As-Safar — sesuai SK Pengurus No. 017/MA.21.17.0008/IX/2026.</span>
             <span>Waktu cetak: {new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}</span>
           </div>
 
@@ -282,7 +306,7 @@ export const SimasDossierModal: React.FC<SimasDossierModalProps> = ({ isOpen, on
 
         {/* Footer info in Modal */}
         <div className="bg-slate-50 px-6 py-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 print:hidden font-sans">
-          <span>Draf profil data Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang):</span>
+          <span>Draf profil data Masjid As-Safar (Desa Wiringtasi, Kec. Suppa, Kab. Pinrang):</span>
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopyId}

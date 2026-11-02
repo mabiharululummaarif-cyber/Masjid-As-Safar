@@ -9,7 +9,7 @@ export const FinancialSection: React.FC = () => {
   const [copiedRekening, setCopiedRekening] = useState(false);
 
   const handleCopyRekening = () => {
-    const textToCopy = `Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang) - Status Rekening Infaq: ${MASJID_SIMAS_DATA.kontak.rekeningInfaq.bank} (${MASJID_SIMAS_DATA.kontak.rekeningInfaq.nomorRekening})`;
+    const textToCopy = `Masjid As-Safar (Desa Wiringtasi, Kec. Suppa, Kab. Pinrang) - Status Rekening Infaq: ${MASJID_SIMAS_DATA.kontak.rekeningInfaq.bank} (${MASJID_SIMAS_DATA.kontak.rekeningInfaq.nomorRekening})`;
     navigator.clipboard.writeText(textToCopy);
     setCopiedRekening(true);
     setTimeout(() => setCopiedRekening(false), 2500);
@@ -29,8 +29,8 @@ export const FinancialSection: React.FC = () => {
             Laporan Keuangan & Saluran Infaq
           </h2>
           <p className="text-slate-200 text-xs sm:text-base mt-2 leading-relaxed">
-            Prinsip keterbukaan dan transparansi pengelolaan kas DKM Masjid As-Safar, 
-            Desa Lero, Kecamatan Suppa, Kabupaten Pinrang.
+            Prinsip keterbukaan dan transparansi pengelolaan kas Takmir Masjid As-Safar, 
+            Desa Wiringtasi, Kecamatan Suppa, Kabupaten Pinrang.
           </p>
         </div>
 
@@ -43,10 +43,10 @@ export const FinancialSection: React.FC = () => {
               <TrendingUp className="w-4 h-4 text-emerald-400" />
             </div>
             <span className="text-lg sm:text-2xl font-bold font-sans text-amber-200 block">
-              Menunggu Rilis
+              Belum tersedia
             </span>
             <span className="text-[10px] sm:text-[11px] text-slate-300 block mt-1">
-              Dalam proses konfirmasi Bendahara DKM
+              Menunggu rilis dari Bendahara Takmir
             </span>
           </div>
 
@@ -56,10 +56,10 @@ export const FinancialSection: React.FC = () => {
               <TrendingDown className="w-4 h-4 text-rose-400" />
             </div>
             <span className="text-lg sm:text-2xl font-bold font-sans text-amber-200 block">
-              Menunggu Rilis
+              Belum tersedia
             </span>
             <span className="text-[10px] sm:text-[11px] text-slate-300 block mt-1">
-              Dalam proses konfirmasi Bendahara DKM
+              Menunggu rilis dari Bendahara Takmir
             </span>
           </div>
 
@@ -69,10 +69,10 @@ export const FinancialSection: React.FC = () => {
               <Wallet className="w-4 h-4 text-[#F3D063]" />
             </div>
             <span className="text-lg sm:text-2xl font-bold font-sans text-[#F3D063] block">
-              Tahap Rekonsiliasi
+              Belum tersedia
             </span>
             <span className="text-[10px] sm:text-[11px] text-slate-200 block mt-1">
-              Pencatatan kas fisik Desa Lero
+              Pencatatan kas fisik Desa Wiringtasi
             </span>
           </div>
 
@@ -88,7 +88,7 @@ export const FinancialSection: React.FC = () => {
                 Transparansi Pembukuan Kas Masjid
               </h3>
               <p className="text-xs text-slate-200 leading-relaxed">
-                Laporan kas operasional rutin diumumkan kepada jamaah sebelum pelaksanaan Sholat Jum'at di Desa Lero.
+                Laporan kas operasional rutin diumumkan kepada jamaah sebelum pelaksanaan Sholat Jum'at di Desa Wiringtasi.
               </p>
             </div>
 
@@ -96,7 +96,7 @@ export const FinancialSection: React.FC = () => {
             <div className="p-3.5 sm:p-4 rounded-xl bg-[#091F1A] border border-amber-500/50 text-xs text-amber-100 space-y-2">
               <div className="flex items-center gap-2 font-bold text-amber-200">
                 <AlertCircle className="w-4 h-4 text-amber-300 shrink-0" />
-                <span>Status Data Keuangan: Belum Terpublikasi</span>
+                <span>Status Data Keuangan: Belum tersedia</span>
               </div>
               <p className="leading-relaxed text-[11px] sm:text-xs text-slate-200">
                 {FINANCIAL_DATA.keterangan}
@@ -105,15 +105,15 @@ export const FinancialSection: React.FC = () => {
 
             <div className="space-y-2">
               <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-300 block">
-                Struktur Pos Pengelolaan Dana DKM:
+                Struktur Pos Pengelolaan Dana Takmir:
               </span>
               <div className="space-y-2 text-xs">
                 <div className="p-3 rounded-xl bg-[#091D18] border border-[#184639] flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <span className="font-semibold text-white block truncate">• Infaq Jum'at & Tromol Rutin</span>
-                    <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Penerimaan jamaah Desa Lero & musafir</span>
+                    <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Penerimaan jamaah Desa Wiringtasi & musafir</span>
                   </div>
-                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola DKM</span>
+                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola Takmir</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#091D18] border border-[#184639] flex items-center justify-between gap-2">
@@ -121,7 +121,7 @@ export const FinancialSection: React.FC = () => {
                     <span className="font-semibold text-white block truncate">• Biaya Operasional & Sarana</span>
                     <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Listrik, air bersih, kebersihan sarana</span>
                   </div>
-                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola DKM</span>
+                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola Takmir</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-[#091D18] border border-[#184639] flex items-center justify-between gap-2">
@@ -129,14 +129,14 @@ export const FinancialSection: React.FC = () => {
                     <span className="font-semibold text-white block truncate">• ZISWAF & Santunan Sosial</span>
                     <span className="text-[10px] sm:text-[11px] text-slate-300 block truncate">Penyaluran kemakmuran warga sekitar</span>
                   </div>
-                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola DKM</span>
+                  <span className="text-amber-200 font-semibold text-[10px] sm:text-[11px] shrink-0">Dikelola Takmir</span>
                 </div>
               </div>
             </div>
 
             <div className="pt-3 border-t border-[#184639] flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-300">
-              <span>Draf estimasi neraca — Menunggu laporan resmi pengurus DKM</span>
-              <span>Wilayah: Desa Lero, Kec. Suppa</span>
+              <span>Laporan resmi dikelola Bendahara Takmir (Khaerunnisyah Hasbua, S.Pd.)</span>
+              <span>Wilayah: Desa Wiringtasi, Kec. Suppa</span>
             </div>
           </div>
 
@@ -159,13 +159,13 @@ export const FinancialSection: React.FC = () => {
               </div>
               <div className="space-y-1">
                 <span className="font-bold text-white text-xs sm:text-sm block">
-                  Kanal QRIS DKM
+                  Kanal QRIS Masjid
                 </span>
                 <span className="text-xs text-amber-200 font-bold block">
-                  Belum Tersedia — Menunggu Konfirmasi DKM
+                  Belum tersedia
                 </span>
                 <p className="text-[10px] sm:text-[11px] text-slate-200 leading-relaxed max-w-xs mx-auto font-normal">
-                  Kanal pembayaran QRIS saat ini belum tersedia dan belum aktif. Pembayaran digital akan dipublikasikan setelah ada konfirmasi resmi dari pengurus DKM Masjid As-Safar.
+                  Kanal pembayaran QRIS saat ini belum tersedia dan belum aktif. Pembayaran digital resmi akan dipublikasikan setelah ditetapkan oleh Takmir Masjid As-Safar.
                 </p>
               </div>
             </div>
@@ -173,7 +173,7 @@ export const FinancialSection: React.FC = () => {
             {/* Bank Transfer Details Box */}
             <div className="bg-[#091E1A] rounded-2xl p-3.5 sm:p-4 text-left border border-[#2D6A4F] space-y-2 shadow-inner">
               <span className="text-[10px] uppercase font-bold text-amber-200 tracking-wider block">
-                Status Rekening Bank DKM:
+                Status Rekening Bank Takmir:
               </span>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="min-w-0">

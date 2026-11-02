@@ -40,19 +40,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Location & SIMAS Status Badge */}
           <div className="inline-flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 px-3.5 py-1.5 rounded-full bg-[#0A221C] text-emerald-100 border border-[#2D6A4F] shadow-md text-[11px] sm:text-xs font-semibold mb-4 sm:mb-6">
             <MapPin className="w-3.5 h-3.5 text-[#F3D063] shrink-0" />
-            <span>Desa Lero, Kec. Suppa, Pinrang (WITA)</span>
+            <span>Desa Wiringtasi, Kec. Suppa, Pinrang (WITA)</span>
             <span className="hidden xs:inline text-emerald-400">•</span>
-            <span className="text-[#F3D063] font-bold">Status SIMAS: Menunggu Konfirmasi DKM</span>
+            <span className="text-[#F3D063] font-bold">Status SIMAS: Belum tersedia</span>
           </div>
 
           <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-serif font-black tracking-tight text-white leading-tight drop-shadow-md">
             Portal Informasi <span className="text-[#F3D063]">Masjid As-Safar</span>
           </h1>
+          <p className="text-xs sm:text-sm font-serif text-emerald-200 mt-1.5 font-medium tracking-wide">
+            Yayasan Biharul Ulum Ma'arif • Periode Kepengurusan 2026–2030
+          </p>
 
           <p className="text-xs sm:text-base text-slate-100 font-sans max-w-2xl mx-auto mt-3 sm:mt-5 leading-relaxed font-normal">
-            Pusat peribadatan umat, syiar dakwah, dan fasilitas ibadah di Desa Lero, Kecamatan Suppa, 
-            Kabupaten Pinrang, Sulawesi Selatan. Menghadirkan visualisasi rancangan arsitektur tropis modern 
-            serta inventarisasi data persiapan pendaftaran resmi ke KUA dan Kementerian Agama.
+            Pusat peribadatan umat, syiar dakwah, dan fasilitas ibadah di Jl. Poros TPI Ujung Labuang Lero B Wiringtasi, 
+            Kecamatan Suppa, Kabupaten Pinrang, Sulawesi Selatan. Disahkan melalui SK Pengurus Nomor 017/MA.21.17.0008/IX/2026.
           </p>
 
           {/* Call to Actions Button Group (Touch-friendly & Stacked on Mobile) */}
@@ -97,7 +99,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 {MASJID_SIMAS_DATA.luasBangunan} m²
               </span>
               <span className="text-[10px] sm:text-[11px] text-emerald-200 uppercase tracking-wider font-semibold block truncate">
-                Dimensi 3D (22m × 22m)
+                Luas Bangunan (SIMAS)
               </span>
             </div>
           </div>
@@ -108,10 +110,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
             <div className="min-w-0">
               <span className="text-base sm:text-2xl font-black text-white font-mono block leading-tight">
-                ± {MASJID_SIMAS_DATA.kapasitasJamaah}
+                {MASJID_SIMAS_DATA.kapasitasJamaah}
               </span>
               <span className="text-[10px] sm:text-[11px] text-emerald-200 uppercase tracking-wider font-semibold block truncate">
-                Estimasi Kapasitas
+                Daya Tampung Jamaah
               </span>
             </div>
           </div>
@@ -125,7 +127,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 {MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°
               </span>
               <span className="text-[10px] sm:text-[11px] text-emerald-200 uppercase tracking-wider font-semibold block truncate">
-                Estimasi Arah Kiblat
+                Azimut Arah Kiblat
               </span>
             </div>
           </div>
@@ -136,10 +138,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
             <div className="min-w-0">
               <span className="text-xs sm:text-base font-black text-amber-200 font-sans block leading-tight truncate">
-                Menunggu Konfirmasi
+                Tanah Wakaf
               </span>
               <span className="text-[10px] sm:text-[11px] text-emerald-200 uppercase tracking-wider font-semibold block truncate">
-                Status Legalitas
+                Luas: 3.938 m²
               </span>
             </div>
           </div>

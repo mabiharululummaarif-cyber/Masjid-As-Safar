@@ -35,7 +35,7 @@ export const FacilitiesSection: React.FC = () => {
           </h2>
           <p className="text-slate-700 text-xs sm:text-base mt-2 leading-relaxed font-normal">
             Rancangan fasilitas dan sarana ibadah Masjid As-Safar demi kenyamanan 
-            jamaah warga Desa Lero serta musafir yang singgah di koridor Kecamatan Suppa.
+            jamaah warga Desa Wiringtasi serta musafir yang singgah di koridor Kecamatan Suppa.
           </p>
         </div>
 
@@ -73,7 +73,7 @@ export const FacilitiesSection: React.FC = () => {
 
               <div className="pt-3 sm:pt-4 mt-3 sm:mt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 font-medium">
                 <span>Masjid As-Safar</span>
-                <span className="font-bold text-emerald-900">Desa Lero</span>
+                <span className="font-bold text-emerald-900">Desa Wiringtasi</span>
               </div>
             </div>
           ))}

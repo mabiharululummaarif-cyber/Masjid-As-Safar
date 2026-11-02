@@ -33,7 +33,7 @@ export const MosqueInfoModal: React.FC<MosqueInfoModalProps> = ({
                   Spesifikasi Arsitektur 3D
                 </h3>
                 <p className="text-[11px] sm:text-xs text-white/80 truncate">
-                  Masjid As-Safar • Desa Lero, Kec. Suppa, Pinrang
+                  Masjid As-Safar • Desa Wiringtasi, Kec. Suppa, Pinrang
                 </p>
               </div>
             </div>
@@ -58,7 +58,7 @@ export const MosqueInfoModal: React.FC<MosqueInfoModalProps> = ({
                   Lokasi & Registrasi
                 </span>
                 <span className="font-sans text-xs text-white font-medium block">
-                  Desa Lero, Kec. Suppa, Kab. Pinrang (WITA)
+                  Desa Wiringtasi, Kec. Suppa, Kab. Pinrang (WITA)
                 </span>
                 <span className="text-[10px] text-amber-300 font-mono block">
                   Status SIMAS: {MASJID_SIMAS_DATA.idSimas}
@@ -74,14 +74,14 @@ export const MosqueInfoModal: React.FC<MosqueInfoModalProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center">
               <span className="text-[10px] uppercase font-bold text-emerald-800 block">Kapasitas Saf</span>
-              <span className="text-lg font-black text-[#1B4332]">±350</span>
-              <span className="text-[10px] text-gray-500 block">Estimasi Jamaah</span>
+              <span className="text-lg font-black text-[#1B4332]">{MASJID_SIMAS_DATA.kapasitasJamaah}</span>
+              <span className="text-[10px] text-gray-500 block">Jamaah (SIMAS)</span>
             </div>
 
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 text-center">
               <span className="text-[10px] uppercase font-bold text-amber-800 block">Luas Bangunan</span>
-              <span className="text-lg font-black text-amber-900">484 m²</span>
-              <span className="text-[10px] text-gray-500 block">Dimensi 22m × 22m</span>
+              <span className="text-lg font-black text-amber-900">{MASJID_SIMAS_DATA.luasBangunan} m²</span>
+              <span className="text-[10px] text-gray-500 block">Tanah: {MASJID_SIMAS_DATA.luasTanah?.toLocaleString('id-ID')} m²</span>
             </div>
 
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-3 text-center">
@@ -92,8 +92,8 @@ export const MosqueInfoModal: React.FC<MosqueInfoModalProps> = ({
 
             <div className="bg-amber-50 border border-amber-100 rounded-2xl p-3 text-center">
               <span className="text-[10px] uppercase font-bold text-amber-800 block">Arah Kiblat</span>
-              <span className="text-lg font-black text-amber-900">292.5°</span>
-              <span className="text-[10px] text-gray-500 block">Estimasi Kec. Suppa</span>
+              <span className="text-lg font-black text-amber-900">{MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°</span>
+              <span className="text-[10px] text-gray-500 block">Verifikasi Lapangan</span>
             </div>
           </div>
 

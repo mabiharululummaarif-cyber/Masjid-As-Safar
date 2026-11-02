@@ -34,26 +34,26 @@ export const Footer: React.FC<FooterProps> = ({
                   MASJID AS-SAFAR
                 </h3>
                 <p className="text-[11px] sm:text-xs text-emerald-300 font-sans truncate font-medium">
-                  Desa Lero, Kec. Suppa, Kab. Pinrang • WITA (UTC+8)
+                  Desa Wiringtasi, Kec. Suppa, Kab. Pinrang • WITA (UTC+8)
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed max-w-md">
-              Pusat pembinaan ruhiyah, dakwah Islamiyah, dan pelayanan jamaah di wilayah pesisir Desa Lero, 
-              Kecamatan Suppa. Memuat data inventarisasi untuk persiapan pendaftaran resmi pada KUA dan SIMAS Kementerian Agama.
+              Pusat pembinaan ruhiyah, dakwah Islamiyah, dan pelayanan jamaah di Jl. Poros TPI Ujung Labuang Lero B Wiringtasi, 
+              Kecamatan Suppa, Kabupaten Pinrang, Sulawesi Selatan.
             </p>
 
             <div className="p-3 sm:p-3.5 rounded-xl bg-[#0B211C] border border-[#1E4D40] space-y-1 shadow-md">
               <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
                 <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Status SIMAS: Menunggu Konfirmasi DKM</span>
+                <span>Status SIMAS: Belum tersedia</span>
               </div>
               <p className="text-[11px] font-mono text-emerald-200 truncate">
                 ID SIMAS: {MASJID_SIMAS_DATA.idSimas}
               </p>
               <p className="text-[10px] text-slate-300 truncate">
-                SK DKM: {MASJID_SIMAS_DATA.nomorSkDkm} (KUA Kec. Suppa)
+                SK Pengurus: {MASJID_SIMAS_DATA.nomorSkDkm} ({MASJID_SIMAS_DATA.periodeKepengurusan})
               </p>
             </div>
           </div>
@@ -91,7 +91,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button onClick={() => onNavigate('dkm')} className="py-1 min-h-[36px] flex items-center text-slate-200 hover:text-[#F3D063] transition-colors cursor-pointer">
-                  • Pengurus DKM & Agenda
+                  • Pengurus Takmir & Agenda
                 </button>
               </li>
               <li>
@@ -117,8 +117,8 @@ export const Footer: React.FC<FooterProps> = ({
 
               <div className="flex items-start gap-2.5">
                 <Compass className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span className="font-mono text-[11px] leading-relaxed">
-                  Ref. Koordinat: {MASJID_SIMAS_DATA.koordinat.lat}, {MASJID_SIMAS_DATA.koordinat.lng} (Perkiraan Suppa — Belum Final)
+                <span className="text-[11px] leading-relaxed">
+                  Azimut Arah Kiblat: <strong>{MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°</strong> (Formulir SIMAS)
                 </span>
               </div>
 
@@ -133,7 +133,7 @@ export const Footer: React.FC<FooterProps> = ({
 
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="text-amber-200 text-[11px] font-medium truncate">Kontak Pengurus: {MASJID_SIMAS_DATA.kontak.telepon}</span>
+                <span className="text-amber-200 text-[11px] font-medium truncate">Telepon Resmi: {MASJID_SIMAS_DATA.kontak.telepon}</span>
               </div>
             </div>
 

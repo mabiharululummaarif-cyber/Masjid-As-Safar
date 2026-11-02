@@ -1,8 +1,8 @@
 import React from 'react';
-import { DKM_MEMBERS, WEEKLY_AGENDA } from '../data/simasData';
+import { DKM_MEMBERS, PEGAWAI_SYARA, WEEKLY_AGENDA, MASJID_SIMAS_DATA } from '../data/simasData';
 import { 
   Award, Clock, 
-  UserCheck, AlertCircle
+  UserCheck, CheckCircle2, ShieldCheck, Users
 } from 'lucide-react';
 
 export const DkmSection: React.FC = () => {
@@ -17,18 +17,18 @@ export const DkmSection: React.FC = () => {
             <span>TATA KELOLA & PENGURUS MASJID</span>
           </div>
           <h2 className="text-2xl xs:text-3xl sm:text-4xl font-serif font-black text-[#0F2A25] tracking-tight">
-            Dewan Kemakmuran Masjid (DKM)
+            Susunan Pengurus Takmir Masjid
           </h2>
           <p className="text-slate-700 text-xs sm:text-base mt-2 leading-relaxed font-normal">
-            Susunan bidang amanah dan struktur kepengurusan Masjid As-Safar, Desa Lero, Kecamatan Suppa, 
-            Kabupaten Pinrang. Nama definitif pengurus menunggu konfirmasi resmi pengurus DKM.
+            {MASJID_SIMAS_DATA.namaResmi} di Jl. Poros TPI Ujung Labuang Lero B Wiringtasi, Kec. Suppa, Kab. Pinrang. 
+            Disahkan melalui <strong>SK Pengurus Nomor {MASJID_SIMAS_DATA.nomorSkDkm}</strong> untuk masa bakti <strong>Periode {MASJID_SIMAS_DATA.periodeKepengurusan}</strong>.
           </p>
         </div>
 
-        {/* DKM Structure Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-16">
+        {/* Takmir Structure Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-10 sm:mb-14">
           {DKM_MEMBERS.map((member, index) => {
-            const isPimpinan = index < 2;
+            const isPimpinan = index < 4; // Pengurus Harian
             return (
               <div
                 key={index}
@@ -50,11 +50,11 @@ export const DkmSection: React.FC = () => {
 
                     <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0 ${
                       isPimpinan
-                        ? 'bg-[#0B211C] text-amber-200 border border-amber-400/50'
-                        : 'bg-amber-100 text-amber-900 border border-amber-300'
+                        ? 'bg-[#0B211C] text-[#F3D063] border border-[#D4AF37]/50'
+                        : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
                     }`}>
-                      <AlertCircle className="w-3 h-3 text-amber-600" />
-                      <span>Menunggu Konfirmasi</span>
+                      <CheckCircle2 className={`w-3 h-3 ${isPimpinan ? 'text-[#F3D063]' : 'text-emerald-700'}`} />
+                      <span>SK 2026–2030</span>
                     </span>
                   </div>
 
@@ -83,8 +83,44 @@ export const DkmSection: React.FC = () => {
           })}
         </div>
 
+        {/* Pegawai Syara' Section */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-7 border-2 border-slate-200 shadow-sm mb-10 sm:mb-14">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-900 flex items-center justify-center shrink-0 border border-emerald-300">
+                <ShieldCheck className="w-5 h-5 text-emerald-800" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-xl font-bold font-serif text-[#0F2A25]">
+                  Pegawai Syara' Masjid As-Safar
+                </h3>
+                <p className="text-xs text-slate-600">
+                  Petugas pelaksanaan ibadah fardhu, adzan, kebersihan, dan pelayanan jamaah harian.
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold px-3 py-1 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-full w-fit">
+              Petugas Terkonfirmasi
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {PEGAWAI_SYARA.map((item, idx) => (
+              <div key={idx} className="p-3.5 rounded-xl bg-[#FAF8F5] border border-slate-200 flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <h4 className="font-bold text-slate-900 text-sm truncate">{item.nama}</h4>
+                  <p className="text-xs font-semibold text-emerald-800 truncate">{item.tugas}</p>
+                </div>
+                <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <Users className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Agenda & Kajian Section */}
-        <div className="mt-6 sm:mt-8">
+        <div>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
             <div>
               <span className="text-[10px] sm:text-xs uppercase font-bold text-emerald-800 tracking-wider block">
@@ -99,7 +135,7 @@ export const DkmSection: React.FC = () => {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
             {WEEKLY_AGENDA.map((item) => (
               <div 
                 key={item.id}
@@ -107,7 +143,11 @@ export const DkmSection: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 font-bold text-[10px] rounded-full uppercase tracking-wider border border-emerald-300">
+                    <span className={`px-2.5 py-0.5 font-bold text-[10px] rounded-full uppercase tracking-wider border ${
+                      item.status === 'TERKONFIRMASI' 
+                        ? 'bg-emerald-100 text-emerald-900 border-emerald-300' 
+                        : 'bg-amber-100 text-amber-900 border-amber-300'
+                    }`}>
                       {item.kategori}
                     </span>
                     <span className="text-xs text-slate-600 font-semibold flex items-center gap-1">
@@ -128,8 +168,8 @@ export const DkmSection: React.FC = () => {
                 </div>
 
                 <div className="pt-3 mt-3 sm:mt-4 border-t border-slate-100 flex items-center justify-between text-xs text-emerald-900 font-semibold">
-                  <span>Lokasi: Desa Lero, Kec. Suppa</span>
-                  <span className="text-[11px] text-slate-500 font-mono">WITA</span>
+                  <span>Lokasi: Desa {MASJID_SIMAS_DATA.desa}, Kec. {MASJID_SIMAS_DATA.kecamatan}</span>
+                  <span className="text-[11px] text-slate-500 font-mono">{MASJID_SIMAS_DATA.zonaWaktu}</span>
                 </div>
               </div>
             ))}

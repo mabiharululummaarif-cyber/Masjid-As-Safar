@@ -13,9 +13,7 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
   const [copiedId, setCopiedId] = useState(false);
 
   const handleCopyId = () => {
-    const textToCopy = MASJID_SIMAS_DATA.idSimas === 'Belum Dikonfirmasi'
-      ? `Masjid As-Safar, Desa Lero, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan (Status SIMAS: Belum Dikonfirmasi DKM)`
-      : MASJID_SIMAS_DATA.idSimas;
+    const textToCopy = `Masjid As-Safar Yayasan Biharul Ulum Ma'arif, Jl. Poros TPI Ujung Labuang Lero B Wiringtasi, Kec. Suppa, Kab. Pinrang, Sulawesi Selatan (Status SIMAS: Belum tersedia)`;
     navigator.clipboard.writeText(textToCopy);
     setCopiedId(true);
     setTimeout(() => setCopiedId(false), 2500);
@@ -35,8 +33,8 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
             Profil & Inventarisasi Legalitas SIMAS
           </h2>
           <p className="text-slate-700 text-xs sm:text-base mt-2 leading-relaxed font-normal">
-            Inventarisasi data administratif Masjid As-Safar (Desa Lero, Kec. Suppa, Kab. Pinrang) untuk 
-            persiapan koordinasi dan pencatatan resmi di KUA Kecamatan Suppa dan Kementerian Agama Kabupaten Pinrang.
+            Inventarisasi data administratif Masjid As-Safar Yayasan Biharul Ulum Ma'arif (Desa Wiringtasi, Kec. Suppa, Kab. Pinrang) 
+            berdasarkan data formulir pendaftaran SIMAS dan SK Pengurus Nomor 017/MA.21.17.0008/IX/2026.
           </p>
         </div>
 
@@ -58,7 +56,7 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
                 <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1.5 text-[11px] sm:text-xs text-slate-100">
                   <span className="inline-flex items-center gap-1 bg-[#0A221C] text-amber-200 px-2.5 py-1 rounded-full font-bold border border-amber-500/50 text-[10px] sm:text-[11px]">
                     <AlertCircle className="w-3.5 h-3.5 text-amber-300 shrink-0" />
-                    <span>Menunggu Konfirmasi DKM / KUA Kec. Suppa</span>
+                    <span>Status: Belum tersedia</span>
                   </span>
                   <span className="hidden sm:inline text-slate-300">•</span>
                   <span className="hidden sm:inline text-slate-100">Tipologi: <strong className="text-white">{MASJID_SIMAS_DATA.tipologi}</strong></span>
@@ -102,19 +100,19 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
             <ul className="text-xs space-y-2 text-slate-700">
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Tipologi:</span>
-                <span className="font-bold text-slate-900 text-right">Masjid Jami' (Draf)</span>
+                <span className="font-bold text-slate-900 text-right">{MASJID_SIMAS_DATA.tipologi}</span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Luas Bangunan:</span>
-                <span className="font-bold text-slate-900">484 m² (Model 3D)</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.luasBangunanDesc}</span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Luas Tanah:</span>
-                <span className="font-bold text-amber-800">Perlu Konfirmasi</span>
+                <span className="font-bold text-emerald-900">{MASJID_SIMAS_DATA.luasTanahDesc}</span>
               </li>
               <li className="flex justify-between">
-                <span>Estimasi Kapasitas:</span>
-                <span className="font-bold text-emerald-900">± 350 Jamaah (Model 3D)</span>
+                <span>Daya Tampung:</span>
+                <span className="font-bold text-emerald-900">{MASJID_SIMAS_DATA.kapasitasJamaah} Jamaah</span>
               </li>
             </ul>
           </div>
@@ -130,23 +128,23 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
             <ul className="text-xs space-y-2 text-slate-700">
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Status Tanah:</span>
-                <span className="font-bold text-amber-800">Menunggu Bukti</span>
+                <span className="font-bold text-emerald-900">{MASJID_SIMAS_DATA.statusTanah} ({MASJID_SIMAS_DATA.kondisiBangunan})</span>
               </li>
               <li className="flex flex-col border-b border-slate-100 pb-1.5">
                 <span className="text-[10px] text-slate-500">No. Sertifikat Wakaf:</span>
                 <span className="font-mono font-bold text-slate-800 text-[11px] truncate">
-                  Belum Dikonfirmasi
+                  {MASJID_SIMAS_DATA.nomorSertifikatWakaf}
                 </span>
               </li>
               <li className="flex flex-col border-b border-slate-100 pb-1.5">
                 <span className="text-[10px] text-slate-500">Akta Ikrar Wakaf (AIW):</span>
                 <span className="font-mono font-bold text-slate-800 text-[11px] truncate">
-                  Belum Dikonfirmasi
+                  {MASJID_SIMAS_DATA.nomorAIW}
                 </span>
               </li>
               <li className="flex justify-between">
-                <span>Status Nadzir:</span>
-                <span className="font-bold text-slate-800">DKM Masjid As-Safar</span>
+                <span>Nadzir Wakaf:</span>
+                <span className="font-bold text-slate-800 truncate">{MASJID_SIMAS_DATA.nadzirWakaf}</span>
               </li>
             </ul>
           </div>
@@ -157,26 +155,26 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
               <ShieldCheck className="w-5 h-5" />
             </div>
             <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-2">
-              Legalitas & SK DKM
+              Legalitas & SK Pengurus
             </h4>
             <ul className="text-xs space-y-2 text-slate-700">
-              <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>SK DKM KUA:</span>
-                <span className="font-bold text-amber-800">Menunggu Rilis</span>
-              </li>
               <li className="flex flex-col border-b border-slate-100 pb-1.5">
-                <span className="text-[10px] text-slate-500">Penerbit SK:</span>
-                <span className="font-bold text-slate-900 text-[11px]">
-                  KUA Kec. Suppa
+                <span className="text-[10px] text-slate-500">Nomor SK Pengurus:</span>
+                <span className="font-mono font-bold text-slate-900 text-[11px] truncate">
+                  {MASJID_SIMAS_DATA.nomorSkDkm}
                 </span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Tahun Berdiri:</span>
-                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.tahunBerdiri}</span>
+                <span>Periode:</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.periodeKepengurusan}</span>
+              </li>
+              <li className="flex justify-between border-b border-slate-100 pb-1.5">
+                <span>Ketua Umum:</span>
+                <span className="font-bold text-slate-900 truncate">{MASJID_SIMAS_DATA.ketuaUmum}</span>
               </li>
               <li className="flex justify-between">
-                <span>Rekomendasi SIMAS:</span>
-                <span className="font-bold text-amber-800">Draf Persiapan</span>
+                <span>Tahun Berdiri:</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.tahunMulaiDibangun} / {MASJID_SIMAS_DATA.tahunMulaiDigunakan}</span>
               </li>
             </ul>
           </div>
@@ -191,20 +189,20 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
             </h4>
             <ul className="text-xs space-y-2 text-slate-700">
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
-                <span>Desa / Kelurahan:</span>
-                <span className="font-bold text-slate-900">Desa Lero</span>
+                <span>Desa:</span>
+                <span className="font-bold text-slate-900">Desa {MASJID_SIMAS_DATA.desa}</span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Kecamatan:</span>
-                <span className="font-bold text-slate-900">Suppa</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.kecamatan}</span>
               </li>
               <li className="flex justify-between border-b border-slate-100 pb-1.5">
                 <span>Kabupaten:</span>
-                <span className="font-bold text-slate-900">Pinrang</span>
+                <span className="font-bold text-slate-900">{MASJID_SIMAS_DATA.kabupatenKota}</span>
               </li>
               <li className="flex justify-between">
-                <span>Zona Waktu:</span>
-                <span className="font-bold text-slate-900">WITA (UTC+8)</span>
+                <span>Azimut Kiblat:</span>
+                <span className="font-bold text-emerald-900 font-mono">{MASJID_SIMAS_DATA.koordinat.azimuthKiblat}°</span>
               </li>
             </ul>
           </div>
