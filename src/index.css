@@ -31,6 +31,16 @@ body {
   display: none;
 }
 
+/* Ensure sticky header (height ~88px) never overlaps section headings on scroll */
+section[id], footer[id] {
+  scroll-margin-top: 5.75rem;
+}
+@media (min-width: 640px) {
+  section[id], footer[id] {
+    scroll-margin-top: 6.5rem;
+  }
+}
+
 /* Print optimizations for SIMAS Kemenag A4 Dossier */
 @media print {
   body {

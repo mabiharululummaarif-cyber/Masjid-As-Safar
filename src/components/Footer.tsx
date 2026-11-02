@@ -17,7 +17,7 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenShare
 }) => {
   return (
-    <footer id="kontak" className="bg-[#081815] text-slate-200 pt-10 sm:pt-16 pb-8 border-t border-[#1E4D40]">
+    <footer id="kontak" className="scroll-mt-24 sm:scroll-mt-28 bg-[#081815] text-slate-200 pt-10 sm:pt-16 pb-8 border-t border-[#1E4D40]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Main Footer Grid */}
@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="p-3 sm:p-3.5 rounded-xl bg-[#0B211C] border border-[#1E4D40] space-y-1 shadow-md">
               <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
                 <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Status Data SIMAS Kemenag</span>
+                <span>Status SIMAS: Menunggu Konfirmasi DKM</span>
               </div>
               <p className="text-[11px] font-mono text-emerald-200 truncate">
                 ID SIMAS: {MASJID_SIMAS_DATA.idSimas}

@@ -17,7 +17,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onNavigateToInfaq
 }) => {
   return (
-    <section id="beranda" className="relative overflow-hidden bg-[#0F2A25] bg-gradient-to-b from-[#0F2A25] via-[#143E34] to-[#0F2A25] text-white pt-8 pb-12 sm:pt-14 sm:pb-20 lg:pt-18 lg:pb-24 border-b border-[#1E4D40]">
+    <section id="beranda" className="relative overflow-hidden bg-[#0F2A25] bg-gradient-to-b from-[#0F2A25] via-[#143E34] to-[#0F2A25] text-white pt-8 pb-12 sm:pt-14 sm:pb-20 lg:pt-18 lg:pb-24 border-b border-[#1E4D40] scroll-mt-24 sm:scroll-mt-28">
       
       {/* Decorative Islamic Background Pattern (Crisp and subtle, no hazy blur) */}
       <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:24px_24px]" />
@@ -42,7 +42,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <MapPin className="w-3.5 h-3.5 text-[#F3D063] shrink-0" />
             <span>Desa Lero, Kec. Suppa, Pinrang (WITA)</span>
             <span className="hidden xs:inline text-emerald-400">•</span>
-            <span className="text-[#F3D063] font-bold">Status SIMAS: Konfirmasi DKM</span>
+            <span className="text-[#F3D063] font-bold">Status SIMAS: Menunggu Konfirmasi DKM</span>
           </div>
 
           <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-serif font-black tracking-tight text-white leading-tight drop-shadow-md">
@@ -136,7 +136,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
             <div className="min-w-0">
               <span className="text-xs sm:text-base font-black text-amber-200 font-sans block leading-tight truncate">
-                Konfirmasi DKM
+                Menunggu Konfirmasi
               </span>
               <span className="text-[10px] sm:text-[11px] text-emerald-200 uppercase tracking-wider font-semibold block truncate">
                 Status Legalitas

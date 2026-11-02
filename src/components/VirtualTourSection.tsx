@@ -78,7 +78,7 @@ export const VirtualTourSection: React.FC<VirtualTourSectionProps> = ({
   };
 
   return (
-    <section id="tur-3d" className="py-10 sm:py-16 bg-[#0B201C] text-white relative border-b border-[#1E4D40]">
+    <section id="tur-3d" className="scroll-mt-24 sm:scroll-mt-28 py-10 sm:py-16 bg-[#0B201C] text-white relative border-b border-[#1E4D40]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Section Heading */}

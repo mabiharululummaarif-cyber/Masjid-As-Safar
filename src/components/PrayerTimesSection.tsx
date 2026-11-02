@@ -17,7 +17,7 @@ export const PrayerTimesSection: React.FC = () => {
   }, []);
 
   return (
-    <section id="jadwal" className="py-10 sm:py-16 bg-[#0F2A25] bg-gradient-to-b from-[#0F2A25] via-[#143731] to-[#0F2A25] text-white border-b border-[#1E4D40]">
+    <section id="jadwal" className="scroll-mt-24 sm:scroll-mt-28 py-10 sm:py-16 bg-[#0F2A25] bg-gradient-to-b from-[#0F2A25] via-[#143731] to-[#0F2A25] text-white border-b border-[#1E4D40]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Section Header */}

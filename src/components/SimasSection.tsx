@@ -22,7 +22,7 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
   };
 
   return (
-    <section id="simas" className="py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
+    <section id="simas" className="scroll-mt-24 sm:scroll-mt-28 py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Section Header */}
@@ -41,11 +41,11 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
         </div>
 
         {/* Highlight Card: SIMAS National Registration Status */}
-        <div className="bg-[#0F2A25] bg-gradient-to-r from-[#0F2A25] to-[#18463C] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-2xl mb-8 sm:mb-10 border-2 border-[#2D6A4F]">
+        <div className="bg-[#123B32] bg-gradient-to-r from-[#144238] via-[#1B4E43] to-[#12382F] rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 text-white shadow-2xl mb-8 sm:mb-10 border-2 border-[#D4AF37]/80">
           <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 sm:gap-6">
             
             <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl bg-[#143B33] border-2 border-[#D4AF37] flex items-center justify-center shrink-0 shadow-md">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl bg-[#184D40] border-2 border-[#D4AF37] flex items-center justify-center shrink-0 shadow-md">
                 <Landmark className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-[#F3D063]" />
               </div>
               <div className="min-w-0">
@@ -70,7 +70,7 @@ export const SimasSection: React.FC<SimasSectionProps> = ({ onOpenDossier }) => 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto pt-2 lg:pt-0">
               <button
                 onClick={handleCopyId}
-                className="min-h-[44px] px-4 py-2.5 bg-[#143B33] hover:bg-[#1A4C40] border border-[#2D6A4F] text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shadow-sm"
+                className="min-h-[44px] px-4 py-2.5 bg-[#194E42] hover:bg-[#205D50] border border-[#D4AF37]/40 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shadow-sm"
               >
                 {copiedId ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4 text-[#F3D063]" />}
                 <span>{copiedId ? 'Keterangan Disalin!' : 'Salin Info Status'}</span>

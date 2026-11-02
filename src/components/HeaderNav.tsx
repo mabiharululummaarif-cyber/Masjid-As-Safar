@@ -69,7 +69,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
             </span>
             <span className="hidden md:inline text-slate-400">|</span>
             <span className="hidden md:inline text-amber-200 text-[10px] font-semibold truncate">
-              Status SIMAS: Belum Dikonfirmasi
+              Status SIMAS: Menunggu Konfirmasi DKM
             </span>
           </div>
 
@@ -186,7 +186,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = ({
       {mobileMenuOpen && (
         <div className="xl:hidden bg-[#0B211C] border-t border-[#184639] px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200 shadow-2xl">
           <div className="pb-3 border-b border-[#184639] flex items-center justify-between text-xs text-slate-200">
-            <span>Status SIMAS: <strong className="text-amber-200">Belum Dikonfirmasi</strong></span>
+            <span>Status SIMAS: <strong className="text-amber-200">Menunggu Konfirmasi DKM</strong></span>
             <span className="text-[#F3D063] font-semibold">{dates.hijri}</span>
           </div>
 

@@ -7,7 +7,7 @@ import {
 
 export const DkmSection: React.FC = () => {
   return (
-    <section id="dkm" className="py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
+    <section id="dkm" className="scroll-mt-24 sm:scroll-mt-28 py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Section Header */}
@@ -21,7 +21,7 @@ export const DkmSection: React.FC = () => {
           </h2>
           <p className="text-slate-700 text-xs sm:text-base mt-2 leading-relaxed font-normal">
             Susunan bidang amanah dan struktur kepengurusan Masjid As-Safar, Desa Lero, Kecamatan Suppa, 
-            Kabupaten Pinrang. Nama definitif pengurus sedang dalam proses konfirmasi DKM.
+            Kabupaten Pinrang. Nama definitif pengurus menunggu konfirmasi resmi pengurus DKM.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export const DkmSection: React.FC = () => {
                         : 'bg-amber-100 text-amber-900 border border-amber-300'
                     }`}>
                       <AlertCircle className="w-3 h-3 text-amber-600" />
-                      <span>Konfirmasi DKM</span>
+                      <span>Menunggu Konfirmasi</span>
                     </span>
                   </div>
 

@@ -49,6 +49,7 @@ export default function App() {
   const [isSimasDossierOpen, setIsSimasDossierOpen] = useState(false);
   const [focusPosition, setFocusPosition] = useState<[number, number, number] | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showFloating3dBtn, setShowFloating3dBtn] = useState(false);
 
   // Persist config to localStorage
   useEffect(() => {
@@ -58,6 +59,36 @@ export default function App() {
       console.warn('Failed to save config', e);
     }
   }, [config]);
+
+  // Track scroll position to hide floating 3D button when on Hero or when 3D Tour section is visible
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY || window.pageYOffset;
+      const tourSection = document.getElementById('tur-3d');
+
+      // Hide when on hero (top banner has prominent 3D button)
+      if (scrollY < 260) {
+        setShowFloating3dBtn(false);
+        return;
+      }
+
+      // Hide when #tur-3d section is currently visible in viewport
+      if (tourSection) {
+        const rect = tourSection.getBoundingClientRect();
+        const inView = rect.top < window.innerHeight * 0.8 && rect.bottom > window.innerHeight * 0.2;
+        if (inView) {
+          setShowFloating3dBtn(false);
+          return;
+        }
+      }
+
+      setShowFloating3dBtn(true);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Smooth scroll navigation on website
   const handleNavigate = (sectionId: string) => {
@@ -205,15 +236,21 @@ export default function App() {
             onOpenShare={() => setIsShareModalOpen(true)}
           />
 
-          {/* Floating Action Button: Quick 3D Fullscreen Jump (Compact circular on mobile, expanded on desktop) */}
-          <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30">
+          {/* Floating Action Button: Quick 3D Fullscreen Jump (Adaptive visibility, safe-area aware) */}
+          <div 
+            className={`fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] right-3.5 sm:bottom-6 sm:right-6 z-30 transition-all duration-300 ${
+              showFloating3dBtn
+                ? 'opacity-100 translate-y-0 pointer-events-auto scale-100'
+                : 'opacity-0 translate-y-4 pointer-events-none scale-90'
+            }`}
+          >
             <button
               onClick={() => setViewMode('fullscreen3D')}
-              className="w-12 h-12 sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-full shadow-2xl transition-all cursor-pointer transform hover:scale-105 active:scale-95 border-2 border-white/80 flex items-center justify-center gap-2"
+              className="w-11 h-11 sm:w-auto sm:h-auto sm:px-4 sm:py-2.5 bg-gradient-to-r from-[#D4AF37] to-[#e4c254] hover:from-[#c29e2e] hover:to-[#d4af37] text-[#0F2A25] font-black rounded-full shadow-2xl transition-all cursor-pointer transform hover:scale-105 active:scale-95 border-2 border-white/80 flex items-center justify-center gap-2"
               title="Buka Mode Tur 3D Fullscreen"
               aria-label="Jelajah Tur 3D Fullscreen"
             >
-              <Eye className="w-5 h-5 sm:w-4 sm:h-4 shrink-0" />
+              <Eye className="w-5 h-5 sm:w-4 sm:h-4 shrink-0 text-[#0F2A25]" />
               <span className="text-xs sm:text-sm hidden sm:inline">Jelajah 3D Fullscreen</span>
             </button>
           </div>

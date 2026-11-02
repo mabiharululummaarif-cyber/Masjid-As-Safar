@@ -21,7 +21,7 @@ export const FacilitiesSection: React.FC = () => {
   };
 
   return (
-    <section id="fasilitas" className="py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
+    <section id="fasilitas" className="scroll-mt-24 sm:scroll-mt-28 py-10 sm:py-16 bg-[#FAF8F5] text-slate-800 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Header */}
